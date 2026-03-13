@@ -22,6 +22,8 @@ export async function createCustomerAction(
     return { error: parsed.error.issues[0]?.message ?? "Controleer de klantgegevens." };
   }
 
+  let klantId: number;
+
   try {
     const klant = await prisma.customer.create({
       data: {
@@ -32,11 +34,13 @@ export async function createCustomerAction(
       }
     });
 
-    revalidatePath("/klanten");
-    redirect(`/klanten/${klant.id}`);
+    klantId = klant.id;
   } catch {
     return { error: "Opslaan is mislukt. Controleer of het telefoonnummer al bestaat." };
   }
+
+  revalidatePath("/klanten");
+  redirect(`/klanten/${klantId}`);
 }
 
 export async function updateCustomerAction(
