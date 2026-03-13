@@ -22,7 +22,7 @@ export async function changePasswordAction(
     return { error: parsed.error.issues[0]?.message ?? "Controleer de wachtwoordgegevens." };
   }
 
-  if (!user.moetWachtwoordWijzigen && user.wachtwoord !== undefined) {
+  if (!user.moetWachtwoordWijzigen) {
     const volledigeUser = await prisma.user.findUnique({
       where: { id: user.id },
       select: { wachtwoord: true }

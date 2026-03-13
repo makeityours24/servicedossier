@@ -1,14 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSessionUser } from "@/lib/auth";
+import { requireSalonSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { buildCsvRow, formatDate } from "@/lib/utils";
 
 export async function GET(request: NextRequest) {
-  const user = await getSessionUser();
-
-  if (!user) {
-    return NextResponse.json({ error: "Niet ingelogd." }, { status: 401 });
-  }
+  const user = await requireSalonSession();
 
   const searchParams = request.nextUrl.searchParams;
   const customerId = searchParams.get("customerId");

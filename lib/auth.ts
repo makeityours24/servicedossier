@@ -8,6 +8,12 @@ export function hashPassword(value: string) {
   return createHash("sha256").update(value).digest("hex");
 }
 
+type SessionUser = NonNullable<Awaited<ReturnType<typeof getSessionUser>>>;
+type SalonSessionUser = SessionUser & {
+  salonId: number;
+  salon: NonNullable<SessionUser["salon"]>;
+};
+
 export async function getSessionUser() {
   const cookieStore = await cookies();
   const session = cookieStore.get(SESSION_COOKIE)?.value;
@@ -36,6 +42,9 @@ export async function getSessionUser() {
         select: {
           id: true,
           naam: true,
+          email: true,
+          telefoonnummer: true,
+          adres: true,
           slug: true,
           status: true,
           instellingen: {
@@ -44,7 +53,9 @@ export async function getSessionUser() {
               logoUrl: true,
               primaireKleur: true,
               contactEmail: true,
-              contactTelefoon: true
+              contactTelefoon: true,
+              adres: true,
+              treatmentPresets: true
             }
           }
         }
@@ -81,7 +92,7 @@ export async function requireSalonSession() {
     redirect(`/login?salon=${user.salon.slug}&fout=gepauzeerd`);
   }
 
-  return user;
+  return user as SalonSessionUser;
 }
 
 export async function requirePlatformAdmin() {
