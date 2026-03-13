@@ -61,6 +61,23 @@ export default async function KlantenPage({ searchParams }: KlantenPageProps) {
 
       <CustomerSearch initialQuery={zoek} />
 
+      <section className="info-grid">
+        <article className="info-kaart">
+          <h3>Klanten zijn dossiers</h3>
+          <p className="meta">
+            Klanten die je hier toevoegt zijn bedoeld voor behandelgeschiedenis, kleurrecepten en
+            contactgegevens. Zij krijgen geen eigen loginaccount.
+          </p>
+        </article>
+        <article className="info-kaart">
+          <h3>Loginaccounts maak je in Team</h3>
+          <p className="meta">
+            Moet iemand wel kunnen inloggen? Voeg die persoon dan toe via <strong>Team</strong> als
+            medewerkeraccount.
+          </p>
+        </article>
+      </section>
+
       <section className="kaart">
         <table className="tafel">
           <thead>

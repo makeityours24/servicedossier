@@ -94,7 +94,9 @@ export default async function DashboardPage() {
           <div className="lijst" style={{ marginTop: 18 }}>
             <Link href="/klanten/nieuwe" className="lijst-item">
               <h4>Nieuwe klant registreren</h4>
-              <p className="meta">Voeg direct een nieuw klantdossier toe.</p>
+              <p className="meta">
+                Voeg direct een nieuw klantdossier toe. Voor inlogaccounts gebruik je Team.
+              </p>
             </Link>
             <Link href="/klanten" className="lijst-item">
               <h4>Behandelhistorie zoeken</h4>
