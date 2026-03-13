@@ -6,7 +6,11 @@ import { usePathname } from "next/navigation";
 const links = [
   { href: "/dashboard", label: "Dashboard" },
   { href: "/klanten", label: "Klanten" },
-  { href: "/klanten/nieuwe", label: "Nieuwe klant" }
+  { href: "/klanten/nieuwe", label: "Nieuwe klant" },
+  { href: "/recepten", label: "Receptsjablonen" },
+  { href: "/team", label: "Team" },
+  { href: "/instellingen", label: "Instellingen" },
+  { href: "/account/wachtwoord", label: "Wachtwoord" }
 ];
 
 export function SidebarNav() {

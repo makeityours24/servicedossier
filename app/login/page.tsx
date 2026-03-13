@@ -1,58 +1,54 @@
-"use client";
+import { headers } from "next/headers";
+import { LoginForm } from "@/components/login-form";
+import { prisma } from "@/lib/prisma";
 
-import Image from "next/image";
-import { useActionState } from "react";
-import { loginAction, type LoginState } from "@/app/login/actions";
-import { FormMessage } from "@/components/form-message";
-import { SubmitButton } from "@/components/submit-button";
+type LoginPageProps = {
+  searchParams: Promise<{
+    salon?: string;
+    fout?: string;
+  }>;
+};
 
-const initialState: LoginState = {};
+export default async function LoginPage({ searchParams }: LoginPageProps) {
+  const params = await searchParams;
+  const headerStore = await headers();
+  const slugUitHeader = headerStore.get("x-tenant-slug")?.trim().toLowerCase() ?? "";
+  const slugUitQuery = params.salon?.trim().toLowerCase() ?? "";
+  const salonSlug = slugUitHeader || slugUitQuery;
 
-export default function LoginPage() {
-  const [state, formAction] = useActionState(loginAction, initialState);
+  const salon = salonSlug
+    ? await prisma.salon.findUnique({
+        where: { slug: salonSlug },
+        select: {
+          status: true,
+          naam: true,
+          instellingen: {
+            select: {
+              weergavenaam: true,
+              logoUrl: true
+            }
+          }
+        }
+      })
+    : null;
+
+  const tenantGedetecteerd = Boolean(salonSlug && salon);
+  const presetError =
+    params.fout === "gepauzeerd"
+      ? "Deze salon is tijdelijk gepauzeerd. Neem contact op met de beheerder."
+      : params.fout === "niet-gevonden"
+        ? "Deze saloncode is niet gevonden."
+        : undefined;
 
   return (
     <main className="inlog-scherm">
-      <section className="inlog-kaart">
-        <div className="logo-blok">
-          <Image
-            src="/logo-salon.svg"
-            alt="Salon logo"
-            width={64}
-            height={64}
-            className="logo-afbeelding"
-          />
-          <span className="logo-label">My Style</span>
-        </div>
-        <h1 className="pagina-titel">Inloggen voor medewerkers</h1>
-        <p className="subtitel">
-          Registreer klanten, bewaar kleurrecepten en houd de volledige behandelgeschiedenis centraal bij.
-        </p>
-
-        <form action={formAction} className="formulier">
-          <FormMessage error={state.error} />
-
-          <div className="veld">
-            <label htmlFor="email">E-mailadres</label>
-            <input id="email" name="email" type="email" placeholder="naam@salon.nl" required />
-          </div>
-
-          <div className="veld">
-            <label htmlFor="wachtwoord">Wachtwoord</label>
-            <input id="wachtwoord" name="wachtwoord" type="password" required />
-          </div>
-
-          <SubmitButton label="Inloggen" bezigLabel="Controleren..." />
-        </form>
-
-        <p className="subtitel" style={{ marginTop: 20 }}>
-          Voorbeeldgebruiker: <strong>admin@salonluna.nl</strong> met wachtwoord <strong>Welkom123!</strong>
-        </p>
-
-        <p className="maker">
-          Gemaakt door <a href="https://miy24.nl" target="_blank" rel="noreferrer">miy24.nl</a>
-        </p>
-      </section>
+      <LoginForm
+        salonSlug={tenantGedetecteerd ? salonSlug : slugUitQuery || undefined}
+        salonNaam={salon?.instellingen?.weergavenaam ?? salon?.naam ?? "SalonDossier"}
+        logoUrl={salon?.instellingen?.logoUrl}
+        tenantGedetecteerd={tenantGedetecteerd}
+        presetError={presetError}
+      />
     </main>
   );
 }

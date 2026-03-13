@@ -14,7 +14,10 @@ export async function GET(request: NextRequest) {
   const customerId = searchParams.get("customerId");
 
   const behandelingen = await prisma.treatment.findMany({
-    where: customerId ? { customerId: Number(customerId) } : undefined,
+    where: {
+      salonId: user.salonId,
+      ...(customerId ? { customerId: Number(customerId) } : {})
+    },
     include: {
       customer: true
     },

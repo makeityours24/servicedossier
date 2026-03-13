@@ -1,13 +1,20 @@
 import Link from "next/link";
+import { requireSalonSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { formatDate } from "@/lib/utils";
 
 export default async function DashboardPage() {
+  const user = await requireSalonSession();
   const [aantalKlanten, aantalBehandelingen, laatsteBehandelingen, medewerkers] =
     await Promise.all([
-      prisma.customer.count(),
-      prisma.treatment.count(),
+      prisma.customer.count({
+        where: { salonId: user.salonId }
+      }),
+      prisma.treatment.count({
+        where: { salonId: user.salonId }
+      }),
       prisma.treatment.findMany({
+        where: { salonId: user.salonId },
         orderBy: { datum: "desc" },
         take: 5,
         include: {
@@ -16,7 +23,9 @@ export default async function DashboardPage() {
           }
         }
       }),
-      prisma.user.count()
+      prisma.user.count({
+        where: { salonId: user.salonId }
+      })
     ]);
 
   return (
@@ -28,7 +37,7 @@ export default async function DashboardPage() {
             Overzicht van klanten en behandelingen
           </h2>
           <p className="subtitel">
-            Snel inzicht in de salonagenda, recente kleurrecepten en het aantal actieve dossiers.
+            Snel inzicht in de salonagenda van {user.salon.instellingen?.weergavenaam ?? user.salon.naam}, recente kleurrecepten en het aantal actieve dossiers.
           </p>
         </div>
 

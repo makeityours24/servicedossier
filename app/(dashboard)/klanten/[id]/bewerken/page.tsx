@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { CustomerForm } from "@/components/customer-form";
 import { updateCustomerAction } from "@/app/(dashboard)/klanten/actions";
+import { requireSalonSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
 type BewerkKlantPageProps = {
@@ -8,6 +9,7 @@ type BewerkKlantPageProps = {
 };
 
 export default async function BewerkKlantPage({ params }: BewerkKlantPageProps) {
+  const user = await requireSalonSession();
   const { id } = await params;
   const klantId = Number(id);
 
@@ -15,8 +17,11 @@ export default async function BewerkKlantPage({ params }: BewerkKlantPageProps) 
     notFound();
   }
 
-  const klant = await prisma.customer.findUnique({
-    where: { id: klantId }
+  const klant = await prisma.customer.findFirst({
+    where: {
+      id: klantId,
+      salonId: user.salonId
+    }
   });
 
   if (!klant) {

@@ -1,12 +1,14 @@
 import Image from "next/image";
-import { requireSession } from "@/lib/auth";
+import { requireSalonSession } from "@/lib/auth";
 import { SidebarNav } from "@/components/sidebar-nav";
 import { LogoutForm } from "@/components/logout-form";
 
 export default async function DashboardLayout({
   children
 }: Readonly<{ children: React.ReactNode }>) {
-  const user = await requireSession();
+  const user = await requireSalonSession();
+  const salonNaam = user.salon.instellingen?.weergavenaam ?? user.salon.naam;
+  const salonLogo = user.salon.instellingen?.logoUrl || "/logo-salon.svg";
 
   return (
     <div className="shell">
@@ -14,7 +16,7 @@ export default async function DashboardLayout({
         <div className="merk">
           <div className="logo-blok">
             <Image
-              src="/logo-salon.svg"
+              src={salonLogo}
               alt="Salon logo"
               width={56}
               height={56}
@@ -22,7 +24,7 @@ export default async function DashboardLayout({
             />
             <div>
               <p>Professioneel salonbeheer</p>
-              <h1>My Style</h1>
+              <h1>{salonNaam}</h1>
             </div>
           </div>
         </div>
@@ -36,6 +38,8 @@ export default async function DashboardLayout({
               <strong>{user.naam}</strong>
               <br />
               {user.email}
+              <br />
+              {salonNaam}
             </p>
           </div>
 

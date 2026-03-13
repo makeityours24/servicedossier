@@ -5,6 +5,17 @@ export const loginSchema = z.object({
   wachtwoord: z.string().min(6, "Vul uw wachtwoord in.")
 });
 
+export const passwordChangeSchema = z
+  .object({
+    huidigWachtwoord: z.string().optional().or(z.literal("")),
+    nieuwWachtwoord: z.string().min(8, "Nieuw wachtwoord moet minimaal 8 tekens bevatten."),
+    bevestigWachtwoord: z.string().min(8, "Bevestig het nieuwe wachtwoord.")
+  })
+  .refine((data) => data.nieuwWachtwoord === data.bevestigWachtwoord, {
+    message: "De wachtwoorden komen niet overeen.",
+    path: ["bevestigWachtwoord"]
+  });
+
 export const customerSchema = z.object({
   naam: z.string().min(2, "Naam is verplicht."),
   adres: z.string().min(5, "Adres is verplicht."),
@@ -30,4 +41,86 @@ export const treatmentFilterSchema = z.object({
   van: z.string().optional(),
   tot: z.string().optional(),
   medewerker: z.string().optional()
+});
+
+export const recipeTemplateSchema = z.object({
+  naam: z.string().min(2, "Naam van het sjabloon is verplicht."),
+  behandeling: z.string().min(2, "Behandeling is verplicht."),
+  recept: z.string().min(2, "Recept is verplicht."),
+  notities: z.string().optional()
+});
+
+export const recipeTemplateUpdateSchema = recipeTemplateSchema.extend({
+  templateId: z.coerce.number().int().positive()
+});
+
+export const salonSettingsSchema = z.object({
+  weergavenaam: z.string().min(2, "Salonnaam is verplicht."),
+  contactEmail: z
+    .string()
+    .trim()
+    .optional()
+    .or(z.literal(""))
+    .refine((value) => !value || z.string().email().safeParse(value).success, "Gebruik een geldig e-mailadres."),
+  contactTelefoon: z.string().trim().max(30, "Telefoonnummer is te lang.").optional(),
+  adres: z.string().trim().max(200, "Adres is te lang.").optional(),
+  primaireKleur: z
+    .string()
+    .regex(/^#[0-9A-Fa-f]{6}$/, "Gebruik een geldige hex-kleur, bijvoorbeeld #B42323."),
+  logoUrl: z.string().trim().max(400, "Logo URL is te lang.").optional(),
+  treatmentPresets: z.string().max(500, "De lijst met snelkeuzes is te lang.")
+});
+
+export const medewerkerSchema = z.object({
+  naam: z.string().min(2, "Naam is verplicht."),
+  email: z.string().email("Gebruik een geldig e-mailadres."),
+  wachtwoord: z.string().min(8, "Wachtwoord moet minimaal 8 tekens bevatten."),
+  rol: z.enum(["OWNER", "ADMIN", "MEDEWERKER"]),
+  status: z.enum(["ACTIEF", "UITGESCHAKELD"]).default("ACTIEF")
+});
+
+export const medewerkerUpdateSchema = z.object({
+  medewerkerId: z.coerce.number().int().positive(),
+  naam: z.string().min(2, "Naam is verplicht."),
+  email: z.string().email("Gebruik een geldig e-mailadres."),
+  wachtwoord: z
+    .string()
+    .optional()
+    .or(z.literal(""))
+    .refine((value) => !value || value.length >= 8, "Wachtwoord moet minimaal 8 tekens bevatten."),
+  rol: z.enum(["OWNER", "ADMIN", "MEDEWERKER"]),
+  status: z.enum(["ACTIEF", "UITGESCHAKELD"]).default("ACTIEF")
+});
+
+export const platformSalonSchema = z.object({
+  naam: z.string().min(2, "Salonnaam is verplicht."),
+  status: z.enum(["ACTIEF", "GEPAUZEERD"]).default("ACTIEF"),
+  email: z
+    .string()
+    .trim()
+    .optional()
+    .or(z.literal(""))
+    .refine((value) => !value || z.string().email().safeParse(value).success, "Gebruik een geldig e-mailadres voor de salon."),
+  telefoonnummer: z.string().trim().max(30, "Telefoonnummer is te lang.").optional(),
+  adres: z.string().trim().max(200, "Adres is te lang.").optional(),
+  eigenaarNaam: z.string().min(2, "Naam van de eigenaar is verplicht."),
+  eigenaarEmail: z.string().email("Gebruik een geldig e-mailadres voor de eigenaar."),
+  eigenaarWachtwoord: z.string().min(8, "Wachtwoord moet minimaal 8 tekens bevatten.")
+});
+
+export const platformSalonUpdateSchema = z.object({
+  salonId: z.coerce.number().int().positive(),
+  naam: z.string().min(2, "Salonnaam is verplicht."),
+  status: z.enum(["ACTIEF", "GEPAUZEERD"]).default("ACTIEF"),
+  email: z
+    .string()
+    .trim()
+    .optional()
+    .or(z.literal(""))
+    .refine(
+      (value) => !value || z.string().email().safeParse(value).success,
+      "Gebruik een geldig e-mailadres voor de salon."
+    ),
+  telefoonnummer: z.string().trim().max(30, "Telefoonnummer is te lang.").optional(),
+  adres: z.string().trim().max(200, "Adres is te lang.").optional()
 });

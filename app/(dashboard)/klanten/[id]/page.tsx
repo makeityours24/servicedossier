@@ -1,10 +1,16 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import {
+  createTreatmentAction,
+  deleteCustomerAction,
+  deleteTreatmentAction
+} from "@/app/(dashboard)/klanten/actions";
+import { DeleteCustomerButton } from "@/components/delete-customer-button";
 import { TreatmentForm } from "@/components/treatment-form";
-import { createTreatmentAction } from "@/app/(dashboard)/klanten/actions";
-import { requireSession } from "@/lib/auth";
+import { requireSalonSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { formatDate } from "@/lib/utils";
+import { treatmentPresets as defaultTreatmentPresets } from "@/lib/treatment-presets";
 
 type KlantDetailPageProps = {
   params: Promise<{ id: string }>;
@@ -12,6 +18,8 @@ type KlantDetailPageProps = {
     van?: string;
     tot?: string;
     medewerker?: string;
+    herhaalId?: string;
+    templateId?: string;
   }>;
 };
 
@@ -22,17 +30,23 @@ export default async function KlantDetailPage({
   const { id } = await params;
   const filters = await searchParams;
   const klantId = Number(id);
-  const user = await requireSession();
+  const herhaalId = filters.herhaalId ? Number(filters.herhaalId) : null;
+  const templateId = filters.templateId ? Number(filters.templateId) : null;
+  const user = await requireSalonSession();
 
   if (!Number.isInteger(klantId)) {
     notFound();
   }
 
-  const klant = await prisma.customer.findUnique({
-    where: { id: klantId },
+  const klant = await prisma.customer.findFirst({
+    where: {
+      id: klantId,
+      salonId: user.salonId
+    },
     include: {
       behandelingen: {
         where: {
+          salonId: user.salonId,
           datum: {
             gte: filters.van ? new Date(`${filters.van}T00:00:00`) : undefined,
             lte: filters.tot ? new Date(`${filters.tot}T23:59:59`) : undefined
@@ -52,6 +66,92 @@ export default async function KlantDetailPage({
   if (!klant) {
     notFound();
   }
+
+  const laatsteBehandeling = await prisma.treatment.findFirst({
+    where: {
+      customerId: klant.id,
+      salonId: user.salonId
+    },
+    orderBy: { datum: "desc" },
+    select: {
+      id: true,
+      datum: true,
+      behandeling: true,
+      recept: true,
+      behandelaar: true,
+      notities: true
+    }
+  });
+
+  const herhaalBehandeling =
+    herhaalId && Number.isInteger(herhaalId)
+      ? await prisma.treatment.findFirst({
+          where: {
+            id: herhaalId,
+            customerId: klant.id,
+            salonId: user.salonId
+          },
+          select: {
+            id: true,
+            datum: true,
+            behandeling: true,
+            recept: true,
+            behandelaar: true,
+            notities: true
+          }
+        })
+      : null;
+
+  const voorgeselecteerdeBehandeling = herhaalBehandeling
+    ? {
+        ...herhaalBehandeling,
+        id: undefined,
+        datum: new Date(
+          herhaalBehandeling.datum.getTime() - herhaalBehandeling.datum.getTimezoneOffset() * 60000
+        )
+          .toISOString()
+          .slice(0, 16)
+      }
+    : undefined;
+
+  const geselecteerdSjabloon =
+    !herhaalBehandeling && templateId && Number.isInteger(templateId)
+      ? await prisma.recipeTemplate.findFirst({
+          where: {
+            id: templateId,
+            salonId: user.salonId
+          },
+          select: {
+            naam: true,
+            behandeling: true,
+            recept: true,
+            notities: true
+          }
+        })
+      : null;
+
+  const sjablonen = await prisma.recipeTemplate.findMany({
+    where: { salonId: user.salonId },
+    orderBy: { naam: "asc" },
+    take: 6,
+    select: {
+      id: true,
+      naam: true,
+      behandeling: true
+    }
+  });
+
+  const treatmentVoorFormulier =
+    voorgeselecteerdeBehandeling ??
+    (geselecteerdSjabloon
+      ? {
+          behandeling: geselecteerdSjabloon.behandeling,
+          recept: geselecteerdSjabloon.recept,
+          behandelaar: user.naam,
+          notities: geselecteerdSjabloon.notities ?? "",
+          datum: new Date().toISOString().slice(0, 16)
+        }
+      : undefined);
 
   return (
     <div className="rooster">
@@ -78,11 +178,56 @@ export default async function KlantDetailPage({
           <a href={`/api/export?customerId=${klant.id}`} className="knop">
             CSV export
           </a>
+          <form action={deleteCustomerAction}>
+            <input type="hidden" name="customerId" value={klant.id} />
+            <DeleteCustomerButton
+              naam={klant.naam}
+              confirmMessage="Weet je zeker dat je {naam} wilt verwijderen? Alle behandelingen van deze klant worden ook verwijderd."
+            />
+          </form>
         </div>
       </section>
 
       <section className="detail-grid">
         <article className="kaart">
+          {laatsteBehandeling ? (
+            <div className="lijst-item" style={{ marginBottom: 18 }}>
+              <div className="acties" style={{ justifyContent: "space-between" }}>
+                <div>
+                  <span className="logo-label" style={{ marginBottom: 12 }}>
+                    Laatste behandeling
+                  </span>
+                  <h3 style={{ margin: 0 }}>{laatsteBehandeling.behandeling}</h3>
+                </div>
+                <span className="badge">{formatDate(laatsteBehandeling.datum)}</span>
+              </div>
+
+              <p className="meta" style={{ marginTop: 14 }}>
+                <strong>Behandelaar:</strong> {laatsteBehandeling.behandelaar}
+                <br />
+                <strong>Recept:</strong> {laatsteBehandeling.recept}
+                {laatsteBehandeling.notities ? (
+                  <>
+                    <br />
+                    <strong>Notities:</strong> {laatsteBehandeling.notities}
+                  </>
+                ) : null}
+              </p>
+
+              <div className="acties" style={{ marginTop: 16 }}>
+                <Link href={`/klanten/${klant.id}?herhaalId=${laatsteBehandeling.id}`} className="knop">
+                  Laatste recept opnieuw gebruiken
+                </Link>
+                <Link
+                  href={`/klanten/${klant.id}/behandelingen/${laatsteBehandeling.id}/bewerken`}
+                  className="knop-secundair"
+                >
+                  Laatste behandeling bewerken
+                </Link>
+              </div>
+            </div>
+          ) : null}
+
           <div className="print-balk">
             <div>
               <h3>Behandelgeschiedenis</h3>
@@ -137,6 +282,29 @@ export default async function KlantDetailPage({
                       <strong>Notities:</strong> {behandeling.notities}
                     </p>
                   ) : null}
+                  <div className="acties" style={{ marginTop: 16 }}>
+                    <Link
+                      href={`/klanten/${klant.id}?herhaalId=${behandeling.id}`}
+                      className="knop-zacht"
+                    >
+                      Nogmaals gebruiken
+                    </Link>
+                    <Link
+                      href={`/klanten/${klant.id}/behandelingen/${behandeling.id}/bewerken`}
+                      className="knop-secundair"
+                    >
+                      Behandeling bewerken
+                    </Link>
+                    <form action={deleteTreatmentAction}>
+                      <input type="hidden" name="customerId" value={klant.id} />
+                      <input type="hidden" name="treatmentId" value={behandeling.id} />
+                      <DeleteCustomerButton
+                        naam={behandeling.behandeling}
+                        confirmMessage="Weet je zeker dat je behandeling {naam} wilt verwijderen?"
+                        label="Behandeling verwijderen"
+                      />
+                    </form>
+                  </div>
                 </article>
               ))}
             </div>
@@ -148,11 +316,57 @@ export default async function KlantDetailPage({
           <p className="subtitel" style={{ marginTop: 8 }}>
             Voeg direct een nieuwe kleurbehandeling of andere behandeling toe aan dit dossier.
           </p>
+          {sjablonen.length > 0 ? (
+            <div style={{ marginTop: 16 }}>
+              <p className="meta" style={{ marginBottom: 12 }}>
+                Snel starten vanuit een receptsjabloon:
+              </p>
+              <div className="acties">
+                {sjablonen.map((template) => (
+                  <Link
+                    key={template.id}
+                    href={`/klanten/${klant.id}?templateId=${template.id}`}
+                    className="knop-zacht"
+                  >
+                    {template.naam}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          ) : null}
+          {herhaalBehandeling ? (
+            <div className="acties" style={{ marginTop: 16 }}>
+              <span className="badge">Recept overgenomen uit {formatDate(herhaalBehandeling.datum)}</span>
+              <Link href={`/klanten/${klant.id}`} className="knop-secundair">
+                Formulier leegmaken
+              </Link>
+            </div>
+          ) : geselecteerdSjabloon ? (
+            <div className="acties" style={{ marginTop: 16 }}>
+              <span className="badge">Sjabloon geladen: {geselecteerdSjabloon.naam}</span>
+              <Link href={`/klanten/${klant.id}`} className="knop-secundair">
+                Formulier leegmaken
+              </Link>
+            </div>
+          ) : null}
 
           <TreatmentForm
             customerId={klant.id}
             medewerkerNaam={user.naam}
             action={createTreatmentAction}
+            treatment={treatmentVoorFormulier}
+            treatmentPresets={
+              user.salon.instellingen?.treatmentPresets?.length
+                ? user.salon.instellingen.treatmentPresets
+                : defaultTreatmentPresets
+            }
+            helperText={
+              herhaalBehandeling
+                ? "De velden zijn vooringevuld vanuit een eerdere behandeling. Pas ze aan waar nodig en sla de nieuwe behandeling op."
+                : geselecteerdSjabloon
+                  ? "De velden zijn vooringevuld vanuit een receptsjabloon. Pas ze aan waar nodig en sla de nieuwe behandeling op."
+                : undefined
+            }
           />
         </aside>
       </section>

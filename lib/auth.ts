@@ -25,16 +25,69 @@ export async function getSessionUser() {
     where: { id: userId },
     select: {
       id: true,
+      salonId: true,
+      isPlatformAdmin: true,
       naam: true,
-      email: true
+      email: true,
+      moetWachtwoordWijzigen: true,
+      rol: true,
+      status: true,
+      salon: {
+        select: {
+          id: true,
+          naam: true,
+          slug: true,
+          status: true,
+          instellingen: {
+            select: {
+              weergavenaam: true,
+              logoUrl: true,
+              primaireKleur: true,
+              contactEmail: true,
+              contactTelefoon: true
+            }
+          }
+        }
+      }
     }
   });
 }
 
-export async function requireSession() {
+export async function requireSession(options?: { allowPasswordChange?: boolean }) {
   const user = await getSessionUser();
   if (!user) {
     redirect("/login");
+  }
+
+  if (user.moetWachtwoordWijzigen && !options?.allowPasswordChange) {
+    redirect("/account/wachtwoord");
+  }
+
+  return user;
+}
+
+export async function requireSalonSession() {
+  const user = await requireSession();
+  if (user.isPlatformAdmin) {
+    redirect("/platform");
+  }
+
+  if (!user.salon || !user.salonId) {
+    redirect("/login");
+  }
+
+  if (user.salon.status === "GEPAUZEERD") {
+    await clearSession();
+    redirect(`/login?salon=${user.salon.slug}&fout=gepauzeerd`);
+  }
+
+  return user;
+}
+
+export async function requirePlatformAdmin() {
+  const user = await requireSession();
+  if (!user.isPlatformAdmin) {
+    redirect("/dashboard");
   }
 
   return user;

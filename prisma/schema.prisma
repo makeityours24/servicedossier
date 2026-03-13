@@ -8,28 +8,58 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
+enum UserRole {
+  OWNER
+  ADMIN
+  MEDEWERKER
+}
+
+enum UserStatus {
+  ACTIEF
+  UITGESCHAKELD
+}
+
+enum SalonStatus {
+  ACTIEF
+  GEPAUZEERD
+}
+
 model User {
   id           Int         @id @default(autoincrement())
+  salonId      Int?
+  isPlatformAdmin Boolean @default(false)
   naam         String
   email        String      @unique
   wachtwoord   String
+  moetWachtwoordWijzigen Boolean @default(false)
+  rol          UserRole    @default(MEDEWERKER)
+  status       UserStatus  @default(ACTIEF)
   createdAt    DateTime    @default(now())
   updatedAt    DateTime    @updatedAt
+  salon        Salon?      @relation(fields: [salonId], references: [id], onDelete: Cascade)
   behandelingen Treatment[]
+
+  @@index([salonId, email])
 }
 
 model Customer {
   id              Int         @id @default(autoincrement())
+  salonId         Int
   naam            String
   adres           String
-  telefoonnummer  String      @unique
+  telefoonnummer  String
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
+  salon           Salon       @relation(fields: [salonId], references: [id], onDelete: Cascade)
   behandelingen   Treatment[]
+
+  @@unique([salonId, telefoonnummer])
+  @@index([salonId, naam])
 }
 
 model Treatment {
   id            Int       @id @default(autoincrement())
+  salonId       Int
   customerId    Int
   userId        Int?
   datum         DateTime
@@ -39,9 +69,57 @@ model Treatment {
   notities      String?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
+  salon         Salon     @relation(fields: [salonId], references: [id], onDelete: Cascade)
   customer      Customer  @relation(fields: [customerId], references: [id], onDelete: Cascade)
   user          User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
 
+  @@index([salonId, datum])
   @@index([customerId, datum])
   @@index([behandelaar, datum])
+}
+
+model Salon {
+  id            Int            @id @default(autoincrement())
+  naam          String
+  slug          String         @unique
+  status        SalonStatus    @default(ACTIEF)
+  email         String?
+  telefoonnummer String?
+  adres         String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  instellingen  SalonSettings?
+  users         User[]
+  customers     Customer[]
+  treatments    Treatment[]
+  recipeTemplates RecipeTemplate[]
+}
+
+model SalonSettings {
+  id             Int      @id @default(autoincrement())
+  salonId        Int      @unique
+  weergavenaam   String
+  logoUrl        String?
+  primaireKleur  String   @default("#b42323")
+  contactEmail   String?
+  contactTelefoon String?
+  adres          String?
+  treatmentPresets String[] @default([])
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  salon          Salon    @relation(fields: [salonId], references: [id], onDelete: Cascade)
+}
+
+model RecipeTemplate {
+  id           Int      @id @default(autoincrement())
+  salonId      Int
+  naam         String
+  behandeling  String
+  recept       String
+  notities     String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  salon        Salon    @relation(fields: [salonId], references: [id], onDelete: Cascade)
+
+  @@index([salonId, naam])
 }

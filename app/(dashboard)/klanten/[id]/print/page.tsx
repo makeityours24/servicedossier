@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { PrintButton } from "@/components/print-button";
+import { requireSalonSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { formatDate } from "@/lib/utils";
 
@@ -8,6 +9,7 @@ type PrintPageProps = {
 };
 
 export default async function PrintPage({ params }: PrintPageProps) {
+  const user = await requireSalonSession();
   const { id } = await params;
   const klantId = Number(id);
 
@@ -15,10 +17,14 @@ export default async function PrintPage({ params }: PrintPageProps) {
     notFound();
   }
 
-  const klant = await prisma.customer.findUnique({
-    where: { id: klantId },
+  const klant = await prisma.customer.findFirst({
+    where: {
+      id: klantId,
+      salonId: user.salonId
+    },
     include: {
       behandelingen: {
+        where: { salonId: user.salonId },
         orderBy: { datum: "asc" }
       }
     }
@@ -36,6 +42,7 @@ export default async function PrintPage({ params }: PrintPageProps) {
           <h1 className="pagina-titel" style={{ fontSize: "2.3rem" }}>
             Behandelhistorie van {klant.naam}
           </h1>
+          <p className="subtitel">{user.salon.instellingen?.weergavenaam ?? user.salon.naam}</p>
         </div>
 
         <PrintButton />

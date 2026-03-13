@@ -69,6 +69,9 @@ Voorbeeld:
 DATABASE_URL="postgresql://USER:PASSWORD@HOST:5432/my_style?schema=public"
 DIRECT_URL="postgresql://USER:PASSWORD@HOST:5432/my_style?schema=public"
 SESSION_SECRET="een-lang-uniek-geheim"
+NEXT_PUBLIC_APP_URL="http://127.0.0.1:3000"
+NEXT_PUBLIC_TENANT_MODE="query"
+NEXT_PUBLIC_BASE_DOMAIN=""
 ```
 
 4. Initialiseer de database en genereer Prisma Client:
@@ -97,6 +100,42 @@ npm run dev
 - E-mailadres: `admin@salonluna.nl`
 - Wachtwoord: `Welkom123!`
 
+## Tenant-login en subdomeinen
+
+De app ondersteunt twee loginmodi voor salons:
+
+### 1. Lokale of centrale login via query
+
+Gebruik in `.env`:
+
+```env
+NEXT_PUBLIC_APP_URL="http://127.0.0.1:3000"
+NEXT_PUBLIC_TENANT_MODE="query"
+NEXT_PUBLIC_BASE_DOMAIN=""
+```
+
+Voorbeeld:
+
+- Centrale login: `http://127.0.0.1:3000/login`
+- Salonlogin: `http://127.0.0.1:3000/login?salon=my-style`
+
+### 2. Live login via subdomeinen
+
+Gebruik in `.env` of in productie:
+
+```env
+NEXT_PUBLIC_APP_URL="https://app.jouwdomein.nl"
+NEXT_PUBLIC_TENANT_MODE="subdomain"
+NEXT_PUBLIC_BASE_DOMAIN="jouwdomein.nl"
+```
+
+Dan worden loginlinks automatisch opgebouwd als:
+
+- `https://my-style.jouwdomein.nl/login`
+- `https://andere-salon.jouwdomein.nl/login`
+
+De middleware herkent een salonsubdomein automatisch en toont direct de juiste saloncontext op de loginpagina.
+
 ## Online publiceren als website
 
 Aanbevolen stack:
@@ -116,6 +155,9 @@ Aanbevolen stack:
 DATABASE_URL=postgresql://...
 DIRECT_URL=postgresql://...
 SESSION_SECRET=een-lang-uniek-geheim
+NEXT_PUBLIC_APP_URL=https://app.jouwdomein.nl
+NEXT_PUBLIC_TENANT_MODE=subdomain
+NEXT_PUBLIC_BASE_DOMAIN=jouwdomein.nl
 ```
 
 5. Laat Vercel builden en deployen.
@@ -127,6 +169,10 @@ npm run db:seed
 ```
 
 Daarna is de applicatie via een publieke URL bereikbaar en kan de klant er overal bij.
+
+Voor de volledige live setup met centrale app, salonsubdomeinen en STRATO DNS:
+
+- Zie [DEPLOYMENT.md](/Users/hasandeniz/Documents/New%20project/DEPLOYMENT.md)
 
 ## Database
 
@@ -142,3 +188,4 @@ DATABASE_URL="postgresql://USER:PASSWORD@HOST:5432/my_style?schema=public"
 - Voor de eerste versie wordt een eenvoudige sessiecookie gebruikt.
 - Wachtwoorden worden in deze demo gehasht met SHA-256. Voor productie is `bcrypt` of `argon2` aan te raden.
 - Deze versie is voorbereid voor online hosting met PostgreSQL in plaats van SQLite.
+- Voor multi-tenant live gebruik is een subdomein-setup via Vercel + STRATO de aanbevolen route.

@@ -1,5 +1,8 @@
 import Link from "next/link";
+import { deleteCustomerAction } from "@/app/(dashboard)/klanten/actions";
 import { CustomerSearch } from "@/components/customer-search";
+import { DeleteCustomerButton } from "@/components/delete-customer-button";
+import { requireSalonSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
 type KlantenPageProps = {
@@ -9,18 +12,22 @@ type KlantenPageProps = {
 };
 
 export default async function KlantenPage({ searchParams }: KlantenPageProps) {
+  const user = await requireSalonSession();
   const params = await searchParams;
   const zoek = params.zoek?.trim() ?? "";
 
   const klanten = await prisma.customer.findMany({
-    where: zoek
+    where: {
+      salonId: user.salonId,
+      ...(zoek
         ? {
           OR: [
             { naam: { contains: zoek, mode: "insensitive" } },
             { telefoonnummer: { contains: zoek } }
           ]
         }
-      : undefined,
+        : {})
+    },
     orderBy: { naam: "asc" },
     include: {
       behandelingen: {
@@ -80,9 +87,21 @@ export default async function KlantenPage({ searchParams }: KlantenPageProps) {
                   <td>{klant.adres}</td>
                   <td>{klant.behandelingen[0]?.behandeling ?? "Nog geen behandeling"}</td>
                   <td>
-                    <Link href={`/klanten/${klant.id}`} className="knop-zacht">
-                      Open dossier
-                    </Link>
+                    <div className="acties">
+                      <Link href={`/klanten/${klant.id}`} className="knop-zacht">
+                        Open dossier
+                      </Link>
+                      <Link href={`/klanten/${klant.id}/bewerken`} className="knop-secundair">
+                        Bewerken
+                      </Link>
+                      <form action={deleteCustomerAction}>
+                        <input type="hidden" name="customerId" value={klant.id} />
+                        <DeleteCustomerButton
+                          naam={klant.naam}
+                          confirmMessage="Weet je zeker dat je {naam} wilt verwijderen? Alle behandelingen van deze klant worden ook verwijderd."
+                        />
+                      </form>
+                    </div>
                   </td>
                 </tr>
               ))

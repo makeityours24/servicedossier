@@ -1,16 +1,19 @@
 :root {
-  --achtergrond: #ffffff;
-  --paneel: #ffffff;
-  --paneel-zacht: #fff2f2;
-  --tekst: #221b1b;
-  --subtekst: #6e5a5a;
-  --accent: #c62828;
-  --accent-donker: #8e1818;
-  --rand: #eadede;
+  --achtergrond: #fbf7f4;
+  --achtergrond-zacht: #f5ede8;
+  --paneel: rgba(255, 255, 255, 0.92);
+  --paneel-zacht: #fff1f1;
+  --tekst: #201918;
+  --subtekst: #6f605d;
+  --accent: #b42323;
+  --accent-donker: #7d1717;
+  --accent-zacht: #fbe5e5;
+  --rand: rgba(176, 141, 141, 0.22);
   --fout: #b44141;
   --succes: #2f7a56;
-  --schaduw: 0 18px 45px rgba(120, 22, 22, 0.08);
-  --radius: 20px;
+  --schaduw: 0 26px 60px rgba(73, 35, 29, 0.12);
+  --schaduw-zacht: 0 12px 30px rgba(73, 35, 29, 0.08);
+  --radius: 24px;
 }
 
 * {
@@ -23,9 +26,12 @@ html {
 
 body {
   margin: 0;
-  background: var(--achtergrond);
+  background:
+    radial-gradient(circle at top left, rgba(180, 35, 35, 0.08), transparent 22%),
+    radial-gradient(circle at right top, rgba(115, 85, 76, 0.08), transparent 24%),
+    linear-gradient(180deg, #fffdfb 0%, var(--achtergrond) 42%, var(--achtergrond-zacht) 100%);
   color: var(--tekst);
-  font-family: Calibri, Candara, Segoe, "Segoe UI", Optima, Arial, sans-serif;
+  font-family: var(--font-montserrat), "Segoe UI", Arial, sans-serif;
 }
 
 a {
@@ -58,25 +64,29 @@ textarea {
 
 .inlog-kaart,
 .kaart {
-  background: rgba(255, 255, 255, 0.98);
-  border: 1px solid rgba(234, 222, 222, 0.92);
+  background: var(--paneel);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--rand);
   border-radius: var(--radius);
   box-shadow: var(--schaduw);
 }
 
 .inlog-kaart {
-  width: min(460px, 100%);
-  padding: 36px;
+  width: min(500px, 100%);
+  padding: 40px;
 }
 
 .logo-label {
   display: inline-flex;
   align-items: center;
-  padding: 10px 14px;
+  padding: 11px 16px;
   border-radius: 999px;
-  background: var(--paneel-zacht);
+  background: linear-gradient(135deg, #fff5f5 0%, #f8e7e7 100%);
   color: var(--accent-donker);
-  font-size: 0.95rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
   margin-bottom: 18px;
 }
 
@@ -91,10 +101,11 @@ textarea {
   width: 64px;
   height: 64px;
   object-fit: contain;
-  border-radius: 18px;
+  border-radius: 20px;
   border: 1px solid var(--rand);
-  background: white;
-  padding: 8px;
+  background: linear-gradient(180deg, #ffffff 0%, #fff7f4 100%);
+  padding: 10px;
+  box-shadow: var(--schaduw-zacht);
 }
 
 .logo-afbeelding-klein {
@@ -105,13 +116,14 @@ textarea {
 .pagina-titel {
   margin: 0;
   font-size: clamp(2rem, 4vw, 3rem);
-  line-height: 1.05;
+  line-height: 1.02;
+  letter-spacing: -0.04em;
 }
 
 .subtitel {
   color: var(--subtekst);
-  margin: 10px 0 0;
-  line-height: 1.6;
+  margin: 12px 0 0;
+  line-height: 1.75;
 }
 
 .maker {
@@ -123,6 +135,62 @@ textarea {
 .maker a {
   color: var(--accent-donker);
   font-weight: 700;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.info-kaart {
+  padding: 16px 18px;
+  border-radius: 18px;
+  border: 1px solid var(--rand);
+  background: rgba(255, 255, 255, 0.86);
+  box-shadow: var(--schaduw-zacht);
+}
+
+.info-kaart h3,
+.onboarding-paneel h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.onboarding-paneel {
+  margin-top: 18px;
+  padding: 20px;
+  border-radius: 22px;
+  border: 1px solid rgba(180, 35, 35, 0.14);
+  background: linear-gradient(135deg, rgba(255, 245, 245, 0.98) 0%, rgba(255, 255, 255, 0.94) 100%);
+  box-shadow: var(--schaduw-zacht);
+}
+
+.onboarding-kop {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.onboarding-kop .logo-label {
+  margin-bottom: 0;
+  width: fit-content;
+}
+
+.onboarding-link {
+  margin-top: 16px;
+  display: grid;
+  gap: 8px;
+  padding: 14px 16px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid var(--rand);
+}
+
+.onboarding-link a {
+  color: var(--accent-donker);
+  font-weight: 700;
+  word-break: break-word;
 }
 
 .formulier {
@@ -149,7 +217,9 @@ textarea {
 
 .veld label,
 .veld-groot label {
-  font-size: 0.95rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
   color: var(--subtekst);
 }
 
@@ -162,11 +232,12 @@ textarea {
 .zoekveld {
   width: 100%;
   border: 1px solid var(--rand);
-  border-radius: 16px;
-  background: white;
-  padding: 15px 16px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.98);
+  padding: 16px 18px;
   font-size: 1rem;
   color: var(--tekst);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.7);
 }
 
 .veld textarea,
@@ -184,6 +255,7 @@ textarea {
 .zoekveld:focus {
   outline: 2px solid rgba(198, 40, 40, 0.2);
   border-color: var(--accent);
+  box-shadow: 0 0 0 6px rgba(180, 35, 35, 0.07);
 }
 
 .knoppenrij,
@@ -195,43 +267,55 @@ textarea {
 
 .knop,
 .knop-secundair,
-.knop-zacht {
+.knop-zacht,
+.knop-gevaar {
   border: 0;
-  border-radius: 14px;
-  padding: 14px 18px;
+  border-radius: 16px;
+  padding: 14px 20px;
   cursor: pointer;
-  transition: transform 0.16s ease, opacity 0.16s ease, background 0.16s ease;
+  transition: transform 0.16s ease, opacity 0.16s ease, background 0.16s ease, box-shadow 0.16s ease;
+  font-weight: 600;
 }
 
 .knop {
-  background: var(--accent);
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent-donker) 100%);
   color: white;
+  box-shadow: 0 18px 32px rgba(180, 35, 35, 0.18);
 }
 
 .knop:disabled,
 .knop-secundair:disabled,
-.knop-zacht:disabled {
+.knop-zacht:disabled,
+.knop-gevaar:disabled {
   opacity: 0.7;
   cursor: not-allowed;
 }
 
 .knop:hover,
 .knop-secundair:hover,
-.knop-zacht:hover {
-  transform: translateY(-1px);
+.knop-zacht:hover,
+.knop-gevaar:hover {
+  transform: translateY(-2px);
 }
 
 .knop-secundair {
-  background: white;
+  background: rgba(255, 255, 255, 0.94);
   border: 1px solid var(--rand);
   color: var(--tekst);
+  box-shadow: var(--schaduw-zacht);
 }
 
 .knop-zacht {
-  background: var(--paneel-zacht);
+  background: linear-gradient(135deg, #fff5f5 0%, #fae8e8 100%);
   color: var(--accent-donker);
-  border: 1px solid rgba(198, 40, 40, 0.12);
+  border: 1px solid rgba(180, 35, 35, 0.14);
 }
+
+.knop-gevaar {
+  background: linear-gradient(135deg, #d14a4a 0%, #9d2222 100%);
+  color: #fff;
+  box-shadow: 0 18px 32px rgba(157, 34, 34, 0.22);
+ }
 
 .melding-fout,
 .melding-succes {
@@ -258,8 +342,9 @@ textarea {
 
 .zijbalk {
   padding: 28px 20px;
-  border-right: 1px solid rgba(234, 222, 222, 0.85);
-  background: #ffffff;
+  border-right: 1px solid var(--rand);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(249, 243, 239, 0.92) 100%);
+  backdrop-filter: blur(14px);
   position: sticky;
   top: 0;
   height: 100vh;
@@ -272,11 +357,15 @@ textarea {
 .merk p {
   margin: 0;
   color: var(--subtekst);
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
 }
 
 .merk h1 {
-  margin: 6px 0 0;
-  font-size: 1.7rem;
+  margin: 8px 0 0;
+  font-size: 1.9rem;
+  letter-spacing: -0.04em;
 }
 
 .navigatie {
@@ -285,15 +374,17 @@ textarea {
 }
 
 .navigatie a {
-  padding: 12px 14px;
-  border-radius: 14px;
+  padding: 13px 14px;
+  border-radius: 16px;
   color: var(--subtekst);
+  font-weight: 500;
 }
 
 .navigatie a[data-actief="true"] {
-  background: var(--paneel-zacht);
+  background: linear-gradient(135deg, #fff4f4 0%, #faeaea 100%);
   color: var(--accent-donker);
   font-weight: 700;
+  box-shadow: var(--schaduw-zacht);
 }
 
 .zijbalk-voet {
@@ -339,7 +430,7 @@ textarea {
 
 .stat-kaart,
 .kaart {
-  padding: 22px;
+  padding: 24px;
 }
 
 .stat-kaart h3,
@@ -347,12 +438,14 @@ textarea {
   margin: 0;
   font-size: 0.95rem;
   color: var(--subtekst);
+  letter-spacing: 0.01em;
 }
 
 .stat-kaart strong {
   display: block;
   margin-top: 12px;
-  font-size: 2rem;
+  font-size: 2.15rem;
+  letter-spacing: -0.05em;
 }
 
 .twee-kolommen {
@@ -369,8 +462,9 @@ textarea {
 .lijst-item {
   padding: 18px;
   border: 1px solid var(--rand);
-  border-radius: 16px;
-  background: white;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: var(--schaduw-zacht);
 }
 
 .lijst-item h4,
@@ -393,7 +487,7 @@ textarea {
 .tafel td {
   text-align: left;
   padding: 14px 10px;
-  border-bottom: 1px solid var(--rand);
+  border-bottom: 1px solid rgba(176, 141, 141, 0.18);
   vertical-align: top;
 }
 
@@ -408,10 +502,11 @@ textarea {
   align-items: center;
   gap: 8px;
   border-radius: 999px;
-  background: var(--paneel-zacht);
-  padding: 8px 12px;
+  background: linear-gradient(135deg, #fff5f5 0%, #faebeb 100%);
+  padding: 8px 13px;
   color: var(--accent-donker);
   font-size: 0.92rem;
+  font-weight: 600;
 }
 
 .filters {

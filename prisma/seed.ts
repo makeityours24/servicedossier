@@ -8,39 +8,110 @@ function hashPassword(value: string) {
 }
 
 async function main() {
+  await prisma.user.upsert({
+    where: { email: "platform@miy24.nl" },
+    update: {},
+    create: {
+      naam: "Platform Beheer",
+      email: "platform@miy24.nl",
+      wachtwoord: hashPassword("Platform123!"),
+      moetWachtwoordWijzigen: false,
+      isPlatformAdmin: true,
+      rol: "ADMIN",
+      status: "ACTIEF"
+    }
+  });
+
+  const salon = await prisma.salon.upsert({
+    where: { slug: "my-style" },
+    update: {},
+    create: {
+      naam: "My Style",
+      slug: "my-style",
+      email: "info@kapsalonmystyle.nl",
+      telefoonnummer: "0316240237",
+      adres: "Marktstraat 35, 6901 AK Zevenaar",
+      instellingen: {
+        create: {
+          weergavenaam: "My Style",
+          primaireKleur: "#b42323",
+          contactEmail: "info@kapsalonmystyle.nl",
+          contactTelefoon: "0316240237",
+          adres: "Marktstraat 35, 6901 AK Zevenaar",
+          treatmentPresets: [
+            "Uitgroei kleuren",
+            "Volledige kleuring",
+            "Toner",
+            "Balayage",
+            "Highlights",
+            "Kleurcorrectie"
+          ]
+        }
+      }
+    }
+  });
+
   const medewerker = await prisma.user.upsert({
     where: { email: "admin@salonluna.nl" },
     update: {},
     create: {
+      salonId: salon.id,
       naam: "Sanne de Vries",
       email: "admin@salonluna.nl",
-      wachtwoord: hashPassword("Welkom123!")
+      wachtwoord: hashPassword("Welkom123!"),
+      moetWachtwoordWijzigen: false,
+      isPlatformAdmin: false,
+      rol: "OWNER",
+      status: "ACTIEF"
+    },
+    select: {
+      id: true,
+      naam: true,
+      salonId: true
     }
   });
 
   const klanten = await Promise.all([
     prisma.customer.upsert({
-      where: { telefoonnummer: "0612345678" },
+      where: {
+        salonId_telefoonnummer: {
+          salonId: salon.id,
+          telefoonnummer: "0612345678"
+        }
+      },
       update: {},
       create: {
+        salonId: salon.id,
         naam: "Eva Jansen",
         adres: "Bloemstraat 12, Amsterdam",
         telefoonnummer: "0612345678"
       }
     }),
     prisma.customer.upsert({
-      where: { telefoonnummer: "0622334455" },
+      where: {
+        salonId_telefoonnummer: {
+          salonId: salon.id,
+          telefoonnummer: "0622334455"
+        }
+      },
       update: {},
       create: {
+        salonId: salon.id,
         naam: "Mila Bakker",
         adres: "Havenweg 44, Haarlem",
         telefoonnummer: "0622334455"
       }
     }),
     prisma.customer.upsert({
-      where: { telefoonnummer: "0633445566" },
+      where: {
+        salonId_telefoonnummer: {
+          salonId: salon.id,
+          telefoonnummer: "0633445566"
+        }
+      },
       update: {},
       create: {
+        salonId: salon.id,
         naam: "Noor Visser",
         adres: "Lindelaan 3, Utrecht",
         telefoonnummer: "0633445566"
@@ -54,6 +125,7 @@ async function main() {
     await prisma.treatment.createMany({
       data: [
         {
+          salonId: salon.id,
           customerId: klanten[0].id,
           userId: medewerker.id,
           datum: new Date("2026-02-10T10:00:00.000Z"),
@@ -63,6 +135,7 @@ async function main() {
           notities: "Warme goudtoon, advies voor kleurshampoo gegeven."
         },
         {
+          salonId: salon.id,
           customerId: klanten[0].id,
           userId: medewerker.id,
           datum: new Date("2026-03-01T13:30:00.000Z"),
@@ -72,6 +145,7 @@ async function main() {
           notities: "Lengtes opgefrist met toner."
         },
         {
+          salonId: salon.id,
           customerId: klanten[1].id,
           userId: medewerker.id,
           datum: new Date("2026-02-19T09:15:00.000Z"),
@@ -79,6 +153,38 @@ async function main() {
           recept: "Blondeerpoeder + 6%, toner 9.12",
           behandelaar: medewerker.naam,
           notities: "Koele blondtint behouden."
+        }
+      ]
+    });
+  }
+
+  const bestaandAantalSjablonen = await prisma.recipeTemplate.count({
+    where: { salonId: salon.id }
+  });
+
+  if (bestaandAantalSjablonen === 0) {
+    await prisma.recipeTemplate.createMany({
+      data: [
+        {
+          salonId: salon.id,
+          naam: "Uitgroei basis blond",
+          behandeling: "Uitgroei kleuren",
+          recept: "7.0 + 7.1, 3% oxidatie, 25 minuten",
+          notities: "Geschikt voor neutrale koele dekking bij uitgroei."
+        },
+        {
+          salonId: salon.id,
+          naam: "Warme volledige kleuring",
+          behandeling: "Volledige kleuring",
+          recept: "7.3 + 8.1, 6% oxidatie, 35 minuten",
+          notities: "Voor zachte warme goudtoon met extra glans."
+        },
+        {
+          salonId: salon.id,
+          naam: "Balayage toner koel",
+          behandeling: "Balayage met toner",
+          recept: "Blondeerpoeder + 6%, toner 9.12",
+          notities: "Koele blondtint behouden, lengtes goed bewaken."
         }
       ]
     });
