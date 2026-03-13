@@ -55,6 +55,34 @@ export async function createSalonAction(
     return { error: "De salonnaam kan niet worden omgezet naar een geldige slug." };
   }
 
+  const bestaandeSalon = await prisma.salon.findFirst({
+    where: {
+      OR: [{ slug }, { naam: parsed.data.naam }]
+    },
+    select: {
+      id: true,
+      naam: true,
+      slug: true
+    }
+  });
+
+  if (bestaandeSalon) {
+    return {
+      error: `Deze salon bestaat al. Gebruik een andere salonnaam of saloncode. Bestaande salon: ${bestaandeSalon.naam} (${bestaandeSalon.slug}).`
+    };
+  }
+
+  const bestaandeGebruiker = await prisma.user.findUnique({
+    where: { email: parsed.data.eigenaarEmail.toLowerCase() },
+    select: { id: true }
+  });
+
+  if (bestaandeGebruiker) {
+    return {
+      error: "Het e-mailadres van de eigenaar is al in gebruik. Kies een ander e-mailadres voor deze gebruiker."
+    };
+  }
+
   try {
     await prisma.$transaction(async (tx) => {
       const salon = await tx.salon.create({
