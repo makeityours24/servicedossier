@@ -189,3 +189,18 @@ DATABASE_URL="postgresql://USER:PASSWORD@HOST:5432/my_style?schema=public"
 - Wachtwoorden worden in deze demo gehasht met SHA-256. Voor productie is `bcrypt` of `argon2` aan te raden.
 - Deze versie is voorbereid voor online hosting met PostgreSQL in plaats van SQLite.
 - Voor multi-tenant live gebruik is een subdomein-setup via Vercel + STRATO de aanbevolen route.
+
+## Extra beveiliging
+
+Deze versie bevat nu ook een eerste beveiligingslaag in de app zelf:
+
+- security headers via middleware
+- database-backed rate limiting op loginpogingen
+- audit logging voor gevoelige acties zoals login, wachtwoordwijziging en verwijderen
+
+Na schemawijzigingen hiervoor moet je opnieuw uitvoeren:
+
+```bash
+npx prisma db push
+npx prisma generate
+```

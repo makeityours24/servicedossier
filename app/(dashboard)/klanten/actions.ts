@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import type { FormState } from "@/components/customer-form";
 import { requireSalonSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { createAuditLog, getRequestIp } from "@/lib/security";
 import { customerSchema, treatmentSchema } from "@/lib/validation";
 
 export async function createCustomerAction(
@@ -91,6 +92,7 @@ export async function updateCustomerAction(
 
 export async function deleteCustomerAction(formData: FormData): Promise<void> {
   const user = await requireSalonSession();
+  const ipAddress = await getRequestIp();
   const customerId = Number(formData.get("customerId"));
 
   if (!Number.isInteger(customerId)) {
@@ -111,6 +113,16 @@ export async function deleteCustomerAction(formData: FormData): Promise<void> {
 
   await prisma.customer.delete({
     where: { id: customerId }
+  });
+
+  await createAuditLog({
+    salonId: user.salonId,
+    actorUserId: user.id,
+    action: "CUSTOMER_DELETED",
+    entityType: "CUSTOMER",
+    entityId: customerId,
+    message: "Klant verwijderd.",
+    ipAddress
   });
 
   revalidatePath("/klanten");
@@ -218,6 +230,7 @@ export async function updateTreatmentAction(
 
 export async function deleteTreatmentAction(formData: FormData): Promise<void> {
   const user = await requireSalonSession();
+  const ipAddress = await getRequestIp();
   const treatmentId = Number(formData.get("treatmentId"));
   const customerId = Number(formData.get("customerId"));
 
@@ -240,6 +253,19 @@ export async function deleteTreatmentAction(formData: FormData): Promise<void> {
 
   await prisma.treatment.delete({
     where: { id: treatmentId }
+  });
+
+  await createAuditLog({
+    salonId: user.salonId,
+    actorUserId: user.id,
+    action: "TREATMENT_DELETED",
+    entityType: "TREATMENT",
+    entityId: treatmentId,
+    message: "Behandeling verwijderd.",
+    ipAddress,
+    metadata: {
+      customerId
+    }
   });
 
   revalidatePath(`/klanten/${customerId}`);

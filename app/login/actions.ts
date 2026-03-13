@@ -3,6 +3,13 @@
 import { redirect } from "next/navigation";
 import { clearSession, hashPassword, setSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import {
+  assertLoginAllowed,
+  clearLoginThrottle,
+  createAuditLog,
+  getRequestIp,
+  registerFailedLogin
+} from "@/lib/security";
 import { loginSchema } from "@/lib/validation";
 
 export type LoginState = {
@@ -10,6 +17,7 @@ export type LoginState = {
 };
 
 export async function loginAction(_: LoginState, formData: FormData): Promise<LoginState> {
+  const ipAddress = await getRequestIp();
   const salonInput =
     String(formData.get("salonSlug") || formData.get("salonCode") || "")
       .trim()
@@ -23,6 +31,27 @@ export async function loginAction(_: LoginState, formData: FormData): Promise<Lo
     return { error: parsed.error.issues[0]?.message ?? "Controleer uw invoer." };
   }
 
+  const throttle = await assertLoginAllowed({
+    email: parsed.data.email,
+    ipAddress,
+    salonSlug: salonInput || undefined
+  });
+
+  if (!throttle.allowed) {
+    await createAuditLog({
+      action: "LOGIN_BLOCKED",
+      entityType: "AUTH",
+      message: "Login geblokkeerd door rate limiting.",
+      ipAddress,
+      metadata: {
+        email: parsed.data.email.toLowerCase(),
+        salonSlug: salonInput || null
+      }
+    });
+
+    return { error: throttle.error };
+  }
+
   const salon = salonInput
     ? await prisma.salon.findUnique({
         where: { slug: salonInput },
@@ -31,10 +60,38 @@ export async function loginAction(_: LoginState, formData: FormData): Promise<Lo
     : null;
 
   if (salonInput && !salon) {
+    await registerFailedLogin({
+      key: throttle.key,
+      email: parsed.data.email,
+      ipAddress,
+      salonSlug: salonInput
+    });
+    await createAuditLog({
+      action: "LOGIN_FAILED",
+      entityType: "AUTH",
+      message: "Login mislukt: saloncode niet gevonden.",
+      ipAddress,
+      metadata: {
+        email: parsed.data.email.toLowerCase(),
+        salonSlug: salonInput
+      }
+    });
     redirect("/login?fout=niet-gevonden");
   }
 
   if (salon?.status === "GEPAUZEERD") {
+    await createAuditLog({
+      salonId: salon.id,
+      action: "LOGIN_REJECTED",
+      entityType: "SALON",
+      entityId: salon.id,
+      message: "Login geweigerd omdat de salon gepauzeerd is.",
+      ipAddress,
+      metadata: {
+        email: parsed.data.email.toLowerCase(),
+        salonSlug: salonInput
+      }
+    });
     redirect(`/login?salon=${salonInput}&fout=gepauzeerd`);
   }
 
@@ -57,21 +114,92 @@ export async function loginAction(_: LoginState, formData: FormData): Promise<Lo
   });
 
   if (!user || user.status !== "ACTIEF" || user.wachtwoord !== hashPassword(parsed.data.wachtwoord)) {
+    await registerFailedLogin({
+      key: throttle.key,
+      email: parsed.data.email,
+      ipAddress,
+      salonSlug: salonInput || undefined
+    });
+    await createAuditLog({
+      salonId: user?.salonId ?? salon?.id ?? null,
+      actorUserId: user?.id ?? null,
+      action: "LOGIN_FAILED",
+      entityType: "AUTH",
+      message: "Login mislukt: onjuiste inloggegevens of account niet actief.",
+      ipAddress,
+      metadata: {
+        email: parsed.data.email.toLowerCase(),
+        salonSlug: salonInput || null
+      }
+    });
     return { error: "Onjuiste inloggegevens." };
   }
 
   if (salon && user.isPlatformAdmin) {
+    await createAuditLog({
+      actorUserId: user.id,
+      action: "LOGIN_REJECTED",
+      entityType: "AUTH",
+      message: "Platformbeheerder probeerde via saloncontext in te loggen.",
+      ipAddress,
+      metadata: {
+        email: parsed.data.email.toLowerCase(),
+        salonSlug: salonInput
+      }
+    });
     return { error: "Platformbeheer logt in via de centrale login zonder saloncode." };
   }
 
   if (salon && user.salonId !== salon.id) {
+    await registerFailedLogin({
+      key: throttle.key,
+      email: parsed.data.email,
+      ipAddress,
+      salonSlug: salonInput
+    });
+    await createAuditLog({
+      salonId: salon.id,
+      actorUserId: user.id,
+      action: "LOGIN_REJECTED",
+      entityType: "AUTH",
+      message: "Account hoort niet bij de geselecteerde salon.",
+      ipAddress,
+      metadata: {
+        email: parsed.data.email.toLowerCase(),
+        userSalonId: user.salonId,
+        requestedSalonId: salon.id
+      }
+    });
     return { error: "Dit account hoort niet bij de geselecteerde salon." };
   }
 
   if (!user.isPlatformAdmin && user.salon?.status === "GEPAUZEERD") {
+    await createAuditLog({
+      salonId: user.salonId,
+      actorUserId: user.id,
+      action: "LOGIN_REJECTED",
+      entityType: "SALON",
+      entityId: user.salonId,
+      message: "Login geweigerd omdat de salon gepauzeerd is.",
+      ipAddress
+    });
     redirect(`/login?salon=${user.salon.slug}&fout=gepauzeerd`);
   }
 
+  await clearLoginThrottle({
+    email: parsed.data.email,
+    ipAddress,
+    salonSlug: salonInput || undefined
+  });
+  await createAuditLog({
+    salonId: user.salonId,
+    actorUserId: user.id,
+    action: "LOGIN_SUCCESS",
+    entityType: user.isPlatformAdmin ? "PLATFORM" : "SALON",
+    entityId: user.isPlatformAdmin ? "platform" : user.salonId,
+    message: "Succesvolle login.",
+    ipAddress
+  });
   await setSession(user.id);
   redirect(user.moetWachtwoordWijzigen ? "/account/wachtwoord" : user.isPlatformAdmin ? "/platform" : "/dashboard");
 }

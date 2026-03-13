@@ -30,6 +30,23 @@ export default async function TeamPage() {
         </div>
       </section>
 
+      <section className="info-grid">
+        <article className="info-kaart">
+          <h3>Loginaccounts beheer je hier</h3>
+          <p className="meta">
+            Medewerkers die je op deze pagina toevoegt, krijgen een eigen account om in te loggen in
+            deze salonomgeving.
+          </p>
+        </article>
+        <article className="info-kaart">
+          <h3>Klanten hebben geen login</h3>
+          <p className="meta">
+            Klanten voeg je toe via <strong>Nieuwe klant</strong>. Dat zijn klantdossiers zonder eigen
+            inlogmogelijkheid.
+          </p>
+        </article>
+      </section>
+
       <section className="twee-kolommen">
         <article className="kaart">
           <h3>Bestaande medewerkers</h3>

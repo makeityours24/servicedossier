@@ -38,6 +38,7 @@ model User {
   updatedAt    DateTime    @updatedAt
   salon        Salon?      @relation(fields: [salonId], references: [id], onDelete: Cascade)
   behandelingen Treatment[]
+  auditLogs    AuditLog[]  @relation("AuditActor")
 
   @@index([salonId, email])
 }
@@ -93,6 +94,7 @@ model Salon {
   customers     Customer[]
   treatments    Treatment[]
   recipeTemplates RecipeTemplate[]
+  auditLogs     AuditLog[]
 }
 
 model SalonSettings {
@@ -122,4 +124,43 @@ model RecipeTemplate {
   salon        Salon    @relation(fields: [salonId], references: [id], onDelete: Cascade)
 
   @@index([salonId, naam])
+}
+
+model LoginThrottle {
+  id           Int       @id @default(autoincrement())
+  key          String    @unique
+  email        String?
+  ipAddress    String?
+  salonSlug    String?
+  attemptCount Int       @default(0)
+  windowStart  DateTime
+  blockedUntil DateTime?
+  lastAttemptAt DateTime @default(now())
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([email])
+  @@index([ipAddress])
+  @@index([salonSlug])
+  @@index([blockedUntil])
+}
+
+model AuditLog {
+  id          Int       @id @default(autoincrement())
+  salonId     Int?
+  actorUserId Int?
+  action      String
+  entityType  String
+  entityId    String?
+  message     String?
+  ipAddress   String?
+  metadata    Json?
+  createdAt   DateTime  @default(now())
+  salon       Salon?    @relation(fields: [salonId], references: [id], onDelete: SetNull)
+  actorUser   User?     @relation("AuditActor", fields: [actorUserId], references: [id], onDelete: SetNull)
+
+  @@index([salonId, createdAt])
+  @@index([actorUserId, createdAt])
+  @@index([entityType, entityId])
+  @@index([action, createdAt])
 }

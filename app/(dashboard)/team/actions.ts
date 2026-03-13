@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import type { FormState } from "@/components/customer-form";
 import { requireSalonSession, hashPassword } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { createAuditLog, getRequestIp } from "@/lib/security";
 import { medewerkerSchema, medewerkerUpdateSchema } from "@/lib/validation";
 
 function hasTeamBeheerRechten(rol: "OWNER" | "ADMIN" | "MEDEWERKER") {
@@ -143,6 +144,7 @@ export async function updateMedewerkerAction(
 
 export async function deleteMedewerkerAction(formData: FormData): Promise<void> {
   const user = await requireSalonSession();
+  const ipAddress = await getRequestIp();
 
   if (!hasTeamBeheerRechten(user.rol)) {
     throw new Error("Alleen eigenaren en admins kunnen medewerkers beheren.");
@@ -190,6 +192,16 @@ export async function deleteMedewerkerAction(formData: FormData): Promise<void> 
 
   await prisma.user.delete({
     where: { id: medewerkerId }
+  });
+
+  await createAuditLog({
+    salonId: user.salonId,
+    actorUserId: user.id,
+    action: "USER_DELETED",
+    entityType: "USER",
+    entityId: medewerkerId,
+    message: "Medewerker verwijderd.",
+    ipAddress
   });
 
   revalidatePath("/team");

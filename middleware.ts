@@ -12,7 +12,9 @@ export function middleware(request: NextRequest) {
     pathname.startsWith("/api/auth") ||
     pathname.includes(".")
   ) {
-    return NextResponse.next();
+    const response = NextResponse.next();
+    setSecurityHeaders(response);
+    return response;
   }
 
   const tenantSlug = extractTenantSlugFromHostname(request.headers.get("host") ?? "");
@@ -28,14 +30,39 @@ export function middleware(request: NextRequest) {
   const isPubliek = publiekePaden.some((pad) => pathname.startsWith(pad));
 
   if (!heeftSessie && !isPubliek) {
-    return NextResponse.redirect(new URL("/login", request.url));
+    const response = NextResponse.redirect(new URL("/login", request.url));
+    setSecurityHeaders(response);
+    return response;
   }
 
-  return NextResponse.next({
+  const response = NextResponse.next({
     request: {
       headers: requestHeaders
     }
   });
+  setSecurityHeaders(response);
+  return response;
+}
+
+function setSecurityHeaders(response: NextResponse) {
+  response.headers.set("X-Frame-Options", "DENY");
+  response.headers.set("X-Content-Type-Options", "nosniff");
+  response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
+  response.headers.set("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
+  response.headers.set(
+    "Content-Security-Policy",
+    [
+      "default-src 'self'",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+      "img-src 'self' data: blob: https:",
+      "font-src 'self' https://fonts.gstatic.com",
+      "connect-src 'self' https:",
+      "frame-ancestors 'none'",
+      "base-uri 'self'",
+      "form-action 'self'"
+    ].join("; ")
+  );
 }
 
 export const config = {

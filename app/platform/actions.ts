@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { hashPassword, requirePlatformAdmin } from "@/lib/auth";
 import { getSalonLoginUrl } from "@/lib/app-url";
 import { prisma } from "@/lib/prisma";
+import { createAuditLog, getRequestIp } from "@/lib/security";
 import { platformSalonSchema, platformSalonUpdateSchema } from "@/lib/validation";
 
 export type PlatformSalonFormState = {
@@ -31,7 +32,8 @@ export async function createSalonAction(
   _: PlatformSalonFormState,
   formData: FormData
 ): Promise<PlatformSalonFormState> {
-  await requirePlatformAdmin();
+  const actor = await requirePlatformAdmin();
+  const ipAddress = await getRequestIp();
 
   const parsed = platformSalonSchema.safeParse({
     naam: formData.get("naam"),
@@ -89,6 +91,19 @@ export async function createSalonAction(
     });
 
     revalidatePath("/platform");
+    await createAuditLog({
+      actorUserId: actor.id,
+      action: "SALON_CREATED",
+      entityType: "SALON",
+      entityId: slug,
+      message: "Nieuwe salon en eerste eigenaar aangemaakt.",
+      ipAddress,
+      metadata: {
+        salonNaam: parsed.data.naam,
+        salonSlug: slug,
+        eigenaarEmail: parsed.data.eigenaarEmail.toLowerCase()
+      }
+    });
     return {
       success: "Salon en eigenaar zijn aangemaakt.",
       onboarding: {
@@ -107,7 +122,8 @@ export async function updateSalonAction(
   _: PlatformSalonFormState,
   formData: FormData
 ): Promise<PlatformSalonFormState> {
-  await requirePlatformAdmin();
+  const actor = await requirePlatformAdmin();
+  const ipAddress = await getRequestIp();
 
   const parsed = platformSalonUpdateSchema.safeParse({
     salonId: formData.get("salonId"),
@@ -169,6 +185,18 @@ export async function updateSalonAction(
 
     revalidatePath("/platform");
     revalidatePath(`/platform/${parsed.data.salonId}/bewerken`);
+    await createAuditLog({
+      actorUserId: actor.id,
+      action: "SALON_UPDATED",
+      entityType: "SALON",
+      entityId: parsed.data.salonId,
+      message: "Salon bijgewerkt.",
+      ipAddress,
+      metadata: {
+        salonNaam: parsed.data.naam,
+        status: parsed.data.status
+      }
+    });
     return { success: "Salon is bijgewerkt." };
   } catch {
     return { error: "Bijwerken is mislukt. Mogelijk bestaat de salonnaam al." };
@@ -176,7 +204,8 @@ export async function updateSalonAction(
 }
 
 export async function deleteSalonAction(formData: FormData): Promise<void> {
-  await requirePlatformAdmin();
+  const actor = await requirePlatformAdmin();
+  const ipAddress = await getRequestIp();
 
   const salonId = Number(formData.get("salonId"));
 
@@ -195,6 +224,15 @@ export async function deleteSalonAction(formData: FormData): Promise<void> {
 
   await prisma.salon.delete({
     where: { id: salonId }
+  });
+
+  await createAuditLog({
+    actorUserId: actor.id,
+    action: "SALON_DELETED",
+    entityType: "SALON",
+    entityId: salonId,
+    message: "Salon verwijderd.",
+    ipAddress
   });
 
   revalidatePath("/platform");

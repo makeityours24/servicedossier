@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import type { FormState } from "@/components/customer-form";
 import { hashPassword, requireSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { createAuditLog, getRequestIp } from "@/lib/security";
 import { passwordChangeSchema } from "@/lib/validation";
 
 export async function changePasswordAction(
@@ -12,6 +13,7 @@ export async function changePasswordAction(
   formData: FormData
 ): Promise<FormState> {
   const user = await requireSession({ allowPasswordChange: true });
+  const ipAddress = await getRequestIp();
   const parsed = passwordChangeSchema.safeParse({
     huidigWachtwoord: formData.get("huidigWachtwoord") || "",
     nieuwWachtwoord: formData.get("nieuwWachtwoord"),
@@ -39,6 +41,16 @@ export async function changePasswordAction(
       wachtwoord: hashPassword(parsed.data.nieuwWachtwoord),
       moetWachtwoordWijzigen: false
     }
+  });
+
+  await createAuditLog({
+    salonId: user.salonId,
+    actorUserId: user.id,
+    action: "PASSWORD_CHANGED",
+    entityType: user.isPlatformAdmin ? "PLATFORM_USER" : "USER",
+    entityId: user.id,
+    message: "Wachtwoord gewijzigd.",
+    ipAddress
   });
 
   revalidatePath("/dashboard");
