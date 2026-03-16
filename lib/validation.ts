@@ -54,6 +54,20 @@ export const recipeTemplateUpdateSchema = recipeTemplateSchema.extend({
   templateId: z.coerce.number().int().positive()
 });
 
+export const packageTypeSchema = z.object({
+  naam: z.string().min(2, "Naam van het pakket is verplicht."),
+  omschrijving: z.string().trim().max(300, "Omschrijving is te lang.").optional(),
+  totaalBeurten: z.coerce.number().int().positive("Aantal beurten moet minimaal 1 zijn."),
+  pakketPrijs: z.coerce.number().positive("Pakketprijs moet groter zijn dan 0."),
+  lossePrijs: z.coerce.number().positive("Losse prijs moet groter zijn dan 0."),
+  standaardBehandeling: z.string().min(2, "Standaardbehandeling is verplicht."),
+  isActief: z.enum(["true", "false"]).default("true")
+});
+
+export const packageTypeUpdateSchema = packageTypeSchema.extend({
+  packageTypeId: z.coerce.number().int().positive()
+});
+
 export const salonSettingsSchema = z.object({
   weergavenaam: z.string().min(2, "Salonnaam is verplicht."),
   contactEmail: z

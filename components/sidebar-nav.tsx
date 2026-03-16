@@ -8,6 +8,7 @@ const links = [
   { href: "/klanten", label: "Klanten" },
   { href: "/klanten/nieuwe", label: "Nieuwe klant (dossier)" },
   { href: "/recepten", label: "Receptsjablonen" },
+  { href: "/pakketten", label: "Pakketten" },
   { href: "/team", label: "Team" },
   { href: "/instellingen", label: "Instellingen" },
   { href: "/account/wachtwoord", label: "Wachtwoord" }

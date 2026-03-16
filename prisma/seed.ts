@@ -189,6 +189,47 @@ async function main() {
       ]
     });
   }
+
+  const bestaandAantalPakketten = await prisma.packageType.count({
+    where: { salonId: salon.id }
+  });
+
+  if (bestaandAantalPakketten === 0) {
+    await prisma.packageType.createMany({
+      data: [
+        {
+          salonId: salon.id,
+          naam: "5x epileren",
+          omschrijving: "Voordelig bundelpakket voor terugkerende epilatie-afspraken.",
+          totaalBeurten: 5,
+          pakketPrijsCents: 3000,
+          lossePrijsCents: 750,
+          standaardBehandeling: "Epileren",
+          isActief: true
+        },
+        {
+          salonId: salon.id,
+          naam: "6x toner",
+          omschrijving: "Onderhoudspakket voor kleurverfrissing tussen grotere behandelingen door.",
+          totaalBeurten: 6,
+          pakketPrijsCents: 4800,
+          lossePrijsCents: 900,
+          standaardBehandeling: "Toner",
+          isActief: true
+        },
+        {
+          salonId: salon.id,
+          naam: "10x wenkbrauwen",
+          omschrijving: "Digitale stempelkaart voor vaste wenkbrauwbehandelingen.",
+          totaalBeurten: 10,
+          pakketPrijsCents: 6500,
+          lossePrijsCents: 750,
+          standaardBehandeling: "Wenkbrauwen",
+          isActief: true
+        }
+      ]
+    });
+  }
 }
 
 main()

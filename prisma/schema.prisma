@@ -24,6 +24,13 @@ enum SalonStatus {
   GEPAUZEERD
 }
 
+enum CustomerPackageStatus {
+  ACTIEF
+  VOLLEDIG_GEBRUIKT
+  VERLOPEN
+  GEANNULEERD
+}
+
 model User {
   id           Int         @id @default(autoincrement())
   salonId      Int?
@@ -39,6 +46,7 @@ model User {
   salon        Salon?      @relation(fields: [salonId], references: [id], onDelete: Cascade)
   behandelingen Treatment[]
   auditLogs    AuditLog[]  @relation("AuditActor")
+  packageUsages CustomerPackageUsage[]
 
   @@index([salonId, email])
 }
@@ -53,6 +61,8 @@ model Customer {
   updatedAt       DateTime    @updatedAt
   salon           Salon       @relation(fields: [salonId], references: [id], onDelete: Cascade)
   behandelingen   Treatment[]
+  customerPackages CustomerPackage[]
+  packageUsages   CustomerPackageUsage[]
 
   @@unique([salonId, telefoonnummer])
   @@index([salonId, naam])
@@ -73,6 +83,7 @@ model Treatment {
   salon         Salon     @relation(fields: [salonId], references: [id], onDelete: Cascade)
   customer      Customer  @relation(fields: [customerId], references: [id], onDelete: Cascade)
   user          User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  packageUsages CustomerPackageUsage[]
 
   @@index([salonId, datum])
   @@index([customerId, datum])
@@ -95,6 +106,9 @@ model Salon {
   treatments    Treatment[]
   recipeTemplates RecipeTemplate[]
   auditLogs     AuditLog[]
+  packageTypes  PackageType[]
+  customerPackages CustomerPackage[]
+  packageUsages CustomerPackageUsage[]
 }
 
 model SalonSettings {
@@ -124,6 +138,72 @@ model RecipeTemplate {
   salon        Salon    @relation(fields: [salonId], references: [id], onDelete: Cascade)
 
   @@index([salonId, naam])
+}
+
+model PackageType {
+  id                    Int       @id @default(autoincrement())
+  salonId               Int
+  naam                  String
+  omschrijving          String?
+  totaalBeurten         Int
+  pakketPrijsCents      Int
+  lossePrijsCents       Int
+  standaardBehandeling  String
+  isActief              Boolean   @default(true)
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+  salon                 Salon     @relation(fields: [salonId], references: [id], onDelete: Cascade)
+  customerPackages      CustomerPackage[]
+
+  @@index([salonId, naam])
+}
+
+model CustomerPackage {
+  id                         Int                    @id @default(autoincrement())
+  salonId                    Int
+  customerId                 Int
+  packageTypeId              Int
+  gekochtOp                  DateTime               @default(now())
+  naamSnapshot               String
+  standaardBehandelingSnapshot String
+  totaalBeurten              Int
+  resterendeBeurten          Int
+  pakketPrijsCents           Int
+  lossePrijsCents            Int
+  status                     CustomerPackageStatus  @default(ACTIEF)
+  notities                   String?
+  createdAt                  DateTime               @default(now())
+  updatedAt                  DateTime               @updatedAt
+  salon                      Salon                  @relation(fields: [salonId], references: [id], onDelete: Cascade)
+  customer                   Customer               @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  packageType                PackageType            @relation(fields: [packageTypeId], references: [id], onDelete: Restrict)
+  usages                     CustomerPackageUsage[]
+
+  @@index([salonId, customerId])
+  @@index([customerId, status])
+  @@index([packageTypeId])
+}
+
+model CustomerPackageUsage {
+  id                Int      @id @default(autoincrement())
+  salonId           Int
+  customerPackageId Int
+  customerId        Int
+  treatmentId       Int?
+  userId            Int?
+  datum             DateTime
+  aantalAfgeboekt   Int      @default(1)
+  notitie           String?
+  createdAt         DateTime @default(now())
+  salon             Salon    @relation(fields: [salonId], references: [id], onDelete: Cascade)
+  customerPackage   CustomerPackage @relation(fields: [customerPackageId], references: [id], onDelete: Cascade)
+  customer          Customer  @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  treatment         Treatment? @relation(fields: [treatmentId], references: [id], onDelete: SetNull)
+  user              User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([salonId, customerId])
+  @@index([customerPackageId, datum])
+  @@index([treatmentId])
 }
 
 model LoginThrottle {

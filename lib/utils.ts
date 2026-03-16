@@ -18,3 +18,10 @@ export function buildCsvRow(values: string[]) {
     .map((value) => `"${value.replaceAll('"', '""')}"`)
     .join(",");
 }
+
+export function formatCurrencyFromCents(value: number) {
+  return new Intl.NumberFormat("nl-NL", {
+    style: "currency",
+    currency: "EUR"
+  }).format(value / 100);
+}
