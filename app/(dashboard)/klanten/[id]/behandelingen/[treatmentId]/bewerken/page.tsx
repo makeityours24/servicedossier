@@ -48,7 +48,13 @@ export default async function BewerkBehandelingPage({
       behandeling: true,
       recept: true,
       behandelaar: true,
-      notities: true
+      notities: true,
+      packageUsages: {
+        take: 1,
+        select: {
+          customerPackageId: true
+        }
+      }
     }
   });
 
@@ -59,6 +65,26 @@ export default async function BewerkBehandelingPage({
   const datumWaarde = new Date(behandeling.datum.getTime() - behandeling.datum.getTimezoneOffset() * 60000)
     .toISOString()
     .slice(0, 16);
+
+  const activePackages = await prisma.customerPackage.findMany({
+    where: {
+      customerId: klant.id,
+      salonId: user.salonId,
+      OR: [
+        { status: "ACTIEF" },
+        {
+          id: behandeling.packageUsages[0]?.customerPackageId ?? -1
+        }
+      ]
+    },
+    orderBy: [{ status: "asc" }, { gekochtOp: "desc" }],
+    select: {
+      id: true,
+      naamSnapshot: true,
+      resterendeBeurten: true,
+      totaalBeurten: true
+    }
+  });
 
   return (
     <div className="rooster">
@@ -86,8 +112,10 @@ export default async function BewerkBehandelingPage({
           submitLabel="Behandeling opslaan"
           treatment={{
             ...behandeling,
-            datum: datumWaarde
+            datum: datumWaarde,
+            customerPackageId: behandeling.packageUsages[0]?.customerPackageId ?? null
           }}
+          activePackages={activePackages}
         />
       </section>
     </div>

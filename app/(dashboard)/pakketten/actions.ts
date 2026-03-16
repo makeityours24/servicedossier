@@ -5,7 +5,6 @@ import { redirect } from "next/navigation";
 import type { FormState } from "@/components/customer-form";
 import { requireSalonSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { formatCurrencyFromCents } from "@/lib/utils";
 import { packageTypeSchema, packageTypeUpdateSchema } from "@/lib/validation";
 
 function hasPakketBeheerRechten(rol: "OWNER" | "ADMIN" | "MEDEWERKER") {
@@ -262,15 +261,4 @@ export async function reactivatePackageTypeAction(formData: FormData): Promise<v
 
   revalidatePath("/pakketten");
   redirect("/pakketten");
-}
-
-export function describePackagePrice(pakketPrijsCents: number, lossePrijsCents: number, totaalBeurten: number) {
-  const normaleWaarde = lossePrijsCents * totaalBeurten;
-  const voordeel = normaleWaarde - pakketPrijsCents;
-
-  if (voordeel <= 0) {
-    return `${formatCurrencyFromCents(pakketPrijsCents)} voor ${totaalBeurten} beurten`;
-  }
-
-  return `${formatCurrencyFromCents(pakketPrijsCents)} voor ${totaalBeurten} beurten, bespaar ${formatCurrencyFromCents(voordeel)}`;
 }

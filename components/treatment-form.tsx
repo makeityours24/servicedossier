@@ -19,9 +19,16 @@ type TreatmentFormProps = {
     recept: string;
     behandelaar: string;
     notities?: string | null;
+    customerPackageId?: number | null;
   };
   helperText?: string;
   treatmentPresets?: readonly string[];
+  activePackages?: Array<{
+    id: number;
+    naamSnapshot: string;
+    resterendeBeurten: number;
+    totaalBeurten: number;
+  }>;
 };
 
 export function TreatmentForm({
@@ -31,7 +38,8 @@ export function TreatmentForm({
   submitLabel = "Behandeling opslaan",
   treatment,
   helperText,
-  treatmentPresets = []
+  treatmentPresets = [],
+  activePackages = []
 }: TreatmentFormProps) {
   const [state, formAction] = useActionState(action, initialState);
   const vandaag = new Date().toISOString().slice(0, 16);
@@ -40,6 +48,9 @@ export function TreatmentForm({
   const [behandeling, setBehandeling] = useState(treatment?.behandeling ?? "");
   const [recept, setRecept] = useState(treatment?.recept ?? "");
   const [notities, setNotities] = useState(treatment?.notities ?? "");
+  const [customerPackageId, setCustomerPackageId] = useState(
+    treatment?.customerPackageId ? String(treatment.customerPackageId) : ""
+  );
 
   useEffect(() => {
     setDatum(treatment?.datum ?? vandaag);
@@ -47,6 +58,7 @@ export function TreatmentForm({
     setBehandeling(treatment?.behandeling ?? "");
     setRecept(treatment?.recept ?? "");
     setNotities(treatment?.notities ?? "");
+    setCustomerPackageId(treatment?.customerPackageId ? String(treatment.customerPackageId) : "");
   }, [medewerkerNaam, treatment, vandaag]);
 
   return (
@@ -130,6 +142,23 @@ export function TreatmentForm({
             value={notities}
             onChange={(event) => setNotities(event.target.value)}
           />
+        </div>
+
+        <div className="veld-groot">
+          <label htmlFor="customerPackageId">Afboeken van pakket (optioneel)</label>
+          <select
+            id="customerPackageId"
+            name="customerPackageId"
+            value={customerPackageId}
+            onChange={(event) => setCustomerPackageId(event.target.value)}
+          >
+            <option value="">Geen pakket gebruiken</option>
+            {activePackages.map((customerPackage) => (
+              <option key={customerPackage.id} value={customerPackage.id}>
+                {customerPackage.naamSnapshot} - nog {customerPackage.resterendeBeurten} van {customerPackage.totaalBeurten}
+              </option>
+            ))}
+          </select>
         </div>
       </div>
 

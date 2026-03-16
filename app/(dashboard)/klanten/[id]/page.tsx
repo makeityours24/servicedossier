@@ -1,15 +1,17 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
+  createCustomerPackageAction,
   createTreatmentAction,
   deleteCustomerAction,
   deleteTreatmentAction
 } from "@/app/(dashboard)/klanten/actions";
+import { CustomerPackageForm } from "@/components/customer-package-form";
 import { DeleteCustomerButton } from "@/components/delete-customer-button";
 import { TreatmentForm } from "@/components/treatment-form";
 import { requireSalonSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { formatDate } from "@/lib/utils";
+import { formatCurrencyFromCents, formatDate } from "@/lib/utils";
 import { treatmentPresets as defaultTreatmentPresets } from "@/lib/treatment-presets";
 
 type KlantDetailPageProps = {
@@ -140,6 +142,49 @@ export default async function KlantDetailPage({
       behandeling: true
     }
   });
+
+  const [customerPackages, availablePackageTypes] = await Promise.all([
+    prisma.customerPackage.findMany({
+      where: {
+        customerId: klant.id,
+        salonId: user.salonId
+      },
+      orderBy: [{ status: "asc" }, { gekochtOp: "desc" }],
+      select: {
+        id: true,
+        naamSnapshot: true,
+        standaardBehandelingSnapshot: true,
+        totaalBeurten: true,
+        resterendeBeurten: true,
+        status: true,
+        pakketPrijsCents: true,
+        lossePrijsCents: true,
+        gekochtOp: true,
+        notities: true
+      }
+    }),
+    prisma.packageType.findMany({
+      where: {
+        salonId: user.salonId,
+        isActief: true
+      },
+      orderBy: { naam: "asc" },
+      select: {
+        id: true,
+        naam: true,
+        totaalBeurten: true
+      }
+    })
+  ]);
+
+  const actieveKlantPakketten = customerPackages.filter((customerPackage) => customerPackage.status === "ACTIEF");
+  const overigeKlantPakketten = customerPackages.filter((customerPackage) => customerPackage.status !== "ACTIEF");
+  const activePackagesForTreatment = actieveKlantPakketten.map((customerPackage) => ({
+    id: customerPackage.id,
+    naamSnapshot: customerPackage.naamSnapshot,
+    resterendeBeurten: customerPackage.resterendeBeurten,
+    totaalBeurten: customerPackage.totaalBeurten
+  }));
 
   const treatmentVoorFormulier =
     voorgeselecteerdeBehandeling ??
@@ -312,6 +357,93 @@ export default async function KlantDetailPage({
         </article>
 
         <aside className="kaart">
+          <h3>Pakketten</h3>
+          <p className="subtitel" style={{ marginTop: 8 }}>
+            Verkoop hier bundels of digitale stempelkaarten aan deze klant. Afboeken per behandeling koppelen we in de volgende stap aan deze actieve pakketten.
+          </p>
+
+          <div className="lijst" style={{ marginTop: 18 }}>
+            {customerPackages.length === 0 ? (
+              <div className="leeg">Deze klant heeft nog geen actieve of eerdere pakketten.</div>
+            ) : (
+              <>
+                {actieveKlantPakketten.map((customerPackage) => (
+                  <article className="lijst-item" key={customerPackage.id}>
+                    <div className="acties" style={{ justifyContent: "space-between", alignItems: "flex-start" }}>
+                      <div>
+                        <h4>{customerPackage.naamSnapshot}</h4>
+                        <p className="meta">
+                          <strong>Behandeling:</strong> {customerPackage.standaardBehandelingSnapshot}
+                          <br />
+                          <strong>Nog over:</strong> {customerPackage.resterendeBeurten} van {customerPackage.totaalBeurten}
+                          <br />
+                          <strong>Verkocht op:</strong> {formatDate(customerPackage.gekochtOp)}
+                          <br />
+                          <strong>Pakketprijs:</strong> {formatCurrencyFromCents(customerPackage.pakketPrijsCents)}
+                          <br />
+                          <strong>Losse prijs:</strong> {formatCurrencyFromCents(customerPackage.lossePrijsCents)} per beurt
+                          {customerPackage.notities ? (
+                            <>
+                              <br />
+                              <strong>Notities:</strong> {customerPackage.notities}
+                            </>
+                          ) : null}
+                        </p>
+                      </div>
+                      <span className="status-badge">Actief</span>
+                    </div>
+                  </article>
+                ))}
+
+                {overigeKlantPakketten.length > 0 ? (
+                  <div className="kaart" style={{ marginTop: 12, padding: 20 }}>
+                    <h4>Eerdere pakketten</h4>
+                    <div className="lijst" style={{ marginTop: 16 }}>
+                      {overigeKlantPakketten.map((customerPackage) => (
+                        <article className="lijst-item" key={customerPackage.id}>
+                          <div className="acties" style={{ justifyContent: "space-between", alignItems: "flex-start" }}>
+                            <div>
+                              <h4>{customerPackage.naamSnapshot}</h4>
+                              <p className="meta">
+                                <strong>Status:</strong> {customerPackage.status.replaceAll("_", " ")}
+                                <br />
+                                <strong>Verbruikt:</strong> {customerPackage.totaalBeurten - customerPackage.resterendeBeurten} van {customerPackage.totaalBeurten}
+                                <br />
+                                <strong>Verkocht op:</strong> {formatDate(customerPackage.gekochtOp)}
+                              </p>
+                            </div>
+                            <span className="status-badge" data-inactive="true">
+                              {customerPackage.status === "VOLLEDIG_GEBRUIKT" ? "Volledig gebruikt" : customerPackage.status.replaceAll("_", " ")}
+                            </span>
+                          </div>
+                        </article>
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
+              </>
+            )}
+          </div>
+
+          <div className="kaart" style={{ marginTop: 18, padding: 20 }}>
+            <h4>Pakket verkopen</h4>
+            <p className="subtitel" style={{ marginTop: 8 }}>
+              Kies een actief pakkettype van deze salon en koppel het direct aan deze klant.
+            </p>
+            {availablePackageTypes.length === 0 ? (
+              <div className="leeg" style={{ marginTop: 16 }}>
+                Er zijn nog geen actieve pakkettypes. Voeg eerst een pakket toe via Pakketten.
+              </div>
+            ) : (
+              <CustomerPackageForm
+                customerId={klant.id}
+                action={createCustomerPackageAction}
+                packageTypes={availablePackageTypes}
+              />
+            )}
+          </div>
+
+          <div className="kaart" style={{ marginTop: 18, padding: 20 }}>
           <h3>Nieuwe behandeling registreren</h3>
           <p className="subtitel" style={{ marginTop: 8 }}>
             Voeg direct een nieuwe kleurbehandeling of andere behandeling toe aan dit dossier.
@@ -367,7 +499,9 @@ export default async function KlantDetailPage({
                   ? "De velden zijn vooringevuld vanuit een receptsjabloon. Pas ze aan waar nodig en sla de nieuwe behandeling op."
                 : undefined
             }
+            activePackages={activePackagesForTreatment}
           />
+          </div>
         </aside>
       </section>
     </div>

@@ -2,14 +2,13 @@ import Link from "next/link";
 import {
   createPackageTypeAction,
   deactivatePackageTypeAction,
-  describePackagePrice,
   reactivatePackageTypeAction
 } from "@/app/(dashboard)/pakketten/actions";
 import { DeleteCustomerButton } from "@/components/delete-customer-button";
 import { PackageTypeForm } from "@/components/package-type-form";
 import { requireSalonSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { formatCurrencyFromCents } from "@/lib/utils";
+import { describePackagePrice, formatCurrencyFromCents } from "@/lib/utils";
 
 export default async function PakkettenPage() {
   const user = await requireSalonSession();

@@ -34,7 +34,10 @@ export const treatmentSchema = z.object({
   behandeling: z.string().min(2, "Behandeling is verplicht."),
   recept: z.string().min(2, "Recept is verplicht."),
   behandelaar: z.string().min(2, "Naam behandelaar is verplicht."),
-  notities: z.string().optional()
+  notities: z.string().optional(),
+  customerPackageId: z
+    .union([z.coerce.number().int().positive(), z.literal(""), z.null(), z.undefined()])
+    .transform((value) => (typeof value === "number" ? value : null))
 });
 
 export const treatmentFilterSchema = z.object({
@@ -66,6 +69,12 @@ export const packageTypeSchema = z.object({
 
 export const packageTypeUpdateSchema = packageTypeSchema.extend({
   packageTypeId: z.coerce.number().int().positive()
+});
+
+export const customerPackageSchema = z.object({
+  customerId: z.coerce.number().int().positive(),
+  packageTypeId: z.coerce.number().int().positive("Kies een pakkettype."),
+  notities: z.string().trim().max(300, "Notities zijn te lang.").optional()
 });
 
 export const salonSettingsSchema = z.object({

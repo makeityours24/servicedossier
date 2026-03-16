@@ -25,3 +25,18 @@ export function formatCurrencyFromCents(value: number) {
     currency: "EUR"
   }).format(value / 100);
 }
+
+export function describePackagePrice(
+  pakketPrijsCents: number,
+  lossePrijsCents: number,
+  totaalBeurten: number
+) {
+  const normaleWaarde = lossePrijsCents * totaalBeurten;
+  const voordeel = normaleWaarde - pakketPrijsCents;
+
+  if (voordeel <= 0) {
+    return `${formatCurrencyFromCents(pakketPrijsCents)} voor ${totaalBeurten} beurten`;
+  }
+
+  return `${formatCurrencyFromCents(pakketPrijsCents)} voor ${totaalBeurten} beurten, bespaar ${formatCurrencyFromCents(voordeel)}`;
+}
