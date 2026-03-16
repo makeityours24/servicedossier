@@ -14,6 +14,7 @@ type TreatmentFormProps = {
   submitLabel?: string;
   treatment?: {
     id?: number;
+    appointmentId?: number | null;
     datum: string;
     behandeling: string;
     recept: string;
@@ -26,6 +27,7 @@ type TreatmentFormProps = {
   activePackages?: Array<{
     id: number;
     naamSnapshot: string;
+    weergaveTypeSnapshot?: "PAKKET" | "STEMPELKAART";
     resterendeBeurten: number;
     totaalBeurten: number;
   }>;
@@ -65,6 +67,9 @@ export function TreatmentForm({
     <form action={formAction} className="formulier">
       <input type="hidden" name="customerId" value={customerId} />
       {treatment?.id ? <input type="hidden" name="treatmentId" value={treatment.id} /> : null}
+      {treatment?.appointmentId ? (
+        <input type="hidden" name="appointmentId" value={treatment.appointmentId} />
+      ) : null}
       <FormMessage error={state.error} success={state.success} />
       {helperText ? <p className="subtitel" style={{ marginTop: 0 }}>{helperText}</p> : null}
       <div>
@@ -155,7 +160,12 @@ export function TreatmentForm({
             <option value="">Geen pakket gebruiken</option>
             {activePackages.map((customerPackage) => (
               <option key={customerPackage.id} value={customerPackage.id}>
-                {customerPackage.naamSnapshot} - nog {customerPackage.resterendeBeurten} van {customerPackage.totaalBeurten}
+                {customerPackage.naamSnapshot} - nog {customerPackage.resterendeBeurten} van{" "}
+                {customerPackage.totaalBeurten} (
+                {customerPackage.weergaveTypeSnapshot === "STEMPELKAART"
+                  ? "stempelkaart"
+                  : "pakket"}
+                )
               </option>
             ))}
           </select>

@@ -65,6 +65,8 @@ export default async function PakkettenPage() {
                         <p className="meta">
                           <strong>Standaardbehandeling:</strong> {packageType.standaardBehandeling}
                           <br />
+                          <strong>Type:</strong> {packageType.weergaveType === "STEMPELKAART" ? "Digitale stempelkaart" : "Bundelpakket"}
+                          <br />
                           <strong>Pakket:</strong> {describePackagePrice(packageType.pakketPrijsCents, packageType.lossePrijsCents, packageType.totaalBeurten)}
                           <br />
                           <strong>Losse prijs:</strong> {formatCurrencyFromCents(packageType.lossePrijsCents)} per behandeling
@@ -111,6 +113,8 @@ export default async function PakkettenPage() {
                               <h4>{packageType.naam}</h4>
                               <p className="meta">
                                 <strong>Standaardbehandeling:</strong> {packageType.standaardBehandeling}
+                                <br />
+                                <strong>Type:</strong> {packageType.weergaveType === "STEMPELKAART" ? "Digitale stempelkaart" : "Bundelpakket"}
                                 <br />
                                 <strong>Pakket:</strong> {describePackagePrice(packageType.pakketPrijsCents, packageType.lossePrijsCents, packageType.totaalBeurten)}
                                 <br />

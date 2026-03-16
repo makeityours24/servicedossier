@@ -32,6 +32,7 @@ export async function createPackageTypeAction(
     pakketPrijs: formData.get("pakketPrijs"),
     lossePrijs: formData.get("lossePrijs"),
     standaardBehandeling: formData.get("standaardBehandeling"),
+    weergaveType: formData.get("weergaveType") || "PAKKET",
     isActief: formData.get("isActief") || "true"
   });
 
@@ -61,6 +62,7 @@ export async function createPackageTypeAction(
         pakketPrijsCents: euroToCents(parsed.data.pakketPrijs),
         lossePrijsCents: euroToCents(parsed.data.lossePrijs),
         standaardBehandeling: parsed.data.standaardBehandeling,
+        weergaveType: parsed.data.weergaveType,
         isActief: parsed.data.isActief === "true"
       }
     });
@@ -90,6 +92,7 @@ export async function updatePackageTypeAction(
     pakketPrijs: formData.get("pakketPrijs"),
     lossePrijs: formData.get("lossePrijs"),
     standaardBehandeling: formData.get("standaardBehandeling"),
+    weergaveType: formData.get("weergaveType") || "PAKKET",
     isActief: formData.get("isActief") || "true"
   });
 
@@ -132,6 +135,7 @@ export async function updatePackageTypeAction(
         pakketPrijsCents: euroToCents(parsed.data.pakketPrijs),
         lossePrijsCents: euroToCents(parsed.data.lossePrijs),
         standaardBehandeling: parsed.data.standaardBehandeling,
+        weergaveType: parsed.data.weergaveType,
         isActief: parsed.data.isActief === "true"
       }
     });

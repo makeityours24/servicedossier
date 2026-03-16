@@ -18,6 +18,7 @@ type PackageTypeFormProps = {
     pakketPrijsCents: number;
     lossePrijsCents: number;
     standaardBehandeling: string;
+    weergaveType: "PAKKET" | "STEMPELKAART";
     isActief: boolean;
   };
 };
@@ -111,6 +112,18 @@ export function PackageTypeForm({
           >
             <option value="true">Actief</option>
             <option value="false">Inactief</option>
+          </select>
+        </div>
+
+        <div className="veld">
+          <label htmlFor="weergaveType">Weergavetype</label>
+          <select
+            id="weergaveType"
+            name="weergaveType"
+            defaultValue={packageType?.weergaveType ?? "PAKKET"}
+          >
+            <option value="PAKKET">Bundelpakket</option>
+            <option value="STEMPELKAART">Digitale stempelkaart</option>
           </select>
         </div>
 

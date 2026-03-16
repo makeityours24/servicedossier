@@ -1,0 +1,42 @@
+{
+  "node": {
+    "00769fdfebc249a22edee17ef91b2acd7d590500d3": {
+      "workers": {
+        "app/login/page": {
+          "moduleId": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2FUsers%2Fhasandeniz%2FDocuments%2FNew%20project%2Fapp%2Flogin%2Factions.ts%22%2C%5B%7B%22id%22%3A%2200769fdfebc249a22edee17ef91b2acd7d590500d3%22%2C%22exportedName%22%3A%22logoutAction%22%2C%22filename%22%3A%22app%2Flogin%2Factions.ts%22%7D%2C%7B%22id%22%3A%2260ac63c9ba6a777729e428ed41de34666bb7339fc0%22%2C%22exportedName%22%3A%22loginAction%22%2C%22filename%22%3A%22app%2Flogin%2Factions.ts%22%7D%5D%5D%5D&__client_imported__=true!",
+          "async": false
+        },
+        "app/(dashboard)/dashboard/page": {
+          "moduleId": "(rsc)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2FUsers%2Fhasandeniz%2FDocuments%2FNew%20project%2Fapp%2Flogin%2Factions.ts%22%2C%5B%7B%22id%22%3A%2200769fdfebc249a22edee17ef91b2acd7d590500d3%22%2C%22exportedName%22%3A%22logoutAction%22%2C%22filename%22%3A%22app%2Flogin%2Factions.ts%22%7D%2C%7B%22id%22%3A%2260ac63c9ba6a777729e428ed41de34666bb7339fc0%22%2C%22exportedName%22%3A%22loginAction%22%2C%22filename%22%3A%22app%2Flogin%2Factions.ts%22%7D%5D%5D%5D&__client_imported__=!",
+          "async": false
+        }
+      },
+      "layer": {
+        "app/login/page": "action-browser",
+        "app/(dashboard)/dashboard/page": "rsc"
+      },
+      "filename": "app/login/actions.ts",
+      "exportedName": "logoutAction"
+    },
+    "60ac63c9ba6a777729e428ed41de34666bb7339fc0": {
+      "workers": {
+        "app/login/page": {
+          "moduleId": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2FUsers%2Fhasandeniz%2FDocuments%2FNew%20project%2Fapp%2Flogin%2Factions.ts%22%2C%5B%7B%22id%22%3A%2200769fdfebc249a22edee17ef91b2acd7d590500d3%22%2C%22exportedName%22%3A%22logoutAction%22%2C%22filename%22%3A%22app%2Flogin%2Factions.ts%22%7D%2C%7B%22id%22%3A%2260ac63c9ba6a777729e428ed41de34666bb7339fc0%22%2C%22exportedName%22%3A%22loginAction%22%2C%22filename%22%3A%22app%2Flogin%2Factions.ts%22%7D%5D%5D%5D&__client_imported__=true!",
+          "async": false
+        },
+        "app/(dashboard)/dashboard/page": {
+          "moduleId": "(rsc)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2FUsers%2Fhasandeniz%2FDocuments%2FNew%20project%2Fapp%2Flogin%2Factions.ts%22%2C%5B%7B%22id%22%3A%2200769fdfebc249a22edee17ef91b2acd7d590500d3%22%2C%22exportedName%22%3A%22logoutAction%22%2C%22filename%22%3A%22app%2Flogin%2Factions.ts%22%7D%2C%7B%22id%22%3A%2260ac63c9ba6a777729e428ed41de34666bb7339fc0%22%2C%22exportedName%22%3A%22loginAction%22%2C%22filename%22%3A%22app%2Flogin%2Factions.ts%22%7D%5D%5D%5D&__client_imported__=!",
+          "async": false
+        }
+      },
+      "layer": {
+        "app/login/page": "action-browser",
+        "app/(dashboard)/dashboard/page": "rsc"
+      },
+      "filename": "app/login/actions.ts",
+      "exportedName": "loginAction"
+    }
+  },
+  "edge": {},
+  "encryptionKey": "p2wUsDHbXBOF3L0xFVyQIGiaSz8y1gdcoohQY2PoFlI="
+}

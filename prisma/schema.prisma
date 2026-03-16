@@ -31,6 +31,24 @@ enum CustomerPackageStatus {
   GEANNULEERD
 }
 
+enum PackageDisplayType {
+  PAKKET
+  STEMPELKAART
+}
+
+enum AppointmentStatus {
+  GEPLAND
+  VOLTOOID
+  GEANNULEERD
+  NIET_GEKOMEN
+}
+
+enum TreatmentPhotoType {
+  VOOR
+  NA
+  ALGEMEEN
+}
+
 model User {
   id           Int         @id @default(autoincrement())
   salonId      Int?
@@ -45,8 +63,10 @@ model User {
   updatedAt    DateTime    @updatedAt
   salon        Salon?      @relation(fields: [salonId], references: [id], onDelete: Cascade)
   behandelingen Treatment[]
+  afspraken    Appointment[]
   auditLogs    AuditLog[]  @relation("AuditActor")
   packageUsages CustomerPackageUsage[]
+  uploadedTreatmentPhotos TreatmentPhoto[]
 
   @@index([salonId, email])
 }
@@ -61,8 +81,10 @@ model Customer {
   updatedAt       DateTime    @updatedAt
   salon           Salon       @relation(fields: [salonId], references: [id], onDelete: Cascade)
   behandelingen   Treatment[]
+  afspraken       Appointment[]
   customerPackages CustomerPackage[]
   packageUsages   CustomerPackageUsage[]
+  treatmentPhotos TreatmentPhoto[]
 
   @@unique([salonId, telefoonnummer])
   @@index([salonId, naam])
@@ -73,6 +95,7 @@ model Treatment {
   salonId       Int
   customerId    Int
   userId        Int?
+  sourceAppointmentId Int? @unique
   datum         DateTime
   behandeling   String
   recept        String
@@ -83,11 +106,36 @@ model Treatment {
   salon         Salon     @relation(fields: [salonId], references: [id], onDelete: Cascade)
   customer      Customer  @relation(fields: [customerId], references: [id], onDelete: Cascade)
   user          User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  sourceAppointment Appointment? @relation(fields: [sourceAppointmentId], references: [id], onDelete: SetNull)
   packageUsages CustomerPackageUsage[]
+  photos        TreatmentPhoto[]
 
   @@index([salonId, datum])
   @@index([customerId, datum])
   @@index([behandelaar, datum])
+}
+
+model Appointment {
+  id          Int               @id @default(autoincrement())
+  salonId     Int
+  customerId  Int
+  userId      Int?
+  datumStart  DateTime
+  datumEinde  DateTime
+  behandeling String
+  notities    String?
+  status      AppointmentStatus @default(GEPLAND)
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  salon       Salon             @relation(fields: [salonId], references: [id], onDelete: Cascade)
+  customer    Customer          @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  user        User?             @relation(fields: [userId], references: [id], onDelete: SetNull)
+  convertedTreatment Treatment?
+
+  @@index([salonId, datumStart])
+  @@index([customerId, datumStart])
+  @@index([userId, datumStart])
+  @@index([salonId, status])
 }
 
 model Salon {
@@ -104,11 +152,13 @@ model Salon {
   users         User[]
   customers     Customer[]
   treatments    Treatment[]
+  appointments  Appointment[]
   recipeTemplates RecipeTemplate[]
   auditLogs     AuditLog[]
   packageTypes  PackageType[]
   customerPackages CustomerPackage[]
   packageUsages CustomerPackageUsage[]
+  treatmentPhotos TreatmentPhoto[]
 }
 
 model SalonSettings {
@@ -149,6 +199,7 @@ model PackageType {
   pakketPrijsCents      Int
   lossePrijsCents       Int
   standaardBehandeling  String
+  weergaveType          PackageDisplayType @default(PAKKET)
   isActief              Boolean   @default(true)
   createdAt             DateTime  @default(now())
   updatedAt             DateTime  @updatedAt
@@ -166,6 +217,7 @@ model CustomerPackage {
   gekochtOp                  DateTime               @default(now())
   naamSnapshot               String
   standaardBehandelingSnapshot String
+  weergaveTypeSnapshot       PackageDisplayType     @default(PAKKET)
   totaalBeurten              Int
   resterendeBeurten          Int
   pakketPrijsCents           Int
@@ -204,6 +256,29 @@ model CustomerPackageUsage {
   @@index([salonId, customerId])
   @@index([customerPackageId, datum])
   @@index([treatmentId])
+}
+
+model TreatmentPhoto {
+  id               Int                @id @default(autoincrement())
+  salonId          Int
+  customerId       Int
+  treatmentId      Int
+  uploadedByUserId Int?
+  url              String
+  blobPath         String
+  bestandNaam      String
+  mimeType         String
+  soort            TreatmentPhotoType @default(ALGEMEEN)
+  notitie          String?
+  createdAt        DateTime           @default(now())
+  salon            Salon              @relation(fields: [salonId], references: [id], onDelete: Cascade)
+  customer         Customer           @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  treatment        Treatment          @relation(fields: [treatmentId], references: [id], onDelete: Cascade)
+  uploadedByUser   User?              @relation(fields: [uploadedByUserId], references: [id], onDelete: SetNull)
+
+  @@index([salonId, customerId, createdAt])
+  @@index([treatmentId, createdAt])
+  @@index([uploadedByUserId, createdAt])
 }
 
 model LoginThrottle {

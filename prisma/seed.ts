@@ -205,6 +205,7 @@ async function main() {
           pakketPrijsCents: 3000,
           lossePrijsCents: 750,
           standaardBehandeling: "Epileren",
+          weergaveType: "STEMPELKAART",
           isActief: true
         },
         {
@@ -215,6 +216,7 @@ async function main() {
           pakketPrijsCents: 4800,
           lossePrijsCents: 900,
           standaardBehandeling: "Toner",
+          weergaveType: "PAKKET",
           isActief: true
         },
         {
@@ -225,7 +227,39 @@ async function main() {
           pakketPrijsCents: 6500,
           lossePrijsCents: 750,
           standaardBehandeling: "Wenkbrauwen",
+          weergaveType: "STEMPELKAART",
           isActief: true
+        }
+      ]
+    });
+  }
+
+  const bestaandAantalAfspraken = await prisma.appointment.count({
+    where: { salonId: salon.id }
+  });
+
+  if (bestaandAantalAfspraken === 0) {
+    await prisma.appointment.createMany({
+      data: [
+        {
+          salonId: salon.id,
+          customerId: klanten[0].id,
+          userId: medewerker.id,
+          datumStart: new Date("2026-03-17T09:00:00.000Z"),
+          datumEinde: new Date("2026-03-17T09:30:00.000Z"),
+          behandeling: "Uitgroei kleuren",
+          notities: "Controleer of het pakket nog actief is.",
+          status: "GEPLAND"
+        },
+        {
+          salonId: salon.id,
+          customerId: klanten[1].id,
+          userId: medewerker.id,
+          datumStart: new Date("2026-03-17T10:00:00.000Z"),
+          datumEinde: new Date("2026-03-17T10:45:00.000Z"),
+          behandeling: "Balayage toner",
+          notities: "Koele toner klaarzetten.",
+          status: "GEPLAND"
         }
       ]
     });

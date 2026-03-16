@@ -9,6 +9,7 @@ import {
 import { CustomerPackageForm } from "@/components/customer-package-form";
 import { DeleteCustomerButton } from "@/components/delete-customer-button";
 import { TreatmentForm } from "@/components/treatment-form";
+import { TreatmentPhotoGallery } from "@/components/treatment-photo-gallery";
 import { requireSalonSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { formatCurrencyFromCents, formatDate } from "@/lib/utils";
@@ -22,6 +23,7 @@ type KlantDetailPageProps = {
     medewerker?: string;
     herhaalId?: string;
     templateId?: string;
+    afspraakId?: string;
   }>;
 };
 
@@ -34,6 +36,7 @@ export default async function KlantDetailPage({
   const klantId = Number(id);
   const herhaalId = filters.herhaalId ? Number(filters.herhaalId) : null;
   const templateId = filters.templateId ? Number(filters.templateId) : null;
+  const afspraakId = filters.afspraakId ? Number(filters.afspraakId) : null;
   const user = await requireSalonSession();
 
   if (!Number.isInteger(klantId)) {
@@ -60,7 +63,25 @@ export default async function KlantDetailPage({
               }
             : undefined
         },
-        orderBy: { datum: "asc" }
+        orderBy: { datum: "asc" },
+        include: {
+          photos: {
+            orderBy: { createdAt: "desc" },
+            select: {
+              id: true,
+              url: true,
+              bestandNaam: true,
+              soort: true,
+              notitie: true,
+              createdAt: true,
+              uploadedByUser: {
+                select: {
+                  naam: true
+                }
+              }
+            }
+          }
+        }
       }
     }
   });
@@ -132,6 +153,33 @@ export default async function KlantDetailPage({
         })
       : null;
 
+  const geselecteerdeAfspraak =
+    !herhaalBehandeling && !geselecteerdSjabloon && afspraakId && Number.isInteger(afspraakId)
+      ? await prisma.appointment.findFirst({
+          where: {
+            id: afspraakId,
+            customerId: klant.id,
+            salonId: user.salonId
+          },
+          select: {
+            id: true,
+            datumStart: true,
+            behandeling: true,
+            notities: true,
+            user: {
+              select: {
+                naam: true
+              }
+            },
+            convertedTreatment: {
+              select: {
+                id: true
+              }
+            }
+          }
+        })
+      : null;
+
   const sjablonen = await prisma.recipeTemplate.findMany({
     where: { salonId: user.salonId },
     orderBy: { naam: "asc" },
@@ -154,13 +202,33 @@ export default async function KlantDetailPage({
         id: true,
         naamSnapshot: true,
         standaardBehandelingSnapshot: true,
+        weergaveTypeSnapshot: true,
         totaalBeurten: true,
         resterendeBeurten: true,
         status: true,
         pakketPrijsCents: true,
         lossePrijsCents: true,
         gekochtOp: true,
-        notities: true
+        notities: true,
+        usages: {
+          orderBy: { datum: "desc" },
+          select: {
+            id: true,
+            datum: true,
+            aantalAfgeboekt: true,
+            treatment: {
+              select: {
+                id: true,
+                behandeling: true
+              }
+            },
+            user: {
+              select: {
+                naam: true
+              }
+            }
+          }
+        }
       }
     }),
     prisma.packageType.findMany({
@@ -172,7 +240,8 @@ export default async function KlantDetailPage({
       select: {
         id: true,
         naam: true,
-        totaalBeurten: true
+        totaalBeurten: true,
+        weergaveType: true
       }
     })
   ]);
@@ -182,6 +251,7 @@ export default async function KlantDetailPage({
   const activePackagesForTreatment = actieveKlantPakketten.map((customerPackage) => ({
     id: customerPackage.id,
     naamSnapshot: customerPackage.naamSnapshot,
+    weergaveTypeSnapshot: customerPackage.weergaveTypeSnapshot,
     resterendeBeurten: customerPackage.resterendeBeurten,
     totaalBeurten: customerPackage.totaalBeurten
   }));
@@ -196,6 +266,20 @@ export default async function KlantDetailPage({
           notities: geselecteerdSjabloon.notities ?? "",
           datum: new Date().toISOString().slice(0, 16)
         }
+      : geselecteerdeAfspraak && !geselecteerdeAfspraak.convertedTreatment
+        ? {
+            appointmentId: geselecteerdeAfspraak.id,
+            behandeling: geselecteerdeAfspraak.behandeling,
+            recept: "",
+            behandelaar: geselecteerdeAfspraak.user?.naam ?? user.naam,
+            notities: geselecteerdeAfspraak.notities ?? "",
+            datum: new Date(
+              geselecteerdeAfspraak.datumStart.getTime() -
+                geselecteerdeAfspraak.datumStart.getTimezoneOffset() * 60000
+            )
+              .toISOString()
+              .slice(0, 16)
+          }
       : undefined);
 
   return (
@@ -260,8 +344,11 @@ export default async function KlantDetailPage({
               </p>
 
               <div className="acties" style={{ marginTop: 16 }}>
-                <Link href={`/klanten/${klant.id}?herhaalId=${laatsteBehandeling.id}`} className="knop">
-                  Laatste recept opnieuw gebruiken
+                <Link
+                  href={`/klanten/${klant.id}?herhaalId=${laatsteBehandeling.id}#nieuwe-behandeling`}
+                  className="knop"
+                >
+                  Laatste recept in formulier laden
                 </Link>
                 <Link
                   href={`/klanten/${klant.id}/behandelingen/${laatsteBehandeling.id}/bewerken`}
@@ -327,12 +414,22 @@ export default async function KlantDetailPage({
                       <strong>Notities:</strong> {behandeling.notities}
                     </p>
                   ) : null}
+                  {behandeling.photos.length > 0 ? (
+                    <div style={{ marginTop: 16 }}>
+                      <h4 style={{ marginBottom: 10 }}>Foto&apos;s bij deze behandeling</h4>
+                      <TreatmentPhotoGallery
+                        customerId={klant.id}
+                        treatmentId={behandeling.id}
+                        photos={behandeling.photos}
+                      />
+                    </div>
+                  ) : null}
                   <div className="acties" style={{ marginTop: 16 }}>
                     <Link
-                      href={`/klanten/${klant.id}?herhaalId=${behandeling.id}`}
+                      href={`/klanten/${klant.id}?herhaalId=${behandeling.id}#nieuwe-behandeling`}
                       className="knop-zacht"
                     >
-                      Nogmaals gebruiken
+                      Recept in formulier laden
                     </Link>
                     <Link
                       href={`/klanten/${klant.id}/behandelingen/${behandeling.id}/bewerken`}
@@ -375,6 +472,11 @@ export default async function KlantDetailPage({
                         <p className="meta">
                           <strong>Behandeling:</strong> {customerPackage.standaardBehandelingSnapshot}
                           <br />
+                          <strong>Type:</strong>{" "}
+                          {customerPackage.weergaveTypeSnapshot === "STEMPELKAART"
+                            ? "Digitale stempelkaart"
+                            : "Bundelpakket"}
+                          <br />
                           <strong>Nog over:</strong> {customerPackage.resterendeBeurten} van {customerPackage.totaalBeurten}
                           <br />
                           <strong>Verkocht op:</strong> {formatDate(customerPackage.gekochtOp)}
@@ -392,6 +494,76 @@ export default async function KlantDetailPage({
                       </div>
                       <span className="status-badge">Actief</span>
                     </div>
+
+                    {customerPackage.weergaveTypeSnapshot === "STEMPELKAART" ? (
+                      <div className="stempelkaart-paneel" style={{ marginTop: 14 }}>
+                        <div className="stempelkaart-kop">
+                          <div>
+                            <strong>Digitale stempelkaart</strong>
+                            <p className="meta" style={{ marginTop: 6 }}>
+                              {customerPackage.totaalBeurten - customerPackage.resterendeBeurten} afgestempeld,{" "}
+                              {customerPackage.resterendeBeurten} open
+                            </p>
+                          </div>
+                          <span className="status-badge">
+                            {customerPackage.resterendeBeurten} over
+                          </span>
+                        </div>
+                        <div className="stempelkaart">
+                          {Array.from({ length: customerPackage.totaalBeurten }, (_, index) => {
+                            const gebruikt =
+                              index < customerPackage.totaalBeurten - customerPackage.resterendeBeurten;
+
+                            return (
+                              <span
+                                key={`${customerPackage.id}-${index}`}
+                                className="stempel"
+                                data-gebruikt={gebruikt ? "true" : "false"}
+                                title={gebruikt ? "Gebruikte beurt" : "Nog open"}
+                              >
+                                {index + 1}
+                              </span>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    ) : null}
+
+                    {customerPackage.usages.length > 0 ? (
+                      <div className="kaart" style={{ marginTop: 14, padding: 16 }}>
+                        <h4 style={{ marginBottom: 10 }}>Gebruiksgeschiedenis</h4>
+                        <div className="lijst">
+                          {customerPackage.usages.map((usage) => (
+                            <div className="lijst-item" key={usage.id}>
+                              <p className="meta">
+                                <strong>{formatDate(usage.datum)}</strong>
+                                <br />
+                                <strong>Afgeboekt:</strong> {usage.aantalAfgeboekt} beurt
+                                {usage.aantalAfgeboekt > 1 ? "en" : ""}
+                                <br />
+                                <strong>Behandeling:</strong> {usage.treatment?.behandeling ?? "Handmatige correctie"}
+                                <br />
+                                <strong>Behandelaar:</strong> {usage.user?.naam ?? "Onbekend"}
+                              </p>
+                              {usage.treatment ? (
+                                <div className="acties" style={{ marginTop: 12 }}>
+                                  <Link
+                                    href={`/klanten/${klant.id}/behandelingen/${usage.treatment.id}/bewerken`}
+                                    className="knop-secundair"
+                                  >
+                                    Gekoppelde behandeling bekijken
+                                  </Link>
+                                </div>
+                              ) : null}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="leeg" style={{ marginTop: 14 }}>
+                        Nog geen beurten van dit pakket afgeboekt.
+                      </div>
+                    )}
                   </article>
                 ))}
 
@@ -407,6 +579,8 @@ export default async function KlantDetailPage({
                               <p className="meta">
                                 <strong>Status:</strong> {customerPackage.status.replaceAll("_", " ")}
                                 <br />
+                                <strong>Type:</strong> {customerPackage.weergaveTypeSnapshot === "STEMPELKAART" ? "Digitale stempelkaart" : "Bundelpakket"}
+                                <br />
                                 <strong>Verbruikt:</strong> {customerPackage.totaalBeurten - customerPackage.resterendeBeurten} van {customerPackage.totaalBeurten}
                                 <br />
                                 <strong>Verkocht op:</strong> {formatDate(customerPackage.gekochtOp)}
@@ -416,6 +590,51 @@ export default async function KlantDetailPage({
                               {customerPackage.status === "VOLLEDIG_GEBRUIKT" ? "Volledig gebruikt" : customerPackage.status.replaceAll("_", " ")}
                             </span>
                           </div>
+
+                          {customerPackage.weergaveTypeSnapshot === "STEMPELKAART" ? (
+                            <div className="stempelkaart-paneel" style={{ marginTop: 14 }}>
+                              <div className="stempelkaart">
+                                {Array.from({ length: customerPackage.totaalBeurten }, (_, index) => {
+                                  const gebruikt =
+                                    index <
+                                    customerPackage.totaalBeurten - customerPackage.resterendeBeurten;
+
+                                  return (
+                                    <span
+                                      key={`${customerPackage.id}-${index}`}
+                                      className="stempel"
+                                      data-gebruikt={gebruikt ? "true" : "false"}
+                                      title={gebruikt ? "Gebruikte beurt" : "Nog open"}
+                                    >
+                                      {index + 1}
+                                    </span>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          ) : null}
+
+                          {customerPackage.usages.length > 0 ? (
+                            <div className="kaart" style={{ marginTop: 14, padding: 16 }}>
+                              <h4 style={{ marginBottom: 10 }}>Gebruiksgeschiedenis</h4>
+                              <div className="lijst">
+                                {customerPackage.usages.map((usage) => (
+                                  <div className="lijst-item" key={usage.id}>
+                                    <p className="meta">
+                                      <strong>{formatDate(usage.datum)}</strong>
+                                      <br />
+                                      <strong>Afgeboekt:</strong> {usage.aantalAfgeboekt} beurt
+                                      {usage.aantalAfgeboekt > 1 ? "en" : ""}
+                                      <br />
+                                      <strong>Behandeling:</strong> {usage.treatment?.behandeling ?? "Handmatige correctie"}
+                                      <br />
+                                      <strong>Behandelaar:</strong> {usage.user?.naam ?? "Onbekend"}
+                                    </p>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          ) : null}
                         </article>
                       ))}
                     </div>
@@ -425,7 +644,11 @@ export default async function KlantDetailPage({
             )}
           </div>
 
-          <div className="kaart" style={{ marginTop: 18, padding: 20 }}>
+          <div
+            className="kaart"
+            id="nieuwe-behandeling"
+            style={{ marginTop: 18, padding: 20, scrollMarginTop: 24 }}
+          >
             <h4>Pakket verkopen</h4>
             <p className="subtitel" style={{ marginTop: 8 }}>
               Kies een actief pakkettype van deze salon en koppel het direct aan deze klant.
@@ -457,7 +680,7 @@ export default async function KlantDetailPage({
                 {sjablonen.map((template) => (
                   <Link
                     key={template.id}
-                    href={`/klanten/${klant.id}?templateId=${template.id}`}
+                    href={`/klanten/${klant.id}?templateId=${template.id}#nieuwe-behandeling`}
                     className="knop-zacht"
                   >
                     {template.naam}
@@ -468,17 +691,40 @@ export default async function KlantDetailPage({
           ) : null}
           {herhaalBehandeling ? (
             <div className="acties" style={{ marginTop: 16 }}>
-              <span className="badge">Recept overgenomen uit {formatDate(herhaalBehandeling.datum)}</span>
+              <span className="badge">
+                Recept geladen uit {formatDate(herhaalBehandeling.datum)}. Controleer de velden en sla daarna als nieuwe behandeling op.
+              </span>
               <Link href={`/klanten/${klant.id}`} className="knop-secundair">
                 Formulier leegmaken
               </Link>
             </div>
           ) : geselecteerdSjabloon ? (
             <div className="acties" style={{ marginTop: 16 }}>
-              <span className="badge">Sjabloon geladen: {geselecteerdSjabloon.naam}</span>
+              <span className="badge">
+                Sjabloon geladen: {geselecteerdSjabloon.naam}. Controleer de velden en sla daarna als nieuwe behandeling op.
+              </span>
               <Link href={`/klanten/${klant.id}`} className="knop-secundair">
                 Formulier leegmaken
               </Link>
+            </div>
+          ) : geselecteerdeAfspraak ? (
+            <div className="acties" style={{ marginTop: 16 }}>
+              <span className="badge">
+                {geselecteerdeAfspraak.convertedTreatment
+                  ? "Van deze afspraak is al een behandeling gemaakt."
+                  : `Afspraak geladen uit ${formatDate(geselecteerdeAfspraak.datumStart)}. Sla op om deze afspraak als behandeling vast te leggen.`}
+              </span>
+              <Link href={`/klanten/${klant.id}`} className="knop-secundair">
+                Formulier leegmaken
+              </Link>
+              {geselecteerdeAfspraak.convertedTreatment ? (
+                <Link
+                  href={`/klanten/${klant.id}/behandelingen/${geselecteerdeAfspraak.convertedTreatment.id}/bewerken`}
+                  className="knop-zacht"
+                >
+                  Bestaande behandeling openen
+                </Link>
+              ) : null}
             </div>
           ) : null}
 

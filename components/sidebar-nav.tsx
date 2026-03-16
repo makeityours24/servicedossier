@@ -7,6 +7,7 @@ const links = [
   { href: "/dashboard", label: "Dashboard" },
   { href: "/klanten", label: "Klanten" },
   { href: "/klanten/nieuwe", label: "Nieuwe klant (dossier)" },
+  { href: "/agenda", label: "Agenda" },
   { href: "/recepten", label: "Receptsjablonen" },
   { href: "/pakketten", label: "Pakketten" },
   { href: "/team", label: "Team" },

@@ -14,6 +14,7 @@ type CustomerPackageFormProps = {
     id: number;
     naam: string;
     totaalBeurten: number;
+    weergaveType: "PAKKET" | "STEMPELKAART";
   }>;
 };
 
@@ -38,7 +39,11 @@ export function CustomerPackageForm({
             </option>
             {packageTypes.map((packageType) => (
               <option key={packageType.id} value={packageType.id}>
-                {packageType.naam} ({packageType.totaalBeurten} beurten)
+                {packageType.naam} ({packageType.totaalBeurten} beurten,{" "}
+                {packageType.weergaveType === "STEMPELKAART"
+                  ? "digitale stempelkaart"
+                  : "bundelpakket"}
+                )
               </option>
             ))}
           </select>

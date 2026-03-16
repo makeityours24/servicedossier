@@ -27,6 +27,9 @@ export const customerSchema = z.object({
 
 export const treatmentSchema = z.object({
   customerId: z.coerce.number().int().positive(),
+  appointmentId: z
+    .union([z.coerce.number().int().positive(), z.literal(""), z.null(), z.undefined()])
+    .transform((value) => (typeof value === "number" ? value : null)),
   datum: z
     .string()
     .min(1, "Datum is verplicht.")
@@ -64,6 +67,7 @@ export const packageTypeSchema = z.object({
   pakketPrijs: z.coerce.number().positive("Pakketprijs moet groter zijn dan 0."),
   lossePrijs: z.coerce.number().positive("Losse prijs moet groter zijn dan 0."),
   standaardBehandeling: z.string().min(2, "Standaardbehandeling is verplicht."),
+  weergaveType: z.enum(["PAKKET", "STEMPELKAART"]).default("PAKKET"),
   isActief: z.enum(["true", "false"]).default("true")
 });
 
@@ -75,6 +79,44 @@ export const customerPackageSchema = z.object({
   customerId: z.coerce.number().int().positive(),
   packageTypeId: z.coerce.number().int().positive("Kies een pakkettype."),
   notities: z.string().trim().max(300, "Notities zijn te lang.").optional()
+});
+
+export const treatmentPhotoSchema = z.object({
+  customerId: z.coerce.number().int().positive(),
+  treatmentId: z.coerce.number().int().positive(),
+  soort: z.enum(["VOOR", "NA", "ALGEMEEN"]).default("ALGEMEEN"),
+  notitie: z.string().trim().max(300, "Notities zijn te lang.").optional()
+});
+
+const appointmentBaseSchema = z.object({
+  customerId: z.coerce.number().int().positive("Kies een klant."),
+  userId: z
+    .union([z.coerce.number().int().positive(), z.literal(""), z.null(), z.undefined()])
+    .transform((value) => (typeof value === "number" ? value : null)),
+  datumStart: z
+    .string()
+    .min(1, "Starttijd is verplicht.")
+    .refine((value) => !Number.isNaN(new Date(value).getTime()), "Vul een geldige starttijd in."),
+  datumEinde: z
+    .string()
+    .min(1, "Eindtijd is verplicht.")
+    .refine((value) => !Number.isNaN(new Date(value).getTime()), "Vul een geldige eindtijd in."),
+  behandeling: z.string().min(2, "Behandeling is verplicht."),
+  notities: z.string().trim().max(500, "Notities zijn te lang.").optional(),
+  status: z.enum(["GEPLAND", "VOLTOOID", "GEANNULEERD", "NIET_GEKOMEN"]).default("GEPLAND")
+});
+
+export const appointmentSchema = appointmentBaseSchema
+  .refine((data) => new Date(data.datumEinde) > new Date(data.datumStart), {
+    message: "De eindtijd moet na de starttijd liggen.",
+    path: ["datumEinde"]
+  });
+
+export const appointmentUpdateSchema = appointmentBaseSchema.extend({
+  appointmentId: z.coerce.number().int().positive()
+}).refine((data) => new Date(data.datumEinde) > new Date(data.datumStart), {
+  message: "De eindtijd moet na de starttijd liggen.",
+  path: ["datumEinde"]
 });
 
 export const salonSettingsSchema = z.object({

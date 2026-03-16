@@ -1,6 +1,9 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { updateTreatmentAction } from "@/app/(dashboard)/klanten/actions";
+import { uploadTreatmentPhotoAction } from "@/app/(dashboard)/klanten/photo-actions";
+import { TreatmentPhotoForm } from "@/components/treatment-photo-form";
+import { TreatmentPhotoGallery } from "@/components/treatment-photo-gallery";
 import { TreatmentForm } from "@/components/treatment-form";
 import { requireSalonSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
@@ -49,6 +52,22 @@ export default async function BewerkBehandelingPage({
       recept: true,
       behandelaar: true,
       notities: true,
+      photos: {
+        orderBy: { createdAt: "desc" },
+        select: {
+          id: true,
+          url: true,
+          bestandNaam: true,
+          soort: true,
+          notitie: true,
+          createdAt: true,
+          uploadedByUser: {
+            select: {
+              naam: true
+            }
+          }
+        }
+      },
       packageUsages: {
         take: 1,
         select: {
@@ -81,6 +100,7 @@ export default async function BewerkBehandelingPage({
     select: {
       id: true,
       naamSnapshot: true,
+      weergaveTypeSnapshot: true,
       resterendeBeurten: true,
       totaalBeurten: true
     }
@@ -117,6 +137,35 @@ export default async function BewerkBehandelingPage({
           }}
           activePackages={activePackages}
         />
+      </section>
+
+      <section className="twee-kolommen">
+        <article className="kaart">
+          <h3>Foto&apos;s bij deze behandeling</h3>
+          <p className="subtitel" style={{ marginTop: 8 }}>
+            Voeg hier voor- en nafoto&apos;s toe als visuele dossieropbouw of bewijs bij een klacht.
+          </p>
+          <div style={{ marginTop: 18 }}>
+            <TreatmentPhotoGallery
+              customerId={klant.id}
+              treatmentId={behandeling.id}
+              photos={behandeling.photos}
+              showDelete
+            />
+          </div>
+        </article>
+
+        <aside className="kaart">
+          <h3>Nieuwe foto uploaden</h3>
+          <p className="subtitel" style={{ marginTop: 8 }}>
+            Upload eerst via de bewerkpagina, zodat de foto altijd direct aan de juiste behandeling gekoppeld blijft.
+          </p>
+          <TreatmentPhotoForm
+            customerId={klant.id}
+            treatmentId={behandeling.id}
+            action={uploadTreatmentPhotoAction}
+          />
+        </aside>
       </section>
     </div>
   );

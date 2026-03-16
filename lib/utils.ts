@@ -13,6 +13,10 @@ export function formatDateInput(date: Date | string) {
   return `${year}-${month}-${day}`;
 }
 
+export function formatDateParamLocal(date: Date | string) {
+  return formatDateInput(date);
+}
+
 export function buildCsvRow(values: string[]) {
   return values
     .map((value) => `"${value.replaceAll('"', '""')}"`)

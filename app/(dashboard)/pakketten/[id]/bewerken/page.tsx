@@ -36,6 +36,7 @@ export default async function BewerkPakketPage({ params }: BewerkPakketPageProps
       pakketPrijsCents: true,
       lossePrijsCents: true,
       standaardBehandeling: true,
+      weergaveType: true,
       isActief: true
     }
   });

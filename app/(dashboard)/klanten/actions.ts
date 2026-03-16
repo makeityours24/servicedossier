@@ -242,6 +242,7 @@ export async function createTreatmentAction(
 
   const parsed = treatmentSchema.safeParse({
     customerId: formData.get("customerId"),
+    appointmentId: formData.get("appointmentId"),
     datum: formData.get("datum"),
     behandeling: formData.get("behandeling"),
     recept: formData.get("recept"),
@@ -256,12 +257,54 @@ export async function createTreatmentAction(
 
   try {
     const datum = new Date(parsed.data.datum);
+    let appointmentMetadata:
+      | {
+          id: number;
+          datumStart: Date;
+          behandeling: string;
+        }
+      | null = null;
+
+    if (parsed.data.appointmentId) {
+      const appointment = await prisma.appointment.findFirst({
+        where: {
+          id: parsed.data.appointmentId,
+          salonId: user.salonId,
+          customerId: parsed.data.customerId
+        },
+        select: {
+          id: true,
+          datumStart: true,
+          behandeling: true,
+          convertedTreatment: {
+            select: {
+              id: true
+            }
+          }
+        }
+      });
+
+      if (!appointment) {
+        return { error: "Deze afspraak hoort niet bij deze klant of salon." };
+      }
+
+      if (appointment.convertedTreatment) {
+        return { error: "Van deze afspraak is al een behandeling gemaakt." };
+      }
+
+      appointmentMetadata = {
+        id: appointment.id,
+        datumStart: appointment.datumStart,
+        behandeling: appointment.behandeling
+      };
+    }
 
     const treatment = await prisma.treatment.create({
       data: {
         salonId: user.salonId,
         customerId: parsed.data.customerId,
         userId: user.id,
+        sourceAppointmentId: appointmentMetadata?.id ?? null,
         datum,
         behandeling: parsed.data.behandeling,
         recept: parsed.data.recept,
@@ -279,8 +322,18 @@ export async function createTreatmentAction(
       datum
     });
 
+    if (appointmentMetadata) {
+      await prisma.appointment.update({
+        where: { id: appointmentMetadata.id },
+        data: {
+          status: "VOLTOOID"
+        }
+      });
+    }
+
     revalidatePath(`/klanten/${parsed.data.customerId}`);
     revalidatePath("/dashboard");
+    revalidatePath("/agenda");
     return { success: "Behandeling is opgeslagen." };
   } catch (error) {
     return {
@@ -327,6 +380,7 @@ export async function createCustomerPackageAction(
         select: {
           id: true,
           naam: true,
+          weergaveType: true,
           standaardBehandeling: true,
           totaalBeurten: true,
           pakketPrijsCents: true,
@@ -350,6 +404,7 @@ export async function createCustomerPackageAction(
         packageTypeId: packageType.id,
         naamSnapshot: packageType.naam,
         standaardBehandelingSnapshot: packageType.standaardBehandeling,
+        weergaveTypeSnapshot: packageType.weergaveType,
         totaalBeurten: packageType.totaalBeurten,
         resterendeBeurten: packageType.totaalBeurten,
         pakketPrijsCents: packageType.pakketPrijsCents,
