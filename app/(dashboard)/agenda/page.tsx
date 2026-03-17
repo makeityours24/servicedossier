@@ -175,6 +175,8 @@ export default async function AgendaPage({ searchParams }: AgendaPageProps) {
                         <br />
                         <strong>Behandeling:</strong> {appointment.behandeling}
                         <br />
+                        <strong>Duur:</strong> {appointment.duurMinuten} minuten
+                        <br />
                         <strong>Behandelaar:</strong> {appointment.user?.naam ?? "Nog niet toegewezen"}
                         <br />
                         <strong>Status:</strong> {appointment.status.replaceAll("_", " ")}
@@ -188,6 +190,10 @@ export default async function AgendaPage({ searchParams }: AgendaPageProps) {
                     </div>
                     <span
                       className="status-badge"
+                      style={{
+                        background: `${appointment.behandelingKleur}18`,
+                        color: appointment.behandelingKleur
+                      }}
                       data-inactive={appointment.status === "GEANNULEERD" || appointment.status === "NIET_GEKOMEN" ? "true" : undefined}
                     >
                       {appointment.status === "GEPLAND"

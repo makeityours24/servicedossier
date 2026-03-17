@@ -13,6 +13,11 @@ function toDateParam(value: Date) {
   return formatDateParamLocal(value);
 }
 
+function buildAppointmentEndDate(datumStart: string, duurMinuten: number) {
+  const start = new Date(datumStart);
+  return new Date(start.getTime() + duurMinuten * 60000);
+}
+
 export async function createAppointmentAction(
   _: FormState,
   formData: FormData
@@ -24,8 +29,9 @@ export async function createAppointmentAction(
     customerId: formData.get("customerId"),
     userId: formData.get("userId"),
     datumStart: formData.get("datumStart"),
-    datumEinde: formData.get("datumEinde"),
+    duurMinuten: formData.get("duurMinuten"),
     behandeling: formData.get("behandeling"),
+    behandelingKleur: formData.get("behandelingKleur"),
     notities: formData.get("notities") || undefined,
     status: formData.get("status")
   });
@@ -69,14 +75,19 @@ export async function createAppointmentAction(
       return { error: "Deze behandelaar hoort niet bij deze salon." };
     }
 
+    const datumStart = new Date(parsed.data.datumStart);
+    const datumEinde = buildAppointmentEndDate(parsed.data.datumStart, parsed.data.duurMinuten);
+
     const afspraak = await prisma.appointment.create({
       data: {
         salonId: user.salonId,
         customerId: customer.id,
         userId: parsed.data.userId,
-        datumStart: new Date(parsed.data.datumStart),
-        datumEinde: new Date(parsed.data.datumEinde),
+        datumStart,
+        datumEinde,
+        duurMinuten: parsed.data.duurMinuten,
         behandeling: parsed.data.behandeling,
+        behandelingKleur: parsed.data.behandelingKleur,
         notities: parsed.data.notities || null,
         status: parsed.data.status
       }
@@ -96,7 +107,9 @@ export async function createAppointmentAction(
         medewerkerId: medewerker?.id ?? null,
         medewerkerNaam: medewerker?.naam ?? null,
         datumStart: afspraak.datumStart.toISOString(),
-        datumEinde: afspraak.datumEinde.toISOString()
+        datumEinde: afspraak.datumEinde.toISOString(),
+        duurMinuten: afspraak.duurMinuten,
+        behandelingKleur: afspraak.behandelingKleur
       }
     });
 
@@ -121,8 +134,9 @@ export async function updateAppointmentAction(
     customerId: formData.get("customerId"),
     userId: formData.get("userId"),
     datumStart: formData.get("datumStart"),
-    datumEinde: formData.get("datumEinde"),
+    duurMinuten: formData.get("duurMinuten"),
     behandeling: formData.get("behandeling"),
+    behandelingKleur: formData.get("behandelingKleur"),
     notities: formData.get("notities") || undefined,
     status: formData.get("status")
   });
@@ -180,14 +194,19 @@ export async function updateAppointmentAction(
       return { error: "Deze behandelaar hoort niet bij deze salon." };
     }
 
+    const datumStart = new Date(parsed.data.datumStart);
+    const datumEinde = buildAppointmentEndDate(parsed.data.datumStart, parsed.data.duurMinuten);
+
     const updated = await prisma.appointment.update({
       where: { id: parsed.data.appointmentId },
       data: {
         customerId: customer.id,
         userId: parsed.data.userId,
-        datumStart: new Date(parsed.data.datumStart),
-        datumEinde: new Date(parsed.data.datumEinde),
+        datumStart,
+        datumEinde,
+        duurMinuten: parsed.data.duurMinuten,
         behandeling: parsed.data.behandeling,
+        behandelingKleur: parsed.data.behandelingKleur,
         notities: parsed.data.notities || null,
         status: parsed.data.status
       }
@@ -208,6 +227,8 @@ export async function updateAppointmentAction(
         medewerkerNaam: medewerker?.naam ?? null,
         datumStart: updated.datumStart.toISOString(),
         datumEinde: updated.datumEinde.toISOString(),
+        duurMinuten: updated.duurMinuten,
+        behandelingKleur: updated.behandelingKleur,
         status: updated.status
       }
     });

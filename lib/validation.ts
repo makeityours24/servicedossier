@@ -22,7 +22,16 @@ export const customerSchema = z.object({
   telefoonnummer: z
     .string()
     .min(8, "Telefoonnummer is verplicht.")
-    .max(20, "Telefoonnummer is te lang.")
+    .max(20, "Telefoonnummer is te lang."),
+  geboortedatum: z
+    .string()
+    .optional()
+    .or(z.literal(""))
+    .refine((value) => !value || !Number.isNaN(new Date(value).getTime()), "Gebruik een geldige geboortedatum."),
+  allergieen: z.string().trim().max(500, "Allergieen zijn te lang.").optional(),
+  haartype: z.string().trim().max(80, "Haartype is te lang.").optional(),
+  haarkleur: z.string().trim().max(80, "Haarkleur is te lang.").optional(),
+  stylistNotities: z.string().trim().max(1000, "Notities van de stylist zijn te lang.").optional()
 });
 
 export const treatmentSchema = z.object({
@@ -97,26 +106,19 @@ const appointmentBaseSchema = z.object({
     .string()
     .min(1, "Starttijd is verplicht.")
     .refine((value) => !Number.isNaN(new Date(value).getTime()), "Vul een geldige starttijd in."),
-  datumEinde: z
-    .string()
-    .min(1, "Eindtijd is verplicht.")
-    .refine((value) => !Number.isNaN(new Date(value).getTime()), "Vul een geldige eindtijd in."),
+  duurMinuten: z.coerce.number().int().min(15, "Duur moet minimaal 15 minuten zijn."),
   behandeling: z.string().min(2, "Behandeling is verplicht."),
+  behandelingKleur: z
+    .string()
+    .regex(/^#[0-9A-Fa-f]{6}$/, "Gebruik een geldige kleur, bijvoorbeeld #B42323."),
   notities: z.string().trim().max(500, "Notities zijn te lang.").optional(),
   status: z.enum(["GEPLAND", "VOLTOOID", "GEANNULEERD", "NIET_GEKOMEN"]).default("GEPLAND")
 });
 
-export const appointmentSchema = appointmentBaseSchema
-  .refine((data) => new Date(data.datumEinde) > new Date(data.datumStart), {
-    message: "De eindtijd moet na de starttijd liggen.",
-    path: ["datumEinde"]
-  });
+export const appointmentSchema = appointmentBaseSchema;
 
 export const appointmentUpdateSchema = appointmentBaseSchema.extend({
   appointmentId: z.coerce.number().int().positive()
-}).refine((data) => new Date(data.datumEinde) > new Date(data.datumStart), {
-  message: "De eindtijd moet na de starttijd liggen.",
-  path: ["datumEinde"]
 });
 
 export const salonSettingsSchema = z.object({

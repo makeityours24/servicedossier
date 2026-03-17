@@ -5,6 +5,12 @@ export function formatDate(date: Date | string) {
   }).format(new Date(date));
 }
 
+export function formatDateOnly(date: Date | string) {
+  return new Intl.DateTimeFormat("nl-NL", {
+    dateStyle: "medium"
+  }).format(new Date(date));
+}
+
 export function formatDateInput(date: Date | string) {
   const value = new Date(date);
   const year = value.getFullYear();

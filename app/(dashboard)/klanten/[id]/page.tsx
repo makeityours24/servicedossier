@@ -12,7 +12,7 @@ import { TreatmentForm } from "@/components/treatment-form";
 import { TreatmentPhotoGallery } from "@/components/treatment-photo-gallery";
 import { requireSalonSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { formatCurrencyFromCents, formatDate } from "@/lib/utils";
+import { formatCurrencyFromCents, formatDate, formatDateOnly } from "@/lib/utils";
 import { treatmentPresets as defaultTreatmentPresets } from "@/lib/treatment-presets";
 
 type KlantDetailPageProps = {
@@ -319,6 +319,34 @@ export default async function KlantDetailPage({
 
       <section className="detail-grid">
         <article className="kaart">
+          <div className="info-grid" style={{ marginBottom: 18 }}>
+            <article className="info-kaart">
+              <h3>Geboortedatum</h3>
+              <p className="meta">
+                {klant.geboortedatum ? formatDateOnly(klant.geboortedatum) : "Nog niet ingevuld"}
+              </p>
+            </article>
+            <article className="info-kaart">
+              <h3>Haartype</h3>
+              <p className="meta">{klant.haartype || "Nog niet ingevuld"}</p>
+            </article>
+            <article className="info-kaart">
+              <h3>Haarkleur</h3>
+              <p className="meta">{klant.haarkleur || "Nog niet ingevuld"}</p>
+            </article>
+            <article className="info-kaart">
+              <h3>Allergieen</h3>
+              <p className="meta">{klant.allergieen || "Nog niet ingevuld"}</p>
+            </article>
+          </div>
+
+          {klant.stylistNotities ? (
+            <div className="info-kaart" style={{ marginBottom: 18 }}>
+              <h3>Notities stylist</h3>
+              <p className="meta">{klant.stylistNotities}</p>
+            </div>
+          ) : null}
+
           {laatsteBehandeling ? (
             <div className="lijst-item" style={{ marginBottom: 18 }}>
               <div className="acties" style={{ justifyContent: "space-between" }}>

@@ -867,6 +867,7 @@ textarea {
 
 .agenda-afspraakblok strong {
   font-size: 0.95rem;
+  line-height: 1.2;
 }
 
 .agenda-afspraakblok span {

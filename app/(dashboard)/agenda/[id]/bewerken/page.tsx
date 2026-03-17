@@ -14,6 +14,10 @@ function toDateTimeLocalValue(date: Date) {
   return new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
 }
 
+function getDurationInMinutes(start: Date, end: Date) {
+  return Math.max(15, Math.round((end.getTime() - start.getTime()) / 60000));
+}
+
 export default async function BewerkAfspraakPage({ params }: BewerkAfspraakPageProps) {
   const user = await requireSalonSession();
   const { id } = await params;
@@ -35,7 +39,9 @@ export default async function BewerkAfspraakPage({ params }: BewerkAfspraakPageP
         userId: true,
         datumStart: true,
         datumEinde: true,
+        duurMinuten: true,
         behandeling: true,
+        behandelingKleur: true,
         notities: true,
         status: true,
         convertedTreatment: {
@@ -123,8 +129,10 @@ export default async function BewerkAfspraakPage({ params }: BewerkAfspraakPageP
             customerId: appointment.customerId,
             userId: appointment.userId,
             datumStart: toDateTimeLocalValue(appointment.datumStart),
-            datumEinde: toDateTimeLocalValue(appointment.datumEinde),
+            duurMinuten:
+              appointment.duurMinuten ?? getDurationInMinutes(appointment.datumStart, appointment.datumEinde),
             behandeling: appointment.behandeling,
+            behandelingKleur: appointment.behandelingKleur,
             notities: appointment.notities,
             status: appointment.status
           }}

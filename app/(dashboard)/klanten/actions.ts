@@ -120,7 +120,12 @@ export async function createCustomerAction(
   const parsed = customerSchema.safeParse({
     naam: formData.get("naam"),
     adres: formData.get("adres"),
-    telefoonnummer: formData.get("telefoonnummer")
+    telefoonnummer: formData.get("telefoonnummer"),
+    geboortedatum: formData.get("geboortedatum"),
+    allergieen: formData.get("allergieen") || undefined,
+    haartype: formData.get("haartype") || undefined,
+    haarkleur: formData.get("haarkleur") || undefined,
+    stylistNotities: formData.get("stylistNotities") || undefined
   });
 
   if (!parsed.success) {
@@ -135,7 +140,12 @@ export async function createCustomerAction(
         salonId: user.salonId,
         naam: parsed.data.naam,
         adres: parsed.data.adres,
-        telefoonnummer: parsed.data.telefoonnummer
+        telefoonnummer: parsed.data.telefoonnummer,
+        geboortedatum: parsed.data.geboortedatum ? new Date(parsed.data.geboortedatum) : null,
+        allergieen: parsed.data.allergieen || null,
+        haartype: parsed.data.haartype || null,
+        haarkleur: parsed.data.haarkleur || null,
+        stylistNotities: parsed.data.stylistNotities || null
       }
     });
 
@@ -157,7 +167,12 @@ export async function updateCustomerAction(
   const parsed = customerSchema.safeParse({
     naam: formData.get("naam"),
     adres: formData.get("adres"),
-    telefoonnummer: formData.get("telefoonnummer")
+    telefoonnummer: formData.get("telefoonnummer"),
+    geboortedatum: formData.get("geboortedatum"),
+    allergieen: formData.get("allergieen") || undefined,
+    haartype: formData.get("haartype") || undefined,
+    haarkleur: formData.get("haarkleur") || undefined,
+    stylistNotities: formData.get("stylistNotities") || undefined
   });
 
   if (!Number.isInteger(customerId)) {
@@ -183,7 +198,16 @@ export async function updateCustomerAction(
 
     await prisma.customer.update({
       where: { id: customerId },
-      data: parsed.data
+      data: {
+        naam: parsed.data.naam,
+        adres: parsed.data.adres,
+        telefoonnummer: parsed.data.telefoonnummer,
+        geboortedatum: parsed.data.geboortedatum ? new Date(parsed.data.geboortedatum) : null,
+        allergieen: parsed.data.allergieen || null,
+        haartype: parsed.data.haartype || null,
+        haarkleur: parsed.data.haarkleur || null,
+        stylistNotities: parsed.data.stylistNotities || null
+      }
     });
 
     revalidatePath("/klanten");

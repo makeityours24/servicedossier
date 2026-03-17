@@ -11,6 +11,8 @@ type TeamAgendaGridProps = {
     datumStart: Date;
     datumEinde: Date;
     behandeling: string;
+    behandelingKleur: string;
+    duurMinuten: number;
     status: "GEPLAND" | "VOLTOOID" | "GEANNULEERD" | "NIET_GEKOMEN";
     customer: {
       id: number;
@@ -113,7 +115,9 @@ export function TeamAgendaGrid({ dayStart, medewerkers, afspraken }: TeamAgendaG
                       className={`agenda-afspraakblok ${getStatusClass(afspraak.status)}`}
                       style={{
                         top,
-                        height: duurMinuten * PIXELS_PER_MINUTE
+                        height: duurMinuten * PIXELS_PER_MINUTE,
+                        borderColor: `${afspraak.behandelingKleur}45`,
+                        background: `linear-gradient(180deg, ${afspraak.behandelingKleur}20 0%, ${afspraak.behandelingKleur}14 100%)`
                       }}
                     >
                       <strong>{afspraak.customer.naam}</strong>
@@ -121,6 +125,7 @@ export function TeamAgendaGrid({ dayStart, medewerkers, afspraken }: TeamAgendaG
                       <span>
                         {formatTime(afspraak.datumStart)} - {formatTime(afspraak.datumEinde)}
                       </span>
+                      <span>{afspraak.duurMinuten} min</span>
                     </Link>
                   );
                 })}

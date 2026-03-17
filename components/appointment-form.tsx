@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useActionState } from "react";
 import type { FormState } from "@/components/customer-form";
 import { FormMessage } from "@/components/form-message";
@@ -23,12 +24,30 @@ type AppointmentFormProps = {
     customerId: number;
     userId?: number | null;
     datumStart: string;
-    datumEinde: string;
+    duurMinuten: number;
     behandeling: string;
+    behandelingKleur: string;
     notities?: string | null;
     status: "GEPLAND" | "VOLTOOID" | "GEANNULEERD" | "NIET_GEKOMEN";
   };
 };
+
+function toDateTimeLocalValue(date: Date) {
+  return new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+}
+
+function buildEndDateTimeValue(startValue: string, duurMinuten: number) {
+  if (!startValue) {
+    return "";
+  }
+
+  const start = new Date(startValue);
+  if (Number.isNaN(start.getTime())) {
+    return "";
+  }
+
+  return toDateTimeLocalValue(new Date(start.getTime() + duurMinuten * 60000));
+}
 
 export function AppointmentForm({
   action,
@@ -38,6 +57,16 @@ export function AppointmentForm({
   appointment
 }: AppointmentFormProps) {
   const [state, formAction] = useActionState(action, initialState);
+  const [datumStart, setDatumStart] = useState(appointment?.datumStart ?? "");
+  const [duurMinuten, setDuurMinuten] = useState(String(appointment?.duurMinuten ?? 30));
+  const [datumEindePreview, setDatumEindePreview] = useState(
+    buildEndDateTimeValue(appointment?.datumStart ?? "", appointment?.duurMinuten ?? 30)
+  );
+
+  useEffect(() => {
+    const duur = Number(duurMinuten) || 0;
+    setDatumEindePreview(buildEndDateTimeValue(datumStart, duur));
+  }, [datumStart, duurMinuten]);
 
   return (
     <form action={formAction} className="formulier">
@@ -78,18 +107,37 @@ export function AppointmentForm({
             name="datumStart"
             type="datetime-local"
             defaultValue={appointment?.datumStart}
+            onChange={(event) => setDatumStart(event.target.value)}
             required
           />
         </div>
 
         <div className="veld">
-          <label htmlFor="datumEinde">Eindtijd</label>
+          <label htmlFor="duurMinuten">Duur</label>
+          <select
+            id="duurMinuten"
+            name="duurMinuten"
+            defaultValue={String(appointment?.duurMinuten ?? 30)}
+            onChange={(event) => setDuurMinuten(event.target.value)}
+          >
+            <option value="15">15 minuten</option>
+            <option value="30">30 minuten</option>
+            <option value="45">45 minuten</option>
+            <option value="60">60 minuten</option>
+            <option value="90">90 minuten</option>
+            <option value="120">120 minuten</option>
+            <option value="150">150 minuten</option>
+            <option value="180">180 minuten</option>
+          </select>
+        </div>
+
+        <div className="veld">
+          <label htmlFor="datumEindePreview">Eindtijd</label>
           <input
-            id="datumEinde"
-            name="datumEinde"
+            id="datumEindePreview"
             type="datetime-local"
-            defaultValue={appointment?.datumEinde}
-            required
+            value={datumEindePreview}
+            readOnly
           />
         </div>
 
@@ -101,6 +149,16 @@ export function AppointmentForm({
             defaultValue={appointment?.behandeling}
             placeholder="Bijvoorbeeld Uitgroei kleuren"
             required
+          />
+        </div>
+
+        <div className="veld">
+          <label htmlFor="behandelingKleur">Kleur in agenda</label>
+          <input
+            id="behandelingKleur"
+            name="behandelingKleur"
+            type="color"
+            defaultValue={appointment?.behandelingKleur ?? "#B42323"}
           />
         </div>
 

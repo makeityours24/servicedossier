@@ -77,6 +77,11 @@ model Customer {
   naam            String
   adres           String
   telefoonnummer  String
+  geboortedatum   DateTime?
+  allergieen      String?
+  haartype        String?
+  haarkleur       String?
+  stylistNotities String?
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
   salon           Salon       @relation(fields: [salonId], references: [id], onDelete: Cascade)
@@ -122,7 +127,9 @@ model Appointment {
   userId      Int?
   datumStart  DateTime
   datumEinde  DateTime
+  duurMinuten Int               @default(30)
   behandeling String
+  behandelingKleur String       @default("#B42323")
   notities    String?
   status      AppointmentStatus @default(GEPLAND)
   createdAt   DateTime          @default(now())
