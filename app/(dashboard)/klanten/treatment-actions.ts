@@ -124,6 +124,7 @@ export async function createTreatmentAction(
     customerId: formData.get("customerId"),
     appointmentId: formData.get("appointmentId"),
     datum: formData.get("datum"),
+    behandelaarUserId: formData.get("behandelaarUserId"),
     behandeling: formData.get("behandeling"),
     recept: formData.get("recept"),
     behandelaar: formData.get("behandelaar"),
@@ -184,16 +185,35 @@ export async function createTreatmentAction(
       };
     }
 
+    const behandelaarGebruiker = parsed.data.behandelaarUserId
+      ? await prisma.user.findFirst({
+          where: {
+            id: parsed.data.behandelaarUserId,
+            salonId: user.salonId,
+            isPlatformAdmin: false,
+            status: "ACTIEF"
+          },
+          select: {
+            id: true,
+            naam: true
+          }
+        })
+      : null;
+
+    if (parsed.data.behandelaarUserId && !behandelaarGebruiker) {
+      return { error: "Deze behandelaar hoort niet bij deze salon." };
+    }
+
     const treatment = await prisma.treatment.create({
       data: {
         salonId: user.salonId,
         customerId: parsed.data.customerId,
-        userId: user.id,
+        userId: behandelaarGebruiker?.id ?? user.id,
         sourceAppointmentId: appointmentMetadata?.id ?? null,
         datum,
         behandeling: parsed.data.behandeling,
         recept: parsed.data.recept,
-        behandelaar: parsed.data.behandelaar,
+        behandelaar: behandelaarGebruiker?.naam ?? parsed.data.behandelaar,
         notities: parsed.data.notities
       }
     });
@@ -241,6 +261,7 @@ export async function updateTreatmentAction(
   const parsed = treatmentSchema.safeParse({
     customerId: formData.get("customerId"),
     datum: formData.get("datum"),
+    behandelaarUserId: formData.get("behandelaarUserId"),
     behandeling: formData.get("behandeling"),
     recept: formData.get("recept"),
     behandelaar: formData.get("behandelaar"),
@@ -266,6 +287,25 @@ export async function updateTreatmentAction(
       return { error: "Deze behandeling hoort niet bij deze salon of klant." };
     }
 
+    const behandelaarGebruiker = parsed.data.behandelaarUserId
+      ? await prisma.user.findFirst({
+          where: {
+            id: parsed.data.behandelaarUserId,
+            salonId: user.salonId,
+            isPlatformAdmin: false,
+            status: "ACTIEF"
+          },
+          select: {
+            id: true,
+            naam: true
+          }
+        })
+      : null;
+
+    if (parsed.data.behandelaarUserId && !behandelaarGebruiker) {
+      return { error: "Deze behandelaar hoort niet bij deze salon." };
+    }
+
     await rollbackTreatmentPackageUsage({
       treatmentId,
       salonId: user.salonId
@@ -277,9 +317,10 @@ export async function updateTreatmentAction(
       where: { id: treatmentId },
       data: {
         datum,
+        userId: behandelaarGebruiker?.id ?? user.id,
         behandeling: parsed.data.behandeling,
         recept: parsed.data.recept,
-        behandelaar: parsed.data.behandelaar,
+        behandelaar: behandelaarGebruiker?.naam ?? parsed.data.behandelaar,
         notities: parsed.data.notities
       }
     });

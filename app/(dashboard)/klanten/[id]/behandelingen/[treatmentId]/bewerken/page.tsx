@@ -47,6 +47,7 @@ export default async function BewerkBehandelingPage({
     },
     select: {
       id: true,
+      userId: true,
       datum: true,
       behandeling: true,
       recept: true,
@@ -106,6 +107,19 @@ export default async function BewerkBehandelingPage({
     }
   });
 
+  const medewerkers = await prisma.user.findMany({
+    where: {
+      salonId: user.salonId,
+      isPlatformAdmin: false,
+      status: "ACTIEF"
+    },
+    orderBy: { naam: "asc" },
+    select: {
+      id: true,
+      naam: true
+    }
+  });
+
   return (
     <div className="rooster">
       <section className="bovenbalk">
@@ -128,10 +142,12 @@ export default async function BewerkBehandelingPage({
         <TreatmentForm
           customerId={klant.id}
           medewerkerNaam={user.naam}
+          medewerkers={medewerkers}
           action={updateTreatmentAction}
           submitLabel="Behandeling opslaan"
           treatment={{
             ...behandeling,
+            behandelaarUserId: behandeling.userId,
             datum: datumWaarde,
             customerPackageId: behandeling.packageUsages[0]?.customerPackageId ?? null
           }}

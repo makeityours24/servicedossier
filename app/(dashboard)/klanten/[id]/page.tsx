@@ -167,6 +167,7 @@ export default async function KlantDetailPage({
             datumStart: true,
             behandeling: true,
             notities: true,
+            userId: true,
             user: {
               select: {
                 naam: true
@@ -247,6 +248,19 @@ export default async function KlantDetailPage({
     })
   ]);
 
+  const medewerkers = await prisma.user.findMany({
+    where: {
+      salonId: user.salonId,
+      isPlatformAdmin: false,
+      status: "ACTIEF"
+    },
+    orderBy: { naam: "asc" },
+    select: {
+      id: true,
+      naam: true
+    }
+  });
+
   const aankomendeAfspraken = await prisma.appointment.findMany({
     where: {
       salonId: user.salonId,
@@ -285,6 +299,7 @@ export default async function KlantDetailPage({
       ? {
           behandeling: geselecteerdSjabloon.behandeling,
           recept: geselecteerdSjabloon.recept,
+          behandelaarUserId: medewerkers.find((medewerker) => medewerker.naam === user.naam)?.id ?? null,
           behandelaar: user.naam,
           notities: geselecteerdSjabloon.notities ?? "",
           datum: new Date().toISOString().slice(0, 16)
@@ -292,6 +307,7 @@ export default async function KlantDetailPage({
       : geselecteerdeAfspraak && !geselecteerdeAfspraak.convertedTreatment
         ? {
             appointmentId: geselecteerdeAfspraak.id,
+            behandelaarUserId: geselecteerdeAfspraak.userId ?? null,
             behandeling: geselecteerdeAfspraak.behandeling,
             recept: "",
             behandelaar: geselecteerdeAfspraak.user?.naam ?? user.naam,
@@ -847,6 +863,7 @@ export default async function KlantDetailPage({
           <TreatmentForm
             customerId={klant.id}
             medewerkerNaam={user.naam}
+            medewerkers={medewerkers}
             action={createTreatmentAction}
             treatment={treatmentVoorFormulier}
             treatmentPresets={

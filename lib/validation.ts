@@ -45,6 +45,9 @@ export const treatmentSchema = z.object({
     .refine((value) => !Number.isNaN(new Date(value).getTime()), "Vul een geldige datum in."),
   behandeling: z.string().min(2, "Behandeling is verplicht."),
   recept: z.string().min(2, "Recept is verplicht."),
+  behandelaarUserId: z
+    .union([z.coerce.number().int().positive(), z.literal(""), z.null(), z.undefined()])
+    .transform((value) => (typeof value === "number" ? value : null)),
   behandelaar: z.string().min(2, "Naam behandelaar is verplicht."),
   notities: z.string().optional(),
   customerPackageId: z

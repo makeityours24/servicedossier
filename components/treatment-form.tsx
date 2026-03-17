@@ -10,11 +10,16 @@ const initialState: FormState = {};
 type TreatmentFormProps = {
   customerId: number;
   medewerkerNaam: string;
+  medewerkers: Array<{
+    id: number;
+    naam: string;
+  }>;
   action: (state: FormState, formData: FormData) => Promise<FormState>;
   submitLabel?: string;
   treatment?: {
     id?: number;
     appointmentId?: number | null;
+    behandelaarUserId?: number | null;
     datum: string;
     behandeling: string;
     recept: string;
@@ -36,6 +41,7 @@ type TreatmentFormProps = {
 export function TreatmentForm({
   customerId,
   medewerkerNaam,
+  medewerkers,
   action,
   submitLabel = "Behandeling opslaan",
   treatment,
@@ -46,6 +52,11 @@ export function TreatmentForm({
   const [state, formAction] = useActionState(action, initialState);
   const vandaag = new Date().toISOString().slice(0, 16);
   const [datum, setDatum] = useState(treatment?.datum ?? vandaag);
+  const initialBehandelaarUserId =
+    treatment?.behandelaarUserId ?? medewerkers.find((medewerker) => medewerker.naam === medewerkerNaam)?.id ?? null;
+  const [behandelaarUserId, setBehandelaarUserId] = useState(
+    initialBehandelaarUserId ? String(initialBehandelaarUserId) : ""
+  );
   const [behandelaar, setBehandelaar] = useState(treatment?.behandelaar ?? medewerkerNaam);
   const [behandeling, setBehandeling] = useState(treatment?.behandeling ?? "");
   const [recept, setRecept] = useState(treatment?.recept ?? "");
@@ -63,6 +74,7 @@ export function TreatmentForm({
       try {
         const parsed = JSON.parse(savedDraft) as {
           datum?: string;
+          behandelaarUserId?: string;
           behandelaar?: string;
           behandeling?: string;
           recept?: string;
@@ -71,6 +83,10 @@ export function TreatmentForm({
         };
 
         setDatum(parsed.datum ?? treatment?.datum ?? vandaag);
+        setBehandelaarUserId(
+          parsed.behandelaarUserId ??
+            (treatment?.behandelaarUserId ? String(treatment.behandelaarUserId) : initialBehandelaarUserId ? String(initialBehandelaarUserId) : "")
+        );
         setBehandelaar(parsed.behandelaar ?? treatment?.behandelaar ?? medewerkerNaam);
         setBehandeling(parsed.behandeling ?? treatment?.behandeling ?? "");
         setRecept(parsed.recept ?? treatment?.recept ?? "");
@@ -85,18 +101,37 @@ export function TreatmentForm({
     }
 
     setDatum(treatment?.datum ?? vandaag);
+    setBehandelaarUserId(
+      treatment?.behandelaarUserId ? String(treatment.behandelaarUserId) : initialBehandelaarUserId ? String(initialBehandelaarUserId) : ""
+    );
     setBehandelaar(treatment?.behandelaar ?? medewerkerNaam);
     setBehandeling(treatment?.behandeling ?? "");
     setRecept(treatment?.recept ?? "");
     setNotities(treatment?.notities ?? "");
     setCustomerPackageId(treatment?.customerPackageId ? String(treatment.customerPackageId) : "");
-  }, [draftKey, medewerkerNaam, treatment, vandaag]);
+  }, [draftKey, initialBehandelaarUserId, medewerkerNaam, treatment, vandaag]);
+
+  useEffect(() => {
+    const geselecteerdeMedewerker = medewerkers.find(
+      (medewerker) => String(medewerker.id) === behandelaarUserId
+    );
+
+    if (geselecteerdeMedewerker) {
+      setBehandelaar(geselecteerdeMedewerker.naam);
+      return;
+    }
+
+    if (!behandelaarUserId && !treatment?.behandelaar) {
+      setBehandelaar(medewerkerNaam);
+    }
+  }, [behandelaarUserId, medewerkerNaam, medewerkers, treatment?.behandelaar]);
 
   useEffect(() => {
     window.sessionStorage.setItem(
       draftKey,
       JSON.stringify({
         datum,
+        behandelaarUserId,
         behandelaar,
         behandeling,
         recept,
@@ -104,8 +139,12 @@ export function TreatmentForm({
         customerPackageId
       })
     );
-    setHasDraft(Boolean(datum || behandelaar || behandeling || recept || notities || customerPackageId));
-  }, [behandeling, behandelaar, customerPackageId, datum, draftKey, notities, recept]);
+    setHasDraft(
+      Boolean(
+        datum || behandelaarUserId || behandelaar || behandeling || recept || notities || customerPackageId
+      )
+    );
+  }, [behandeling, behandelaar, behandelaarUserId, customerPackageId, datum, draftKey, notities, recept]);
 
   useEffect(() => {
     if (state.success) {
@@ -172,14 +211,24 @@ export function TreatmentForm({
         </div>
 
         <div className="veld">
-          <label htmlFor="behandelaar">Naam behandelaar</label>
-          <input
-            id="behandelaar"
-            name="behandelaar"
-            value={behandelaar}
-            onChange={(event) => setBehandelaar(event.target.value)}
+          <label htmlFor="behandelaarUserId">Behandelaar</label>
+          <select
+            id="behandelaarUserId"
+            name="behandelaarUserId"
+            value={behandelaarUserId}
+            onChange={(event) => setBehandelaarUserId(event.target.value)}
             required
-          />
+          >
+            <option value="" disabled>
+              Kies een behandelaar
+            </option>
+            {medewerkers.map((medewerker) => (
+              <option key={medewerker.id} value={medewerker.id}>
+                {medewerker.naam}
+              </option>
+            ))}
+          </select>
+          <input type="hidden" name="behandelaar" value={behandelaar} />
         </div>
 
         <div className="veld-groot">
