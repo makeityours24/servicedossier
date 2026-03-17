@@ -2,9 +2,10 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { updateAppointmentAction } from "@/app/(dashboard)/agenda/actions";
 import { AppointmentForm } from "@/components/appointment-form";
+import { ReminderCopyButton } from "@/components/reminder-copy-button";
 import { requireSalonSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { formatDateParamLocal } from "@/lib/utils";
+import { buildAppointmentReminderMessage, formatDateParamLocal } from "@/lib/utils";
 
 type BewerkAfspraakPageProps = {
   params: Promise<{ id: string }>;
@@ -117,6 +118,16 @@ export default async function BewerkAfspraakPage({ params }: BewerkAfspraakPageP
               Behandeling starten vanuit afspraak
             </Link>
           )}
+          <ReminderCopyButton
+            message={buildAppointmentReminderMessage({
+              customerName: appointment.customer.naam,
+              salonName: user.salon.instellingen?.weergavenaam ?? user.salon.naam,
+              treatmentName: appointment.behandeling,
+              startAt: appointment.datumStart,
+              contactPhone:
+                user.salon.instellingen?.contactTelefoon ?? user.salon.telefoonnummer ?? null
+            })}
+          />
         </div>
 
         <AppointmentForm

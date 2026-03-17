@@ -8,11 +8,12 @@ import {
 } from "@/app/(dashboard)/klanten/actions";
 import { CustomerPackageForm } from "@/components/customer-package-form";
 import { DeleteCustomerButton } from "@/components/delete-customer-button";
+import { ReminderCopyButton } from "@/components/reminder-copy-button";
 import { TreatmentForm } from "@/components/treatment-form";
 import { TreatmentPhotoGallery } from "@/components/treatment-photo-gallery";
 import { requireSalonSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { formatCurrencyFromCents, formatDate, formatDateOnly } from "@/lib/utils";
+import { buildAppointmentReminderMessage, formatCurrencyFromCents, formatDate, formatDateOnly } from "@/lib/utils";
 import { treatmentPresets as defaultTreatmentPresets } from "@/lib/treatment-presets";
 
 type KlantDetailPageProps = {
@@ -370,9 +371,21 @@ export default async function KlantDetailPage({
                           {afspraak.user?.naam ?? "Nog niet toegewezen"}
                         </p>
                       </div>
-                      <Link href={`/agenda/${afspraak.id}/bewerken`} className="knop-zacht">
-                        Open afspraak
-                      </Link>
+                      <div className="acties">
+                        <Link href={`/agenda/${afspraak.id}/bewerken`} className="knop-zacht">
+                          Open afspraak
+                        </Link>
+                        <ReminderCopyButton
+                          message={buildAppointmentReminderMessage({
+                            customerName: klant.naam,
+                            salonName: user.salon.instellingen?.weergavenaam ?? user.salon.naam,
+                            treatmentName: afspraak.behandeling,
+                            startAt: afspraak.datumStart,
+                            contactPhone:
+                              user.salon.instellingen?.contactTelefoon ?? user.salon.telefoonnummer ?? null
+                          })}
+                        />
+                      </div>
                     </div>
                   </div>
                 ))}

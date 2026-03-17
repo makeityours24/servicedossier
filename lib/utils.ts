@@ -50,3 +50,28 @@ export function describePackagePrice(
 
   return `${formatCurrencyFromCents(pakketPrijsCents)} voor ${totaalBeurten} beurten, bespaar ${formatCurrencyFromCents(voordeel)}`;
 }
+
+export function buildAppointmentReminderMessage(params: {
+  customerName: string;
+  salonName: string;
+  treatmentName: string;
+  startAt: Date | string;
+  contactPhone?: string | null;
+}) {
+  const date = new Date(params.startAt);
+  const dag = new Intl.DateTimeFormat("nl-NL", {
+    weekday: "long",
+    day: "numeric",
+    month: "long"
+  }).format(date);
+  const tijd = new Intl.DateTimeFormat("nl-NL", {
+    hour: "2-digit",
+    minute: "2-digit"
+  }).format(date);
+
+  const contactLine = params.contactPhone
+    ? ` Vragen? Bel of app gerust naar ${params.contactPhone}.`
+    : "";
+
+  return `Hoi ${params.customerName}, dit is een herinnering voor je afspraak bij ${params.salonName} op ${dag} om ${tijd} voor ${params.treatmentName}. Tot dan!${contactLine}`;
+}

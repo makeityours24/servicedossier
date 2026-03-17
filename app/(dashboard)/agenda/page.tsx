@@ -3,10 +3,11 @@ import { createAppointmentAction, deleteAppointmentAction } from "@/app/(dashboa
 import { AgendaViewSwitch } from "@/components/agenda-view-switch";
 import { AppointmentForm } from "@/components/appointment-form";
 import { DeleteCustomerButton } from "@/components/delete-customer-button";
+import { ReminderCopyButton } from "@/components/reminder-copy-button";
 import { TeamAgendaGrid } from "@/components/team-agenda-grid";
 import { requireSalonSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { formatDate, formatDateParamLocal } from "@/lib/utils";
+import { buildAppointmentReminderMessage, formatDate, formatDateParamLocal } from "@/lib/utils";
 
 type AgendaPageProps = {
   searchParams: Promise<{
@@ -230,6 +231,16 @@ export default async function AgendaPage({ searchParams }: AgendaPageProps) {
                     <Link href={`/klanten/${appointment.customer.id}`} className="knop-zacht">
                       Naar klantdossier
                     </Link>
+                    <ReminderCopyButton
+                      message={buildAppointmentReminderMessage({
+                        customerName: appointment.customer.naam,
+                        salonName: user.salon.instellingen?.weergavenaam ?? user.salon.naam,
+                        treatmentName: appointment.behandeling,
+                        startAt: appointment.datumStart,
+                        contactPhone:
+                          user.salon.instellingen?.contactTelefoon ?? user.salon.telefoonnummer ?? null
+                      })}
+                    />
                     <form action={deleteAppointmentAction}>
                       <input type="hidden" name="appointmentId" value={appointment.id} />
                       <DeleteCustomerButton
