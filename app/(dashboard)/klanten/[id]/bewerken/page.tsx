@@ -36,11 +36,11 @@ export default async function BewerkKlantPage({ params }: BewerkKlantPageProps) 
           Gegevens aanpassen
         </h2>
         <p className="subtitel">
-          Werk adres- of contactgegevens bij zonder het bestaande behandeloverzicht te verliezen.
+          Werk hier ook geboortedatum, haartype, haarkleur, allergieen en notities van de stylist bij.
         </p>
       </section>
 
-      <section className="kaart">
+      <section className="kaart" id="profiel">
         <CustomerForm
           action={updateCustomerAction}
           submitLabel="Wijzigingen opslaan"

@@ -423,6 +423,20 @@ export default async function KlantDetailPage({
             </div>
           )}
 
+          <div className="info-kaart" style={{ marginBottom: 18 }}>
+            <div className="acties" style={{ justifyContent: "space-between", alignItems: "flex-start" }}>
+              <div>
+                <h3>Profiel en haarinfo</h3>
+                <p className="meta" style={{ marginTop: 8 }}>
+                  Werk hier snel geboortedatum, haartype, haarkleur, allergieen en stylistnotities bij.
+                </p>
+              </div>
+              <Link href={`/klanten/${klant.id}/bewerken#profiel`} className="knop-secundair">
+                Profiel bewerken
+              </Link>
+            </div>
+          </div>
+
           <div className="info-grid" style={{ marginBottom: 18 }}>
             <article className="info-kaart">
               <h3>Geboortedatum</h3>
