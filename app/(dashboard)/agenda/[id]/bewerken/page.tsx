@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { updateAppointmentAction } from "@/app/(dashboard)/agenda/actions";
+import { createQuickCustomerAction } from "@/app/(dashboard)/klanten/customer-actions";
 import { AppointmentForm } from "@/components/appointment-form";
 import { ReminderCopyButton } from "@/components/reminder-copy-button";
 import { requireSalonSession } from "@/lib/auth";
@@ -132,6 +133,7 @@ export default async function BewerkAfspraakPage({ params }: BewerkAfspraakPageP
 
         <AppointmentForm
           action={updateAppointmentAction}
+          quickCreateCustomerAction={createQuickCustomerAction}
           submitLabel="Afspraak opslaan"
           customers={customers}
           medewerkers={medewerkers}

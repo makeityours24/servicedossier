@@ -9,6 +9,8 @@ import { formatDateInput } from "@/lib/utils";
 export type FormState = {
   error?: string;
   success?: string;
+  createdCustomerId?: number;
+  createdCustomerName?: string;
 };
 
 const initialState: FormState = {};

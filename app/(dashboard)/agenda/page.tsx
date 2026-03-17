@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { createAppointmentAction, deleteAppointmentAction } from "@/app/(dashboard)/agenda/actions";
+import { createQuickCustomerAction } from "@/app/(dashboard)/klanten/customer-actions";
 import { AgendaViewSwitch } from "@/components/agenda-view-switch";
 import { AppointmentForm } from "@/components/appointment-form";
 import { DeleteCustomerButton } from "@/components/delete-customer-button";
@@ -208,6 +209,7 @@ export default async function AgendaPage({ searchParams }: AgendaPageProps) {
           ) : (
             <AppointmentForm
               action={createAppointmentAction}
+              quickCreateCustomerAction={createQuickCustomerAction}
               preselectedCustomerId={Number.isInteger(preselectedCustomerId) ? preselectedCustomerId : null}
               customers={customers}
               medewerkers={medewerkers}

@@ -54,6 +54,49 @@ export async function createCustomerAction(
   redirect(`/klanten/${klantId}`);
 }
 
+export async function createQuickCustomerAction(
+  _: FormState,
+  formData: FormData
+): Promise<FormState> {
+  const user = await requireSalonSession();
+  const parsed = customerSchema.safeParse({
+    naam: formData.get("naam"),
+    adres: formData.get("adres"),
+    telefoonnummer: formData.get("telefoonnummer"),
+    geboortedatum: undefined,
+    allergieen: undefined,
+    haartype: undefined,
+    haarkleur: undefined,
+    stylistNotities: undefined
+  });
+
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Controleer de klantgegevens." };
+  }
+
+  try {
+    const klant = await prisma.customer.create({
+      data: {
+        salonId: user.salonId,
+        naam: parsed.data.naam,
+        adres: parsed.data.adres,
+        telefoonnummer: parsed.data.telefoonnummer
+      }
+    });
+
+    revalidatePath("/agenda");
+    revalidatePath("/klanten");
+
+    return {
+      success: `${klant.naam} is toegevoegd en direct beschikbaar voor deze afspraak.`,
+      createdCustomerId: klant.id,
+      createdCustomerName: klant.naam
+    };
+  } catch {
+    return { error: "Opslaan is mislukt. Controleer of het telefoonnummer al bestaat." };
+  }
+}
+
 export async function updateCustomerAction(
   _: FormState,
   formData: FormData
