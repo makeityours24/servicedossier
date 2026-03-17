@@ -13,6 +13,7 @@ type AgendaPageProps = {
     datum?: string;
     medewerker?: string;
     weergave?: string;
+    customerId?: string;
   }>;
 };
 
@@ -33,6 +34,7 @@ export default async function AgendaPage({ searchParams }: AgendaPageProps) {
   const { dayStart, dayEnd } = getDayRange(filters.datum);
   const selectedDateParam = filters.datum ?? formatDateParamLocal(dayStart);
   const weergave = filters.weergave === "team" ? "team" : "lijst";
+  const preselectedCustomerId = filters.customerId ? Number(filters.customerId) : null;
 
   const [appointments, customers, medewerkers] = await Promise.all([
     prisma.appointment.findMany({
@@ -255,6 +257,7 @@ export default async function AgendaPage({ searchParams }: AgendaPageProps) {
           ) : (
             <AppointmentForm
               action={createAppointmentAction}
+              preselectedCustomerId={Number.isInteger(preselectedCustomerId) ? preselectedCustomerId : null}
               customers={customers}
               medewerkers={medewerkers}
             />

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState } from "react";
+import { useActionState, useEffect, useMemo, useState } from "react";
 import { FormMessage } from "@/components/form-message";
 import { SubmitButton } from "@/components/submit-button";
 import { formatDateInput } from "@/lib/utils";
@@ -31,6 +31,93 @@ type CustomerFormProps = {
 
 export function CustomerForm({ action, submitLabel, customer }: CustomerFormProps) {
   const [state, formAction] = useActionState(action, initialState);
+  const storageKey = useMemo(
+    () => `salondossier:customer-form:${customer?.id ?? "new"}`,
+    [customer?.id]
+  );
+  const [naam, setNaam] = useState(customer?.naam ?? "");
+  const [telefoonnummer, setTelefoonnummer] = useState(customer?.telefoonnummer ?? "");
+  const [geboortedatum, setGeboortedatum] = useState(
+    customer?.geboortedatum ? formatDateInput(customer.geboortedatum) : ""
+  );
+  const [haartype, setHaartype] = useState(customer?.haartype ?? "");
+  const [haarkleur, setHaarkleur] = useState(customer?.haarkleur ?? "");
+  const [adres, setAdres] = useState(customer?.adres ?? "");
+  const [allergieen, setAllergieen] = useState(customer?.allergieen ?? "");
+  const [stylistNotities, setStylistNotities] = useState(customer?.stylistNotities ?? "");
+
+  useEffect(() => {
+    const savedDraft = window.sessionStorage.getItem(storageKey);
+    if (!savedDraft) {
+      setNaam(customer?.naam ?? "");
+      setTelefoonnummer(customer?.telefoonnummer ?? "");
+      setGeboortedatum(customer?.geboortedatum ? formatDateInput(customer.geboortedatum) : "");
+      setHaartype(customer?.haartype ?? "");
+      setHaarkleur(customer?.haarkleur ?? "");
+      setAdres(customer?.adres ?? "");
+      setAllergieen(customer?.allergieen ?? "");
+      setStylistNotities(customer?.stylistNotities ?? "");
+      return;
+    }
+
+    try {
+      const parsed = JSON.parse(savedDraft) as {
+        naam?: string;
+        telefoonnummer?: string;
+        geboortedatum?: string;
+        haartype?: string;
+        haarkleur?: string;
+        adres?: string;
+        allergieen?: string;
+        stylistNotities?: string;
+      };
+
+      setNaam(parsed.naam ?? customer?.naam ?? "");
+      setTelefoonnummer(parsed.telefoonnummer ?? customer?.telefoonnummer ?? "");
+      setGeboortedatum(
+        parsed.geboortedatum ?? (customer?.geboortedatum ? formatDateInput(customer.geboortedatum) : "")
+      );
+      setHaartype(parsed.haartype ?? customer?.haartype ?? "");
+      setHaarkleur(parsed.haarkleur ?? customer?.haarkleur ?? "");
+      setAdres(parsed.adres ?? customer?.adres ?? "");
+      setAllergieen(parsed.allergieen ?? customer?.allergieen ?? "");
+      setStylistNotities(parsed.stylistNotities ?? customer?.stylistNotities ?? "");
+    } catch {
+      window.sessionStorage.removeItem(storageKey);
+    }
+  }, [customer, storageKey]);
+
+  useEffect(() => {
+    window.sessionStorage.setItem(
+      storageKey,
+      JSON.stringify({
+        naam,
+        telefoonnummer,
+        geboortedatum,
+        haartype,
+        haarkleur,
+        adres,
+        allergieen,
+        stylistNotities
+      })
+    );
+  }, [
+    adres,
+    allergieen,
+    geboortedatum,
+    haarkleur,
+    haartype,
+    naam,
+    storageKey,
+    stylistNotities,
+    telefoonnummer
+  ]);
+
+  useEffect(() => {
+    if (state.success) {
+      window.sessionStorage.removeItem(storageKey);
+    }
+  }, [state.success, storageKey]);
 
   return (
     <form action={formAction} className="formulier">
@@ -40,7 +127,7 @@ export function CustomerForm({ action, submitLabel, customer }: CustomerFormProp
       <div className="formulier-grid">
         <div className="veld">
           <label htmlFor="naam">Naam</label>
-          <input id="naam" name="naam" defaultValue={customer?.naam} required />
+          <input id="naam" name="naam" value={naam} onChange={(event) => setNaam(event.target.value)} required />
         </div>
 
         <div className="veld">
@@ -48,7 +135,8 @@ export function CustomerForm({ action, submitLabel, customer }: CustomerFormProp
           <input
             id="telefoonnummer"
             name="telefoonnummer"
-            defaultValue={customer?.telefoonnummer}
+            value={telefoonnummer}
+            onChange={(event) => setTelefoonnummer(event.target.value)}
             required
           />
         </div>
@@ -59,7 +147,8 @@ export function CustomerForm({ action, submitLabel, customer }: CustomerFormProp
             id="geboortedatum"
             name="geboortedatum"
             type="date"
-            defaultValue={customer?.geboortedatum ? formatDateInput(customer.geboortedatum) : ""}
+            value={geboortedatum}
+            onChange={(event) => setGeboortedatum(event.target.value)}
           />
         </div>
 
@@ -68,7 +157,8 @@ export function CustomerForm({ action, submitLabel, customer }: CustomerFormProp
           <input
             id="haartype"
             name="haartype"
-            defaultValue={customer?.haartype ?? ""}
+            value={haartype}
+            onChange={(event) => setHaartype(event.target.value)}
             placeholder="Bijvoorbeeld krullend, fijn, dik"
           />
         </div>
@@ -78,14 +168,15 @@ export function CustomerForm({ action, submitLabel, customer }: CustomerFormProp
           <input
             id="haarkleur"
             name="haarkleur"
-            defaultValue={customer?.haarkleur ?? ""}
+            value={haarkleur}
+            onChange={(event) => setHaarkleur(event.target.value)}
             placeholder="Bijvoorbeeld donkerblond, koper, zwart"
           />
         </div>
 
         <div className="veld-groot">
           <label htmlFor="adres">Adres</label>
-          <textarea id="adres" name="adres" defaultValue={customer?.adres} required />
+          <textarea id="adres" name="adres" value={adres} onChange={(event) => setAdres(event.target.value)} required />
         </div>
 
         <div className="veld-groot">
@@ -93,7 +184,8 @@ export function CustomerForm({ action, submitLabel, customer }: CustomerFormProp
           <textarea
             id="allergieen"
             name="allergieen"
-            defaultValue={customer?.allergieen ?? ""}
+            value={allergieen}
+            onChange={(event) => setAllergieen(event.target.value)}
             placeholder="Bijvoorbeeld gevoelig voor blondering, parfum of specifieke producten"
           />
         </div>
@@ -103,7 +195,8 @@ export function CustomerForm({ action, submitLabel, customer }: CustomerFormProp
           <textarea
             id="stylistNotities"
             name="stylistNotities"
-            defaultValue={customer?.stylistNotities ?? ""}
+            value={stylistNotities}
+            onChange={(event) => setStylistNotities(event.target.value)}
             placeholder="Bijvoorbeeld aandachtspunten, voorkeuren of belangrijke observaties"
           />
         </div>

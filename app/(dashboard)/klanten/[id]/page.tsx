@@ -246,6 +246,28 @@ export default async function KlantDetailPage({
     })
   ]);
 
+  const aankomendeAfspraken = await prisma.appointment.findMany({
+    where: {
+      salonId: user.salonId,
+      customerId: klant.id,
+      datumStart: {
+        gte: new Date()
+      },
+      status: {
+        in: ["GEPLAND", "NIET_GEKOMEN"]
+      }
+    },
+    orderBy: { datumStart: "asc" },
+    take: 4,
+    include: {
+      user: {
+        select: {
+          naam: true
+        }
+      }
+    }
+  });
+
   const actieveKlantPakketten = customerPackages.filter((customerPackage) => customerPackage.status === "ACTIEF");
   const overigeKlantPakketten = customerPackages.filter((customerPackage) => customerPackage.status !== "ACTIEF");
   const activePackagesForTreatment = actieveKlantPakketten.map((customerPackage) => ({
@@ -301,6 +323,9 @@ export default async function KlantDetailPage({
           <Link href={`/klanten/${klant.id}/bewerken`} className="knop-secundair">
             Klant bewerken
           </Link>
+          <Link href={`/agenda?customerId=${klant.id}`} className="knop-zacht">
+            Afspraak plannen
+          </Link>
           <Link href={`/klanten/${klant.id}/print`} className="knop-zacht">
             Afdrukken
           </Link>
@@ -319,6 +344,56 @@ export default async function KlantDetailPage({
 
       <section className="detail-grid">
         <article className="kaart">
+          {aankomendeAfspraken.length > 0 ? (
+            <div className="info-kaart" style={{ marginBottom: 18 }}>
+              <div className="acties" style={{ justifyContent: "space-between", alignItems: "flex-start" }}>
+                <div>
+                  <h3>Komende afspraken</h3>
+                  <p className="meta" style={{ marginTop: 8 }}>
+                    Snel zicht op wat er voor deze klant al gepland staat.
+                  </p>
+                </div>
+                <Link href={`/agenda?customerId=${klant.id}`} className="knop-secundair">
+                  Nieuwe afspraak
+                </Link>
+              </div>
+
+              <div className="lijst" style={{ marginTop: 16 }}>
+                {aankomendeAfspraken.map((afspraak) => (
+                  <div key={afspraak.id} className="lijst-item">
+                    <div className="acties" style={{ justifyContent: "space-between", alignItems: "flex-start" }}>
+                      <div>
+                        <h4>{afspraak.behandeling}</h4>
+                        <p className="meta">
+                          {formatDate(afspraak.datumStart)}
+                          <br />
+                          {afspraak.user?.naam ?? "Nog niet toegewezen"}
+                        </p>
+                      </div>
+                      <Link href={`/agenda/${afspraak.id}/bewerken`} className="knop-zacht">
+                        Open afspraak
+                      </Link>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className="info-kaart" style={{ marginBottom: 18 }}>
+              <div className="acties" style={{ justifyContent: "space-between", alignItems: "flex-start" }}>
+                <div>
+                  <h3>Komende afspraken</h3>
+                  <p className="meta" style={{ marginTop: 8 }}>
+                    Voor deze klant staan nog geen komende afspraken gepland.
+                  </p>
+                </div>
+                <Link href={`/agenda?customerId=${klant.id}`} className="knop-secundair">
+                  Afspraak plannen
+                </Link>
+              </div>
+            </div>
+          )}
+
           <div className="info-grid" style={{ marginBottom: 18 }}>
             <article className="info-kaart">
               <h3>Geboortedatum</h3>

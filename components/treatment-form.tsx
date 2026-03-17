@@ -53,15 +53,63 @@ export function TreatmentForm({
   const [customerPackageId, setCustomerPackageId] = useState(
     treatment?.customerPackageId ? String(treatment.customerPackageId) : ""
   );
+  const draftKey = `salondossier:treatment-form:${customerId}:${treatment?.id ?? treatment?.appointmentId ?? "new"}`;
 
   useEffect(() => {
+    const savedDraft = window.sessionStorage.getItem(draftKey);
+
+    if (savedDraft) {
+      try {
+        const parsed = JSON.parse(savedDraft) as {
+          datum?: string;
+          behandelaar?: string;
+          behandeling?: string;
+          recept?: string;
+          notities?: string;
+          customerPackageId?: string;
+        };
+
+        setDatum(parsed.datum ?? treatment?.datum ?? vandaag);
+        setBehandelaar(parsed.behandelaar ?? treatment?.behandelaar ?? medewerkerNaam);
+        setBehandeling(parsed.behandeling ?? treatment?.behandeling ?? "");
+        setRecept(parsed.recept ?? treatment?.recept ?? "");
+        setNotities(parsed.notities ?? treatment?.notities ?? "");
+        setCustomerPackageId(
+          parsed.customerPackageId ?? (treatment?.customerPackageId ? String(treatment.customerPackageId) : "")
+        );
+        return;
+      } catch {
+        window.sessionStorage.removeItem(draftKey);
+      }
+    }
+
     setDatum(treatment?.datum ?? vandaag);
     setBehandelaar(treatment?.behandelaar ?? medewerkerNaam);
     setBehandeling(treatment?.behandeling ?? "");
     setRecept(treatment?.recept ?? "");
     setNotities(treatment?.notities ?? "");
     setCustomerPackageId(treatment?.customerPackageId ? String(treatment.customerPackageId) : "");
-  }, [medewerkerNaam, treatment, vandaag]);
+  }, [draftKey, medewerkerNaam, treatment, vandaag]);
+
+  useEffect(() => {
+    window.sessionStorage.setItem(
+      draftKey,
+      JSON.stringify({
+        datum,
+        behandelaar,
+        behandeling,
+        recept,
+        notities,
+        customerPackageId
+      })
+    );
+  }, [behandeling, behandelaar, customerPackageId, datum, draftKey, notities, recept]);
+
+  useEffect(() => {
+    if (state.success) {
+      window.sessionStorage.removeItem(draftKey);
+    }
+  }, [draftKey, state.success]);
 
   return (
     <form action={formAction} className="formulier">

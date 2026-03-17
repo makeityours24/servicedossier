@@ -11,6 +11,7 @@ const initialState: FormState = {};
 type AppointmentFormProps = {
   action: (state: FormState, formData: FormData) => Promise<FormState>;
   submitLabel?: string;
+  preselectedCustomerId?: number | null;
   customers: Array<{
     id: number;
     naam: string;
@@ -52,6 +53,7 @@ function buildEndDateTimeValue(startValue: string, duurMinuten: number) {
 export function AppointmentForm({
   action,
   submitLabel = "Afspraak opslaan",
+  preselectedCustomerId,
   customers,
   medewerkers,
   appointment
@@ -76,7 +78,12 @@ export function AppointmentForm({
       <div className="formulier-grid">
         <div className="veld">
           <label htmlFor="customerId">Klant</label>
-          <select id="customerId" name="customerId" defaultValue={appointment?.customerId ?? ""} required>
+          <select
+            id="customerId"
+            name="customerId"
+            defaultValue={appointment?.customerId ?? preselectedCustomerId ?? ""}
+            required
+          >
             <option value="" disabled>
               Kies een klant
             </option>
