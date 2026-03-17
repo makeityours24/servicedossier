@@ -45,6 +45,7 @@ export function CustomerForm({ action, submitLabel, customer }: CustomerFormProp
   const [adres, setAdres] = useState(customer?.adres ?? "");
   const [allergieen, setAllergieen] = useState(customer?.allergieen ?? "");
   const [stylistNotities, setStylistNotities] = useState(customer?.stylistNotities ?? "");
+  const [hasDraft, setHasDraft] = useState(false);
 
   useEffect(() => {
     const savedDraft = window.sessionStorage.getItem(storageKey);
@@ -101,6 +102,18 @@ export function CustomerForm({ action, submitLabel, customer }: CustomerFormProp
         stylistNotities
       })
     );
+    setHasDraft(
+      Boolean(
+        naam ||
+          telefoonnummer ||
+          geboortedatum ||
+          haartype ||
+          haarkleur ||
+          adres ||
+          allergieen ||
+          stylistNotities
+      )
+    );
   }, [
     adres,
     allergieen,
@@ -116,13 +129,31 @@ export function CustomerForm({ action, submitLabel, customer }: CustomerFormProp
   useEffect(() => {
     if (state.success) {
       window.sessionStorage.removeItem(storageKey);
+      setHasDraft(false);
     }
   }, [state.success, storageKey]);
+
+  useEffect(() => {
+    const handler = (event: BeforeUnloadEvent) => {
+      if (!hasDraft || state.success) {
+        return;
+      }
+
+      event.preventDefault();
+      event.returnValue = "";
+    };
+
+    window.addEventListener("beforeunload", handler);
+    return () => window.removeEventListener("beforeunload", handler);
+  }, [hasDraft, state.success]);
 
   return (
     <form action={formAction} className="formulier">
       {customer?.id ? <input type="hidden" name="customerId" value={customer.id} /> : null}
       <FormMessage error={state.error} success={state.success} />
+      {!state.error && !state.success && hasDraft ? (
+        <p className="melding-info">Concept wordt lokaal bewaard zolang je bezig bent.</p>
+      ) : null}
 
       <div className="formulier-grid">
         <div className="veld">

@@ -54,6 +54,7 @@ export function TreatmentForm({
     treatment?.customerPackageId ? String(treatment.customerPackageId) : ""
   );
   const draftKey = `salondossier:treatment-form:${customerId}:${treatment?.id ?? treatment?.appointmentId ?? "new"}`;
+  const [hasDraft, setHasDraft] = useState(false);
 
   useEffect(() => {
     const savedDraft = window.sessionStorage.getItem(draftKey);
@@ -103,13 +104,29 @@ export function TreatmentForm({
         customerPackageId
       })
     );
+    setHasDraft(Boolean(datum || behandelaar || behandeling || recept || notities || customerPackageId));
   }, [behandeling, behandelaar, customerPackageId, datum, draftKey, notities, recept]);
 
   useEffect(() => {
     if (state.success) {
       window.sessionStorage.removeItem(draftKey);
+      setHasDraft(false);
     }
   }, [draftKey, state.success]);
+
+  useEffect(() => {
+    const handler = (event: BeforeUnloadEvent) => {
+      if (!hasDraft || state.success) {
+        return;
+      }
+
+      event.preventDefault();
+      event.returnValue = "";
+    };
+
+    window.addEventListener("beforeunload", handler);
+    return () => window.removeEventListener("beforeunload", handler);
+  }, [hasDraft, state.success]);
 
   return (
     <form action={formAction} className="formulier">
@@ -119,6 +136,9 @@ export function TreatmentForm({
         <input type="hidden" name="appointmentId" value={treatment.appointmentId} />
       ) : null}
       <FormMessage error={state.error} success={state.success} />
+      {!state.error && !state.success && hasDraft ? (
+        <p className="melding-info">Concept wordt lokaal bewaard zolang je bezig bent.</p>
+      ) : null}
       {helperText ? <p className="subtitel" style={{ marginTop: 0 }}>{helperText}</p> : null}
       <div>
         <p className="meta" style={{ marginBottom: 12 }}>
