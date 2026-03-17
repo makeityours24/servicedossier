@@ -37,6 +37,49 @@ const modules = [
   "Meerdere medewerkers met eigen login"
 ];
 
+const pricingPlans = [
+  {
+    naam: "SalonDossier Start",
+    prijs: "€24",
+    periode: "per maand",
+    doelgroep: "Voor solo salons en kleinere teams.",
+    features: [
+      "klantdossiers",
+      "behandelingen en kleurrecepten",
+      "agenda",
+      "pakketten en digitale stempelkaarten",
+      "behandelfoto's",
+      "standaard updates en support"
+    ]
+  },
+  {
+    naam: "SalonDossier Plus",
+    prijs: "€49",
+    periode: "per maand",
+    doelgroep: "Voor salons met meerdere medewerkers.",
+    features: [
+      "alles uit Start",
+      "teamgebruik",
+      "teamagenda",
+      "prioriteit support",
+      "snellere toegang tot nieuwe functies",
+      "meer begeleiding bij gebruik"
+    ]
+  },
+  {
+    naam: "Opstart & inrichting",
+    prijs: "€149",
+    periode: "eenmalig",
+    doelgroep: "Voor salons die hulp willen bij livegang.",
+    features: [
+      "basisinrichting",
+      "hulp bij instellingen",
+      "uitleg van de belangrijkste functies",
+      "begeleiding bij opstart"
+    ]
+  }
+];
+
 export default async function HomePage() {
   const user = await getSessionUser();
   if (user) {
@@ -159,6 +202,85 @@ export default async function HomePage() {
               <p>{module}</p>
             </div>
           ))}
+        </div>
+      </section>
+
+      <section className="landing-sectie container" id="prijzen">
+        <div className="landing-sectie-kop">
+          <span className="logo-label">Prijzen</span>
+          <h2>Eenvoudige prijzen voor salons die overzicht willen</h2>
+          <p>
+            SalonDossier is bedoeld voor salons die klantdossiers, behandelingen, kleurrecepten,
+            afspraken, pakketten, digitale stempelkaarten en behandelfoto&apos;s centraal willen
+            beheren, zonder een zwaar en duur alles-in-één systeem.
+          </p>
+        </div>
+
+        <div className="landing-pricing-grid">
+          {pricingPlans.map((plan) => (
+            <article key={plan.naam} className="kaart landing-pricing-card">
+              <div className="landing-pricing-head">
+                <h3>{plan.naam}</h3>
+                <div className="landing-pricing-price">
+                  <strong>{plan.prijs}</strong>
+                  <span>{plan.periode}</span>
+                </div>
+                <p>{plan.doelgroep}</p>
+              </div>
+
+              <div className="landing-pricing-features">
+                {plan.features.map((feature) => (
+                  <div key={feature} className="landing-pricing-feature">
+                    <span className="landing-module-dot" />
+                    <p>{feature}</p>
+                  </div>
+                ))}
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="landing-sectie container">
+        <div className="landing-demo-request kaart">
+          <div className="landing-demo-request-copy">
+            <span className="logo-label">Demo aanvragen</span>
+            <h2>Laat in 15 minuten zien hoe SalonDossier in jouw salon zou werken.</h2>
+            <p>
+              We lopen samen kort door je werkwijze heen en laten direct zien hoe klantdossiers,
+              afspraken, pakketten, stempelkaarten en behandelfoto&apos;s in jouw situatie passen.
+            </p>
+          </div>
+
+          <div className="landing-demo-request-steps">
+            <div className="landing-demo-step">
+              <strong>1. Korte intake</strong>
+              <p>We bespreken hoe jullie nu werken en waar nu de meeste onrust of tijdverlies zit.</p>
+            </div>
+            <div className="landing-demo-step">
+              <strong>2. Gerichte demo</strong>
+              <p>Je ziet alleen de onderdelen die voor jouw salon echt relevant zijn.</p>
+            </div>
+            <div className="landing-demo-step">
+              <strong>3. Rustige start</strong>
+              <p>Als het past, helpen we met inrichting, livegang en de eerste stappen in gebruik.</p>
+            </div>
+          </div>
+
+          <div className="landing-demo-request-actions">
+            <a
+              href="mailto:platform@miy24.nl?subject=Demo%20aanvraag%20SalonDossier"
+              className="knop"
+            >
+              Vraag een demo aan
+            </a>
+            <a href="mailto:platform@miy24.nl" className="knop-secundair">
+              Stuur een e-mail
+            </a>
+            <a href="#prijzen" className="knop-zacht">
+              Bekijk prijzen
+            </a>
+          </div>
         </div>
       </section>
 

@@ -178,7 +178,8 @@ textarea {
 
 .landing-demo-grid,
 .landing-kaarten,
-.landing-module-grid {
+.landing-module-grid,
+.landing-pricing-grid {
   display: grid;
   gap: 16px;
 }
@@ -239,6 +240,111 @@ textarea {
 
 .landing-module-grid {
   grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.landing-pricing-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.landing-pricing-card {
+  display: grid;
+  gap: 20px;
+  padding: 24px;
+}
+
+.landing-pricing-head {
+  display: grid;
+  gap: 10px;
+}
+
+.landing-pricing-head h3 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.landing-pricing-head p {
+  margin: 0;
+  color: var(--subtekst);
+  line-height: 1.7;
+}
+
+.landing-pricing-price {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.landing-pricing-price strong {
+  font-size: clamp(2rem, 4vw, 2.8rem);
+  line-height: 1;
+  letter-spacing: -0.05em;
+}
+
+.landing-pricing-price span {
+  color: var(--subtekst);
+  font-weight: 600;
+}
+
+.landing-pricing-features {
+  display: grid;
+  gap: 12px;
+}
+
+.landing-pricing-feature {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.landing-demo-request {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(280px, 0.9fr);
+  gap: 24px;
+  padding: 28px;
+  align-items: start;
+}
+
+.landing-demo-request-copy {
+  display: grid;
+  gap: 12px;
+}
+
+.landing-demo-request-copy h2 {
+  margin: 0;
+  font-size: clamp(1.9rem, 3vw, 2.8rem);
+  line-height: 1.02;
+  letter-spacing: -0.05em;
+}
+
+.landing-demo-request-copy p,
+.landing-demo-step p {
+  margin: 0;
+  color: var(--subtekst);
+  line-height: 1.8;
+}
+
+.landing-demo-request-steps {
+  display: grid;
+  gap: 14px;
+}
+
+.landing-demo-step {
+  padding: 18px;
+  border-radius: 20px;
+  border: 1px solid rgba(176, 141, 141, 0.18);
+  background: rgba(255, 255, 255, 0.82);
+}
+
+.landing-demo-step strong {
+  display: block;
+  margin-bottom: 6px;
+}
+
+.landing-demo-request-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 4px;
 }
 
 .landing-module {
@@ -992,6 +1098,8 @@ textarea {
   .landing-hero,
   .landing-kaarten,
   .landing-module-grid,
+  .landing-pricing-grid,
+  .landing-demo-request,
   .landing-cta {
     grid-template-columns: 1fr;
   }
@@ -1033,7 +1141,8 @@ textarea {
   }
 
   .landing-demo-grid,
-  .landing-module-grid {
+  .landing-module-grid,
+  .landing-pricing-grid {
     grid-template-columns: 1fr;
   }
 
