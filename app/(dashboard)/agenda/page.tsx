@@ -6,7 +6,7 @@ import { DeleteCustomerButton } from "@/components/delete-customer-button";
 import { ReminderCopyButton } from "@/components/reminder-copy-button";
 import { TeamAgendaGrid } from "@/components/team-agenda-grid";
 import { requireSalonSession } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { getAdjacentAgendaDates, getAgendaData, getDayRange } from "@/lib/agenda-queries";
 import { buildAppointmentReminderMessage, formatDate, formatDateParamLocal } from "@/lib/utils";
 
 type AgendaPageProps = {
@@ -18,17 +18,6 @@ type AgendaPageProps = {
   }>;
 };
 
-function getDayRange(datum?: string) {
-  const baseDate = datum ? new Date(`${datum}T00:00:00`) : new Date();
-  const dayStart = new Date(baseDate);
-  dayStart.setHours(0, 0, 0, 0);
-
-  const dayEnd = new Date(baseDate);
-  dayEnd.setHours(23, 59, 59, 999);
-
-  return { dayStart, dayEnd };
-}
-
 export default async function AgendaPage({ searchParams }: AgendaPageProps) {
   const user = await requireSalonSession();
   const filters = await searchParams;
@@ -37,62 +26,13 @@ export default async function AgendaPage({ searchParams }: AgendaPageProps) {
   const weergave = filters.weergave === "team" ? "team" : "lijst";
   const preselectedCustomerId = filters.customerId ? Number(filters.customerId) : null;
 
-  const [appointments, customers, medewerkers] = await Promise.all([
-    prisma.appointment.findMany({
-      where: {
-        salonId: user.salonId,
-        datumStart: {
-          gte: dayStart,
-          lte: dayEnd
-        },
-        userId: filters.medewerker ? Number(filters.medewerker) || undefined : undefined
-      },
-      orderBy: { datumStart: "asc" },
-      include: {
-        customer: {
-          select: {
-            id: true,
-            naam: true
-          }
-        },
-        user: {
-          select: {
-            naam: true
-          }
-        },
-        convertedTreatment: {
-          select: {
-            id: true
-          }
-        }
-      }
-    }),
-    prisma.customer.findMany({
-      where: { salonId: user.salonId },
-      orderBy: { naam: "asc" },
-      select: {
-        id: true,
-        naam: true
-      }
-    }),
-    prisma.user.findMany({
-      where: {
-        salonId: user.salonId,
-        isPlatformAdmin: false,
-        status: "ACTIEF"
-      },
-      orderBy: { naam: "asc" },
-      select: {
-        id: true,
-        naam: true
-      }
-    })
-  ]);
-
-  const vorigeDag = new Date(dayStart);
-  vorigeDag.setDate(vorigeDag.getDate() - 1);
-  const volgendeDag = new Date(dayStart);
-  volgendeDag.setDate(volgendeDag.getDate() + 1);
+  const { appointments, customers, medewerkers } = await getAgendaData({
+    salonId: user.salonId,
+    dayStart,
+    dayEnd,
+    medewerkerFilter: filters.medewerker
+  });
+  const { vorigeDagParam, volgendeDagParam } = getAdjacentAgendaDates(dayStart);
 
   return (
     <div className="rooster">
@@ -139,10 +79,10 @@ export default async function AgendaPage({ searchParams }: AgendaPageProps) {
               weergave={weergave}
               medewerker={filters.medewerker}
             />
-            <Link href={`/agenda?datum=${formatDateParamLocal(vorigeDag)}`} className="knop-zacht">
+            <Link href={`/agenda?datum=${vorigeDagParam}`} className="knop-zacht">
               Vorige dag
             </Link>
-            <Link href={`/agenda?datum=${formatDateParamLocal(volgendeDag)}`} className="knop-zacht">
+            <Link href={`/agenda?datum=${volgendeDagParam}`} className="knop-zacht">
               Volgende dag
             </Link>
           </div>
