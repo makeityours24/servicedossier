@@ -1,12 +1,14 @@
 "use client";
 
 import { useState } from "react";
+import { buildWhatsAppReminderUrl } from "@/lib/utils";
 
 type ReminderCopyButtonProps = {
   message: string;
+  phoneNumber?: string | null;
 };
 
-export function ReminderCopyButton({ message }: ReminderCopyButtonProps) {
+export function ReminderCopyButton({ message, phoneNumber }: ReminderCopyButtonProps) {
   const [copied, setCopied] = useState(false);
 
   async function handleCopy() {
@@ -20,8 +22,18 @@ export function ReminderCopyButton({ message }: ReminderCopyButtonProps) {
   }
 
   return (
-    <button type="button" className="knop-zacht" onClick={handleCopy}>
-      {copied ? "Herinnering gekopieerd" : "Herinnering kopiëren"}
-    </button>
+    <div className="acties">
+      <button type="button" className="knop-zacht" onClick={handleCopy}>
+        {copied ? "Herinnering gekopieerd" : "Herinnering kopiëren"}
+      </button>
+      <a
+        href={buildWhatsAppReminderUrl(message, phoneNumber)}
+        target="_blank"
+        rel="noreferrer"
+        className="knop-secundair"
+      >
+        Open in WhatsApp
+      </a>
+    </div>
   );
 }

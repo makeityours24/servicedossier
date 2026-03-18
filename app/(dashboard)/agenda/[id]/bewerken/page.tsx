@@ -53,7 +53,8 @@ export default async function BewerkAfspraakPage({ params }: BewerkAfspraakPageP
         },
         customer: {
           select: {
-            naam: true
+            naam: true,
+            telefoonnummer: true
           }
         }
       }
@@ -120,6 +121,7 @@ export default async function BewerkAfspraakPage({ params }: BewerkAfspraakPageP
             </Link>
           )}
           <ReminderCopyButton
+            phoneNumber={appointment.customer.telefoonnummer}
             message={buildAppointmentReminderMessage({
               customerName: appointment.customer.naam,
               salonName: user.salon.instellingen?.weergavenaam ?? user.salon.naam,

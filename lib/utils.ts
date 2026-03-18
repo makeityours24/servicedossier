@@ -75,3 +75,42 @@ export function buildAppointmentReminderMessage(params: {
 
   return `Hoi ${params.customerName}, dit is een herinnering voor je afspraak bij ${params.salonName} op ${dag} om ${tijd} voor ${params.treatmentName}. Tot dan!${contactLine}`;
 }
+
+export function buildWhatsAppReminderUrl(message: string, phoneNumber?: string | null) {
+  const text = encodeURIComponent(message);
+  const normalizedPhone = normalizePhoneNumberForWhatsApp(phoneNumber);
+
+  if (!normalizedPhone) {
+    return `https://wa.me/?text=${text}`;
+  }
+
+  return `https://wa.me/${normalizedPhone}?text=${text}`;
+}
+
+function normalizePhoneNumberForWhatsApp(phoneNumber?: string | null) {
+  if (!phoneNumber) {
+    return null;
+  }
+
+  const trimmed = phoneNumber.trim();
+  if (!trimmed) {
+    return null;
+  }
+
+  const digitsOnly = trimmed.replace(/[^\d+]/g, "");
+  const withoutPlus = digitsOnly.startsWith("+") ? digitsOnly.slice(1) : digitsOnly;
+
+  if (withoutPlus.startsWith("00")) {
+    return withoutPlus.slice(2);
+  }
+
+  if (withoutPlus.startsWith("31")) {
+    return withoutPlus;
+  }
+
+  if (withoutPlus.startsWith("0")) {
+    return `31${withoutPlus.slice(1)}`;
+  }
+
+  return withoutPlus;
+}

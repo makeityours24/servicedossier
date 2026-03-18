@@ -392,6 +392,7 @@ export default async function KlantDetailPage({
                           Open afspraak
                         </Link>
                         <ReminderCopyButton
+                          phoneNumber={klant.telefoonnummer}
                           message={buildAppointmentReminderMessage({
                             customerName: klant.naam,
                             salonName: user.salon.instellingen?.weergavenaam ?? user.salon.naam,

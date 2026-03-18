@@ -50,7 +50,8 @@ export async function getAgendaData(params: {
         customer: {
           select: {
             id: true,
-            naam: true
+            naam: true,
+            telefoonnummer: true
           }
         },
         user: {

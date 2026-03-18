@@ -173,6 +173,7 @@ export default async function AgendaPage({ searchParams }: AgendaPageProps) {
                       Naar klantdossier
                     </Link>
                     <ReminderCopyButton
+                      phoneNumber={appointment.customer.telefoonnummer}
                       message={buildAppointmentReminderMessage({
                         customerName: appointment.customer.naam,
                         salonName: user.salon.instellingen?.weergavenaam ?? user.salon.naam,
