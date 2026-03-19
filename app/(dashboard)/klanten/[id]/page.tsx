@@ -603,7 +603,8 @@ export default async function KlantDetailPage({
         <aside className="kaart">
           <h3>Pakketten</h3>
           <p className="subtitel" style={{ marginTop: 8 }}>
-            Verkoop hier bundels of digitale stempelkaarten aan deze klant. Afboeken per behandeling koppelen we in de volgende stap aan deze actieve pakketten.
+            Verkoop hier bundels of digitale stempelkaarten aan deze klant. Je kunt ook een bestaande
+            papieren kaart overnemen door alleen de huidige resterende beurten in te voeren.
           </p>
 
           <div className="lijst" style={{ marginTop: 18 }}>

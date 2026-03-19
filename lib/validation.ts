@@ -90,6 +90,10 @@ export const packageTypeUpdateSchema = packageTypeSchema.extend({
 export const customerPackageSchema = z.object({
   customerId: z.coerce.number().int().positive(),
   packageTypeId: z.coerce.number().int().positive("Kies een pakkettype."),
+  invoerType: z.enum(["NIEUW", "OVERNAME"]).default("NIEUW"),
+  resterendeBeurten: z
+    .union([z.coerce.number().int().min(0), z.literal(""), z.null(), z.undefined()])
+    .transform((value) => (typeof value === "number" ? value : null)),
   notities: z.string().trim().max(300, "Notities zijn te lang.").optional()
 });
 

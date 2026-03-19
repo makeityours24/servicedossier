@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { createAuditLog, getRequestIp } from "@/lib/security";
 import { customerPackageSchema } from "@/lib/validation";
 import { revalidatePath } from "next/cache";
+import { getPackageStatusForRemainingSessions } from "@/lib/treatment-workflows";
 
 export async function createCustomerPackageAction(
   _: FormState,
@@ -17,6 +18,8 @@ export async function createCustomerPackageAction(
   const parsed = customerPackageSchema.safeParse({
     customerId: formData.get("customerId"),
     packageTypeId: formData.get("packageTypeId"),
+    invoerType: formData.get("invoerType"),
+    resterendeBeurten: formData.get("resterendeBeurten"),
     notities: formData.get("notities") || undefined
   });
 
@@ -62,6 +65,30 @@ export async function createCustomerPackageAction(
       return { error: "Dit pakkettype is niet actief of hoort niet bij deze salon." };
     }
 
+    const resterendeBeurten =
+      parsed.data.invoerType === "OVERNAME"
+        ? parsed.data.resterendeBeurten
+        : packageType.totaalBeurten;
+
+    if (parsed.data.invoerType === "OVERNAME" && resterendeBeurten === null) {
+      return { error: "Vul in hoeveel beurten nog over zijn op de bestaande kaart." };
+    }
+
+    if (resterendeBeurten === null || resterendeBeurten < 0) {
+      return { error: "Gebruik een geldig aantal resterende beurten." };
+    }
+
+    if (resterendeBeurten > packageType.totaalBeurten) {
+      return {
+        error: `Een ${packageType.naam} heeft maximaal ${packageType.totaalBeurten} beurten.`
+      };
+    }
+
+    const overnameNotitie =
+      parsed.data.invoerType === "OVERNAME" && !parsed.data.notities
+        ? "Overgenomen van bestaande kaart."
+        : null;
+
     const customerPackage = await prisma.customerPackage.create({
       data: {
         salonId: user.salonId,
@@ -71,10 +98,11 @@ export async function createCustomerPackageAction(
         standaardBehandelingSnapshot: packageType.standaardBehandeling,
         weergaveTypeSnapshot: packageType.weergaveType,
         totaalBeurten: packageType.totaalBeurten,
-        resterendeBeurten: packageType.totaalBeurten,
+        resterendeBeurten,
         pakketPrijsCents: packageType.pakketPrijsCents,
         lossePrijsCents: packageType.lossePrijsCents,
-        notities: parsed.data.notities || null
+        status: getPackageStatusForRemainingSessions(resterendeBeurten),
+        notities: parsed.data.notities || overnameNotitie
       }
     });
 
@@ -91,12 +119,19 @@ export async function createCustomerPackageAction(
         customerName: customer.naam,
         packageTypeId: packageType.id,
         packageName: packageType.naam,
-        totalSessions: packageType.totaalBeurten
+        totalSessions: packageType.totaalBeurten,
+        remainingSessions: resterendeBeurten,
+        invoerType: parsed.data.invoerType
       }
     });
 
     revalidatePath(`/klanten/${customer.id}`);
-    return { success: "Pakket is aan de klant toegevoegd." };
+    return {
+      success:
+        parsed.data.invoerType === "OVERNAME"
+          ? "Bestaande kaart is met de huidige stand overgenomen."
+          : "Pakket is aan de klant toegevoegd."
+    };
   } catch {
     return { error: "Opslaan van het klantpakket is mislukt." };
   }
