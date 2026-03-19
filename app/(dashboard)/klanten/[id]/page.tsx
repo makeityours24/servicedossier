@@ -1,11 +1,13 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
+  correctCustomerPackageAction,
   createCustomerPackageAction,
   createTreatmentAction,
   deleteCustomerAction,
   deleteTreatmentAction
 } from "@/app/(dashboard)/klanten/actions";
+import { CustomerPackageCorrectionForm } from "@/components/customer-package-correction-form";
 import { CustomerPackageForm } from "@/components/customer-package-form";
 import { DeleteCustomerButton } from "@/components/delete-customer-button";
 import { ReminderCopyButton } from "@/components/reminder-copy-button";
@@ -218,6 +220,7 @@ export default async function KlantDetailPage({
             id: true,
             datum: true,
             aantalAfgeboekt: true,
+            notitie: true,
             treatment: {
               select: {
                 id: true,
@@ -686,12 +689,21 @@ export default async function KlantDetailPage({
                               <p className="meta">
                                 <strong>{formatDate(usage.datum)}</strong>
                                 <br />
-                                <strong>Afgeboekt:</strong> {usage.aantalAfgeboekt} beurt
-                                {usage.aantalAfgeboekt > 1 ? "en" : ""}
+                                <strong>
+                                  {usage.aantalAfgeboekt < 0 ? "Teruggezet:" : "Afgeboekt:"}
+                                </strong>{" "}
+                                {Math.abs(usage.aantalAfgeboekt)} beurt
+                                {Math.abs(usage.aantalAfgeboekt) > 1 ? "en" : ""}
                                 <br />
                                 <strong>Behandeling:</strong> {usage.treatment?.behandeling ?? "Handmatige correctie"}
                                 <br />
                                 <strong>Behandelaar:</strong> {usage.user?.naam ?? "Onbekend"}
+                                {usage.notitie ? (
+                                  <>
+                                    <br />
+                                    <strong>Reden:</strong> {usage.notitie}
+                                  </>
+                                ) : null}
                               </p>
                               {usage.treatment ? (
                                 <div className="acties" style={{ marginTop: 12 }}>
@@ -712,6 +724,18 @@ export default async function KlantDetailPage({
                         Nog geen beurten van dit pakket afgeboekt.
                       </div>
                     )}
+
+                    <div className="kaart" style={{ marginTop: 14, padding: 16 }}>
+                      <h4 style={{ marginBottom: 8 }}>Correctie</h4>
+                      <p className="subtitel" style={{ marginBottom: 12 }}>
+                        Gebruik dit alleen als je een beurt vergeten bent af te boeken of juist moet
+                        terugzetten. De correctie blijft zichtbaar in de historie.
+                      </p>
+                      <CustomerPackageCorrectionForm
+                        customerPackageId={customerPackage.id}
+                        action={correctCustomerPackageAction}
+                      />
+                    </div>
                   </article>
                 ))}
 
@@ -771,12 +795,21 @@ export default async function KlantDetailPage({
                                     <p className="meta">
                                       <strong>{formatDate(usage.datum)}</strong>
                                       <br />
-                                      <strong>Afgeboekt:</strong> {usage.aantalAfgeboekt} beurt
-                                      {usage.aantalAfgeboekt > 1 ? "en" : ""}
+                                      <strong>
+                                        {usage.aantalAfgeboekt < 0 ? "Teruggezet:" : "Afgeboekt:"}
+                                      </strong>{" "}
+                                      {Math.abs(usage.aantalAfgeboekt)} beurt
+                                      {Math.abs(usage.aantalAfgeboekt) > 1 ? "en" : ""}
                                       <br />
                                       <strong>Behandeling:</strong> {usage.treatment?.behandeling ?? "Handmatige correctie"}
                                       <br />
                                       <strong>Behandelaar:</strong> {usage.user?.naam ?? "Onbekend"}
+                                      {usage.notitie ? (
+                                        <>
+                                          <br />
+                                          <strong>Reden:</strong> {usage.notitie}
+                                        </>
+                                      ) : null}
                                     </p>
                                   </div>
                                 ))}

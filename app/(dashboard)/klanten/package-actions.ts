@@ -4,9 +4,12 @@ import type { FormState } from "@/components/customer-form";
 import { requireSalonSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { createAuditLog, getRequestIp } from "@/lib/security";
-import { customerPackageSchema } from "@/lib/validation";
+import { customerPackageCorrectionSchema, customerPackageSchema } from "@/lib/validation";
 import { revalidatePath } from "next/cache";
-import { getPackageStatusForRemainingSessions } from "@/lib/treatment-workflows";
+import {
+  applyPackageUsage,
+  getPackageStatusForRemainingSessions
+} from "@/lib/treatment-workflows";
 
 export async function createCustomerPackageAction(
   _: FormState,
@@ -134,5 +137,121 @@ export async function createCustomerPackageAction(
     };
   } catch {
     return { error: "Opslaan van het klantpakket is mislukt." };
+  }
+}
+
+export async function correctCustomerPackageAction(
+  _: FormState,
+  formData: FormData
+): Promise<FormState> {
+  const user = await requireSalonSession();
+  const ipAddress = await getRequestIp();
+
+  const parsed = customerPackageCorrectionSchema.safeParse({
+    customerPackageId: formData.get("customerPackageId"),
+    richting: formData.get("richting"),
+    aantal: formData.get("aantal"),
+    notitie: formData.get("notitie")
+  });
+
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Controleer de correctie." };
+  }
+
+  try {
+    const customerPackage = await prisma.customerPackage.findFirst({
+      where: {
+        id: parsed.data.customerPackageId,
+        salonId: user.salonId
+      },
+      select: {
+        id: true,
+        customerId: true,
+        naamSnapshot: true,
+        totaalBeurten: true,
+        resterendeBeurten: true,
+        customer: {
+          select: {
+            naam: true
+          }
+        }
+      }
+    });
+
+    if (!customerPackage) {
+      return { error: "Dit pakket hoort niet bij deze salon." };
+    }
+
+    const isTerugzetten = parsed.data.richting === "TERUGZETTEN";
+    let nieuweResterendeBeurten = customerPackage.resterendeBeurten;
+
+    if (isTerugzetten) {
+      nieuweResterendeBeurten = customerPackage.resterendeBeurten + parsed.data.aantal;
+
+      if (nieuweResterendeBeurten > customerPackage.totaalBeurten) {
+        return {
+          error: `Je kunt maximaal terugzetten tot ${customerPackage.totaalBeurten} beurten.`
+        };
+      }
+    } else {
+      nieuweResterendeBeurten = applyPackageUsage({
+        resterendeBeurten: customerPackage.resterendeBeurten,
+        aantalAfgeboekt: parsed.data.aantal
+      }).resterendeBeurten;
+    }
+
+    const status = getPackageStatusForRemainingSessions(nieuweResterendeBeurten);
+
+    await prisma.$transaction([
+      prisma.customerPackageUsage.create({
+        data: {
+          salonId: user.salonId,
+          customerPackageId: customerPackage.id,
+          customerId: customerPackage.customerId,
+          userId: user.id,
+          datum: new Date(),
+          aantalAfgeboekt: isTerugzetten ? -parsed.data.aantal : parsed.data.aantal,
+          notitie: parsed.data.notitie
+        }
+      }),
+      prisma.customerPackage.update({
+        where: { id: customerPackage.id },
+        data: {
+          resterendeBeurten: nieuweResterendeBeurten,
+          status
+        }
+      })
+    ]);
+
+    await createAuditLog({
+      salonId: user.salonId,
+      actorUserId: user.id,
+      action: "CUSTOMER_PACKAGE_CORRECTED",
+      entityType: "CustomerPackage",
+      entityId: customerPackage.id,
+      message: `${isTerugzetten ? "Correctie teruggezet" : "Correctie afgeboekt"} voor ${customerPackage.customer.naam}.`,
+      ipAddress,
+      metadata: {
+        customerId: customerPackage.customerId,
+        customerName: customerPackage.customer.naam,
+        packageName: customerPackage.naamSnapshot,
+        richting: parsed.data.richting,
+        aantal: parsed.data.aantal,
+        resterendeBeurten: nieuweResterendeBeurten,
+        notitie: parsed.data.notitie
+      }
+    });
+
+    revalidatePath(`/klanten/${customerPackage.customerId}`);
+    revalidatePath("/dashboard");
+    return {
+      success: isTerugzetten
+        ? "Correctie opgeslagen. De beurt is teruggezet."
+        : "Correctie opgeslagen. De beurt is afgeboekt."
+    };
+  } catch (error) {
+    return {
+      error: error instanceof Error ? error.message : "Opslaan van de correctie is mislukt."
+    };
   }
 }

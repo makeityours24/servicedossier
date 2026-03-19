@@ -97,6 +97,13 @@ export const customerPackageSchema = z.object({
   notities: z.string().trim().max(300, "Notities zijn te lang.").optional()
 });
 
+export const customerPackageCorrectionSchema = z.object({
+  customerPackageId: z.coerce.number().int().positive(),
+  richting: z.enum(["AFBOEKEN", "TERUGZETTEN"]),
+  aantal: z.coerce.number().int().min(1, "Aantal moet minimaal 1 zijn.").max(20, "Aantal is te hoog."),
+  notitie: z.string().trim().min(3, "Geef kort de reden van de correctie op.").max(300, "Notities zijn te lang.")
+});
+
 export const treatmentPhotoSchema = z.object({
   customerId: z.coerce.number().int().positive(),
   treatmentId: z.coerce.number().int().positive(),
