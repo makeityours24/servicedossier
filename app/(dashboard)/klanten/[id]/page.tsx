@@ -859,7 +859,7 @@ export default async function KlantDetailPage({
               <span className="badge">
                 {geselecteerdeAfspraak.convertedTreatment
                   ? "Van deze afspraak is al een behandeling gemaakt."
-                  : `Afspraak geladen uit ${formatDate(geselecteerdeAfspraak.datumStart)}. Sla op om deze afspraak als behandeling vast te leggen.`}
+                  : `Afspraak geladen uit ${formatDate(geselecteerdeAfspraak.datumStart)}. Sla op om deze afspraak als behandeling vast te leggen en eventuele stempelkaarten of pakketten af te boeken.`}
               </span>
               <Link href={`/klanten/${klant.id}`} className="knop-secundair">
                 Formulier leegmaken
@@ -869,7 +869,7 @@ export default async function KlantDetailPage({
                   href={`/klanten/${klant.id}/behandelingen/${geselecteerdeAfspraak.convertedTreatment.id}/bewerken`}
                   className="knop-zacht"
                 >
-                  Bestaande behandeling openen
+                  Afgeronde behandeling openen
                 </Link>
               ) : null}
             </div>

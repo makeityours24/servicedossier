@@ -159,14 +159,14 @@ export default async function AgendaPage({ searchParams }: AgendaPageProps) {
                         href={`/klanten/${appointment.customer.id}/behandelingen/${appointment.convertedTreatment.id}/bewerken`}
                         className="knop-zacht"
                       >
-                        Behandeling openen
+                        Afgeronde behandeling openen
                       </Link>
                     ) : (
                       <Link
                         href={`/klanten/${appointment.customer.id}?afspraakId=${appointment.id}#nieuwe-behandeling`}
                         className="knop"
                       >
-                        Behandeling starten
+                        Behandeling registreren en afboeken
                       </Link>
                     )}
                     <Link href={`/klanten/${appointment.customer.id}`} className="knop-zacht">

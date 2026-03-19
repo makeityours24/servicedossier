@@ -24,6 +24,7 @@ type AppointmentFormProps = {
   appointment?: {
     id: number;
     customerId: number;
+    hasConvertedTreatment?: boolean;
     userId?: number | null;
     datumStart: string;
     duurMinuten: number;
@@ -109,6 +110,8 @@ export function AppointmentForm({
     setSelectedCustomerId(String(createdCustomerId));
     setShowQuickCustomerForm(false);
   }, [quickCustomerState.createdCustomerId, quickCustomerState.createdCustomerName]);
+
+  const canMarkCompleted = Boolean(appointment?.hasConvertedTreatment);
 
   return (
     <div>
@@ -265,10 +268,16 @@ export function AppointmentForm({
             <label htmlFor="status">Status</label>
             <select id="status" name="status" defaultValue={appointment?.status ?? "GEPLAND"}>
               <option value="GEPLAND">Gepland</option>
-              <option value="VOLTOOID">Voltooid</option>
+              {canMarkCompleted ? <option value="VOLTOOID">Voltooid</option> : null}
               <option value="GEANNULEERD">Geannuleerd</option>
               <option value="NIET_GEKOMEN">Niet gekomen</option>
             </select>
+            {!canMarkCompleted && appointment ? (
+              <p className="subtitel" style={{ marginTop: 8 }}>
+                Rond deze afspraak af via <strong>Behandeling registreren en afboeken</strong>. Dan
+                worden behandeling, pakket en stempelkaart direct goed verwerkt.
+              </p>
+            ) : null}
           </div>
 
           <div className="veld-groot">

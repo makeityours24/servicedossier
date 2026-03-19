@@ -154,7 +154,12 @@ export async function updateAppointmentAction(
         },
         select: {
           id: true,
-          datumStart: true
+          datumStart: true,
+          convertedTreatment: {
+            select: {
+              id: true
+            }
+          }
         }
       }),
       prisma.customer.findFirst({
@@ -192,6 +197,13 @@ export async function updateAppointmentAction(
 
     if (parsed.data.userId && !medewerker) {
       return { error: "Deze behandelaar hoort niet bij deze salon." };
+    }
+
+    if (parsed.data.status === "VOLTOOID" && !appointment.convertedTreatment) {
+      return {
+        error:
+          "Voltooi deze afspraak via Behandeling registreren en afboeken, zodat de behandeling en eventuele stempelkaart correct worden verwerkt."
+      };
     }
 
     const datumStart = new Date(parsed.data.datumStart);

@@ -110,14 +110,14 @@ export default async function BewerkAfspraakPage({ params }: BewerkAfspraakPageP
               href={`/klanten/${appointment.customerId}/behandelingen/${appointment.convertedTreatment.id}/bewerken`}
               className="knop-zacht"
             >
-              Bestaande behandeling openen
+              Afgeronde behandeling openen
             </Link>
           ) : (
             <Link
               href={`/klanten/${appointment.customerId}?afspraakId=${appointment.id}#nieuwe-behandeling`}
               className="knop"
             >
-              Behandeling starten vanuit afspraak
+              Behandeling registreren en afboeken
             </Link>
           )}
           <ReminderCopyButton
@@ -142,6 +142,7 @@ export default async function BewerkAfspraakPage({ params }: BewerkAfspraakPageP
           appointment={{
             id: appointment.id,
             customerId: appointment.customerId,
+            hasConvertedTreatment: Boolean(appointment.convertedTreatment),
             userId: appointment.userId,
             datumStart: toDateTimeLocalValue(appointment.datumStart),
             duurMinuten:
