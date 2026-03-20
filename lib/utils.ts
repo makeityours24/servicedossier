@@ -1,12 +1,24 @@
-export function formatDate(date: Date | string) {
-  return new Intl.DateTimeFormat("nl-NL", {
+function toIntlLocale(locale?: string) {
+  if (locale === "en") {
+    return "en-GB";
+  }
+
+  if (locale === "de") {
+    return "de-DE";
+  }
+
+  return "nl-NL";
+}
+
+export function formatDate(date: Date | string, locale?: string) {
+  return new Intl.DateTimeFormat(toIntlLocale(locale), {
     dateStyle: "medium",
     timeStyle: "short"
   }).format(new Date(date));
 }
 
-export function formatDateOnly(date: Date | string) {
-  return new Intl.DateTimeFormat("nl-NL", {
+export function formatDateOnly(date: Date | string, locale?: string) {
+  return new Intl.DateTimeFormat(toIntlLocale(locale), {
     dateStyle: "medium"
   }).format(new Date(date));
 }

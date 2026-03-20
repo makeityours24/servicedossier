@@ -1,12 +1,16 @@
 import Image from "next/image";
 import { requireSalonSession } from "@/lib/auth";
+import { AppLanguageSwitcher } from "@/components/app-language-switcher";
 import { SidebarNav } from "@/components/sidebar-nav";
 import { LogoutForm } from "@/components/logout-form";
+import { dashboardDictionary, getCurrentLocale } from "@/lib/i18n";
 
 export default async function DashboardLayout({
   children
 }: Readonly<{ children: React.ReactNode }>) {
   const user = await requireSalonSession();
+  const locale = await getCurrentLocale();
+  const dict = dashboardDictionary[locale];
   const salonNaam = user.salon.instellingen?.weergavenaam ?? user.salon.naam;
   const salonLogo = user.salon.instellingen?.logoUrl || "/logo-salon.svg";
 
@@ -23,17 +27,19 @@ export default async function DashboardLayout({
               className="logo-afbeelding logo-afbeelding-klein"
             />
             <div>
-              <p>Professioneel salonbeheer</p>
+              <p>{dict.sidebarTagline}</p>
               <h1>{salonNaam}</h1>
             </div>
           </div>
         </div>
 
-        <SidebarNav />
+        <SidebarNav labels={dict.nav} />
 
         <div className="zijbalk-voet">
+          <AppLanguageSwitcher currentLocale={locale} />
+
           <div className="kaart">
-            <h3>Ingelogd als</h3>
+            <h3>{dict.loggedInAs}</h3>
             <p className="meta">
               <strong>{user.naam}</strong>
               <br />
@@ -43,14 +49,14 @@ export default async function DashboardLayout({
             </p>
           </div>
 
-          <LogoutForm />
+          <LogoutForm label={dict.logout} busyLabel={dict.logoutBusy} />
         </div>
       </aside>
 
       <main className="hoofdinhoud">
         {children}
         <p className="footer-credits">
-          Gemaakt door <a href="https://miy24.nl" target="_blank" rel="noreferrer">miy24.nl</a>
+          {dict.madeBy} <a href="https://miy24.nl" target="_blank" rel="noreferrer">miy24.nl</a>
         </p>
       </main>
     </div>

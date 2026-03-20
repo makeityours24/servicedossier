@@ -4,18 +4,22 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const links = [
-  { href: "/dashboard", label: "Dashboard" },
-  { href: "/klanten", label: "Klanten" },
-  { href: "/klanten/nieuwe", label: "Nieuwe klant (dossier)" },
-  { href: "/agenda", label: "Agenda" },
-  { href: "/recepten", label: "Receptsjablonen" },
-  { href: "/pakketten", label: "Pakketten" },
-  { href: "/team", label: "Team" },
-  { href: "/instellingen", label: "Instellingen" },
-  { href: "/account/wachtwoord", label: "Wachtwoord" }
+  { href: "/dashboard", key: "dashboard" },
+  { href: "/klanten", key: "customers" },
+  { href: "/klanten/nieuwe", key: "newCustomer" },
+  { href: "/agenda", key: "agenda" },
+  { href: "/recepten", key: "recipes" },
+  { href: "/pakketten", key: "packages" },
+  { href: "/team", key: "team" },
+  { href: "/instellingen", key: "settings" },
+  { href: "/account/wachtwoord", key: "password" }
 ];
 
-export function SidebarNav() {
+type SidebarNavProps = {
+  labels: Record<string, string>;
+};
+
+export function SidebarNav({ labels }: SidebarNavProps) {
   const pathname = usePathname();
 
   return (
@@ -27,7 +31,7 @@ export function SidebarNav() {
 
         return (
           <Link href={link.href} key={link.href} data-actief={actief}>
-            {link.label}
+            {labels[link.key] ?? link.key}
           </Link>
         );
       })}

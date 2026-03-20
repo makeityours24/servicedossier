@@ -1,9 +1,12 @@
 import Link from "next/link";
 import { requireSalonSession } from "@/lib/auth";
 import { formatTime, getDashboardData } from "@/lib/dashboard-queries";
+import { dashboardDictionary, getCurrentLocale } from "@/lib/i18n";
 import { formatDate } from "@/lib/utils";
 
 export default async function DashboardPage() {
+  const locale = await getCurrentLocale();
+  const dict = dashboardDictionary[locale];
   const user = await requireSalonSession();
   const {
     aantalAfsprakenVandaag,
@@ -21,54 +24,53 @@ export default async function DashboardPage() {
     <div className="rooster">
       <section className="bovenbalk">
         <div>
-          <span className="logo-label">Dashboard</span>
+          <span className="logo-label">{dict.label}</span>
           <h2 className="pagina-titel" style={{ fontSize: "2.4rem" }}>
-            Vandaag in de salon
+            {dict.title}
           </h2>
           <p className="subtitel">
-            Direct overzicht van afspraken, behandelingen, nieuwe klanten en open pakketten voor{" "}
-            {user.salon.instellingen?.weergavenaam ?? user.salon.naam}.
+            {dict.subtitle.replace("{salonNaam}", user.salon.instellingen?.weergavenaam ?? user.salon.naam)}
           </p>
         </div>
 
         <div className="acties">
           <Link href="/agenda" className="knop">
-            Agenda openen
+            {dict.openAgenda}
           </Link>
           <Link href="/klanten/nieuwe" className="knop-secundair">
-            Nieuwe klant
+            {dict.newCustomer}
           </Link>
         </div>
       </section>
 
       <section className="statistieken">
         <article className="kaart stat-kaart">
-          <h3>Afspraken vandaag</h3>
+          <h3>{dict.stats.appointmentsToday}</h3>
           <strong>{aantalAfsprakenVandaag}</strong>
         </article>
 
         <article className="kaart stat-kaart">
-          <h3>Open afspraken</h3>
+          <h3>{dict.stats.openAppointments}</h3>
           <strong>{openAfsprakenVandaag}</strong>
         </article>
 
         <article className="kaart stat-kaart">
-          <h3>Behandelingen vandaag</h3>
+          <h3>{dict.stats.treatmentsToday}</h3>
           <strong>{behandelingenVandaag}</strong>
         </article>
 
         <article className="kaart stat-kaart">
-          <h3>Nieuwe klanten vandaag</h3>
+          <h3>{dict.stats.newCustomersToday}</h3>
           <strong>{nieuweKlantenVandaag}</strong>
         </article>
 
         <article className="kaart stat-kaart">
-          <h3>Actieve pakketten</h3>
+          <h3>{dict.stats.activePackages}</h3>
           <strong>{actievePakketten}</strong>
         </article>
 
         <article className="kaart stat-kaart">
-          <h3>Actieve medewerkers</h3>
+          <h3>{dict.stats.activeStaff}</h3>
           <strong>{actieveMedewerkers}</strong>
         </article>
       </section>
@@ -77,19 +79,19 @@ export default async function DashboardPage() {
         <article className="kaart">
           <div className="print-balk">
             <div>
-              <h3>Afspraken van vandaag</h3>
+              <h3>{dict.todayAppointmentsTitle}</h3>
               <p className="subtitel" style={{ marginTop: 6 }}>
-                Handig om de dag te openen zonder eerst naar de volledige agenda te gaan.
+                {dict.todayAppointmentsText}
               </p>
             </div>
             <Link href="/agenda" className="knop-zacht">
-              Volledige agenda
+              {dict.fullAgenda}
             </Link>
           </div>
 
           <div className="lijst">
             {afsprakenVandaag.length === 0 ? (
-              <div className="leeg">Er staan vandaag nog geen afspraken ingepland.</div>
+              <div className="leeg">{dict.noAppointments}</div>
             ) : (
               afsprakenVandaag.map((afspraak) => (
                 <div className="lijst-item" key={afspraak.id}>
@@ -99,9 +101,9 @@ export default async function DashboardPage() {
                       <p className="meta">
                         {afspraak.behandeling}
                         <br />
-                        {formatTime(afspraak.datumStart)} - {formatTime(afspraak.datumEinde)}
+                        {formatTime(afspraak.datumStart, locale)} - {formatTime(afspraak.datumEinde, locale)}
                         <br />
-                        {afspraak.user?.naam ?? "Nog niet toegewezen"}
+                        {afspraak.user?.naam ?? dict.unassigned}
                       </p>
                     </div>
                     <span
@@ -112,13 +114,7 @@ export default async function DashboardPage() {
                           : undefined
                       }
                     >
-                      {afspraak.status === "GEPLAND"
-                        ? "Gepland"
-                        : afspraak.status === "VOLTOOID"
-                          ? "Voltooid"
-                          : afspraak.status === "GEANNULEERD"
-                            ? "Geannuleerd"
-                            : "Niet gekomen"}
+                      {dict.status[afspraak.status]}
                     </span>
                   </div>
                 </div>
@@ -130,19 +126,19 @@ export default async function DashboardPage() {
         <article className="kaart">
           <div className="print-balk">
             <div>
-              <h3>Open pakketten</h3>
+              <h3>{dict.openPackagesTitle}</h3>
               <p className="subtitel" style={{ marginTop: 6 }}>
-                Zie snel welke klanten nog bundels of stempelkaarten hebben lopen.
+                {dict.openPackagesText}
               </p>
             </div>
             <Link href="/pakketten" className="knop-zacht">
-              Pakketten
+              {dict.packagesButton}
             </Link>
           </div>
 
           <div className="lijst">
             {openPakketten.length === 0 ? (
-              <div className="leeg">Er zijn nu geen actieve pakketten in deze salon.</div>
+              <div className="leeg">{dict.noOpenPackages}</div>
             ) : (
               openPakketten.map((pakket) => (
                 <div className="lijst-item" key={pakket.id}>
@@ -152,13 +148,15 @@ export default async function DashboardPage() {
                       <p className="meta">
                         {pakket.naamSnapshot}
                         <br />
-                        Nog {pakket.resterendeBeurten} van {pakket.totaalBeurten} over
+                        {dict.remaining
+                          .replace("{remaining}", String(pakket.resterendeBeurten))
+                          .replace("{total}", String(pakket.totaalBeurten))}
                         <br />
-                        Verkocht op {formatDate(pakket.gekochtOp)}
+                        {dict.soldOn.replace("{date}", formatDate(pakket.gekochtOp, locale))}
                       </p>
                     </div>
                     <Link href={`/klanten/${pakket.customer.id}`} className="knop-secundair">
-                      Open dossier
+                      {dict.openDossier}
                     </Link>
                   </div>
                 </div>
@@ -170,10 +168,10 @@ export default async function DashboardPage() {
 
       <section className="twee-kolommen">
         <article className="kaart">
-          <h3>Laatste behandelingen</h3>
+          <h3>{dict.latestTreatments}</h3>
           <div className="lijst" style={{ marginTop: 18 }}>
             {laatsteBehandelingen.length === 0 ? (
-              <div className="leeg">Er zijn nog geen behandelingen geregistreerd.</div>
+              <div className="leeg">{dict.noTreatments}</div>
             ) : (
               laatsteBehandelingen.map((behandeling) => (
                 <div className="lijst-item" key={behandeling.id}>
@@ -181,7 +179,7 @@ export default async function DashboardPage() {
                   <p className="meta">
                     {behandeling.behandeling}
                     <br />
-                    {formatDate(behandeling.datum)} door {behandeling.behandelaar}
+                    {formatDate(behandeling.datum, locale)} {dict.by} {behandeling.behandelaar}
                   </p>
                 </div>
               ))
@@ -190,21 +188,19 @@ export default async function DashboardPage() {
         </article>
 
         <article className="kaart">
-          <h3>Snelle acties</h3>
+          <h3>{dict.quickActions}</h3>
           <div className="lijst" style={{ marginTop: 18 }}>
             <Link href="/klanten/nieuwe" className="lijst-item">
-              <h4>Nieuwe klant registreren</h4>
-              <p className="meta">
-                Voeg direct een nieuw klantdossier toe. Voor inlogaccounts gebruik je Team.
-              </p>
+              <h4>{dict.quickActionCards.newCustomer.title}</h4>
+              <p className="meta">{dict.quickActionCards.newCustomer.text}</p>
             </Link>
             <Link href="/agenda" className="lijst-item">
-              <h4>Nieuwe afspraak plannen</h4>
-              <p className="meta">Open de agenda en plan direct een nieuwe klantafspraak in.</p>
+              <h4>{dict.quickActionCards.newAppointment.title}</h4>
+              <p className="meta">{dict.quickActionCards.newAppointment.text}</p>
             </Link>
             <a href="/api/export" className="lijst-item">
-              <h4>CSV-export downloaden</h4>
-              <p className="meta">Exporteer klant- en behandelgegevens voor administratie.</p>
+              <h4>{dict.quickActionCards.export.title}</h4>
+              <p className="meta">{dict.quickActionCards.export.text}</p>
             </a>
           </div>
         </article>

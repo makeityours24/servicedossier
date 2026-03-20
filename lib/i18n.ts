@@ -446,3 +446,210 @@ export const loginDictionary = {
     madeBy: "Erstellt von"
   }
 } as const;
+
+export const dashboardDictionary = {
+  nl: {
+    sidebarTagline: "Professioneel salonbeheer",
+    loggedInAs: "Ingelogd als",
+    madeBy: "Gemaakt door",
+    nav: {
+      dashboard: "Dashboard",
+      customers: "Klanten",
+      newCustomer: "Nieuwe klant (dossier)",
+      agenda: "Agenda",
+      recipes: "Receptsjablonen",
+      packages: "Pakketten",
+      team: "Team",
+      settings: "Instellingen",
+      password: "Wachtwoord"
+    },
+    logout: "Uitloggen",
+    logoutBusy: "Afmelden...",
+    label: "Dashboard",
+    title: "Vandaag in de salon",
+    subtitle:
+      "Direct overzicht van afspraken, behandelingen, nieuwe klanten en open pakketten voor {salonNaam}.",
+    openAgenda: "Agenda openen",
+    newCustomer: "Nieuwe klant",
+    stats: {
+      appointmentsToday: "Afspraken vandaag",
+      openAppointments: "Open afspraken",
+      treatmentsToday: "Behandelingen vandaag",
+      newCustomersToday: "Nieuwe klanten vandaag",
+      activePackages: "Actieve pakketten",
+      activeStaff: "Actieve medewerkers"
+    },
+    todayAppointmentsTitle: "Afspraken van vandaag",
+    todayAppointmentsText: "Handig om de dag te openen zonder eerst naar de volledige agenda te gaan.",
+    fullAgenda: "Volledige agenda",
+    noAppointments: "Er staan vandaag nog geen afspraken ingepland.",
+    unassigned: "Nog niet toegewezen",
+    status: {
+      GEPLAND: "Gepland",
+      VOLTOOID: "Voltooid",
+      GEANNULEERD: "Geannuleerd",
+      NIET_GEKOMEN: "Niet gekomen"
+    },
+    openPackagesTitle: "Open pakketten",
+    openPackagesText: "Zie snel welke klanten nog bundels of stempelkaarten hebben lopen.",
+    packagesButton: "Pakketten",
+    noOpenPackages: "Er zijn nu geen actieve pakketten in deze salon.",
+    remaining: "Nog {remaining} van {total} over",
+    soldOn: "Verkocht op {date}",
+    openDossier: "Open dossier",
+    latestTreatments: "Laatste behandelingen",
+    noTreatments: "Er zijn nog geen behandelingen geregistreerd.",
+    by: "door",
+    quickActions: "Snelle acties",
+    quickActionCards: {
+      newCustomer: {
+        title: "Nieuwe klant registreren",
+        text: "Voeg direct een nieuw klantdossier toe. Voor inlogaccounts gebruik je Team."
+      },
+      newAppointment: {
+        title: "Nieuwe afspraak plannen",
+        text: "Open de agenda en plan direct een nieuwe klantafspraak in."
+      },
+      export: {
+        title: "CSV-export downloaden",
+        text: "Exporteer klant- en behandelgegevens voor administratie."
+      }
+    }
+  },
+  en: {
+    sidebarTagline: "Professional salon management",
+    loggedInAs: "Logged in as",
+    madeBy: "Made by",
+    nav: {
+      dashboard: "Dashboard",
+      customers: "Clients",
+      newCustomer: "New client (file)",
+      agenda: "Agenda",
+      recipes: "Recipe templates",
+      packages: "Packages",
+      team: "Team",
+      settings: "Settings",
+      password: "Password"
+    },
+    logout: "Log out",
+    logoutBusy: "Signing out...",
+    label: "Dashboard",
+    title: "Today in the salon",
+    subtitle:
+      "A direct overview of appointments, treatments, new clients and open packages for {salonNaam}.",
+    openAgenda: "Open agenda",
+    newCustomer: "New client",
+    stats: {
+      appointmentsToday: "Appointments today",
+      openAppointments: "Open appointments",
+      treatmentsToday: "Treatments today",
+      newCustomersToday: "New clients today",
+      activePackages: "Active packages",
+      activeStaff: "Active staff"
+    },
+    todayAppointmentsTitle: "Today's appointments",
+    todayAppointmentsText: "Useful for opening the day without going to the full agenda first.",
+    fullAgenda: "Full agenda",
+    noAppointments: "There are no appointments scheduled for today yet.",
+    unassigned: "Not assigned yet",
+    status: {
+      GEPLAND: "Planned",
+      VOLTOOID: "Completed",
+      GEANNULEERD: "Cancelled",
+      NIET_GEKOMEN: "No-show"
+    },
+    openPackagesTitle: "Open packages",
+    openPackagesText: "Quickly see which clients still have active packages or stamp cards.",
+    packagesButton: "Packages",
+    noOpenPackages: "There are no active packages in this salon right now.",
+    remaining: "{remaining} of {total} remaining",
+    soldOn: "Sold on {date}",
+    openDossier: "Open file",
+    latestTreatments: "Latest treatments",
+    noTreatments: "No treatments have been recorded yet.",
+    by: "by",
+    quickActions: "Quick actions",
+    quickActionCards: {
+      newCustomer: {
+        title: "Register new client",
+        text: "Add a new client file right away. Use Team for login accounts."
+      },
+      newAppointment: {
+        title: "Plan new appointment",
+        text: "Open the agenda and schedule a new client appointment directly."
+      },
+      export: {
+        title: "Download CSV export",
+        text: "Export client and treatment data for administration."
+      }
+    }
+  },
+  de: {
+    sidebarTagline: "Professionelle Salonverwaltung",
+    loggedInAs: "Angemeldet als",
+    madeBy: "Erstellt von",
+    nav: {
+      dashboard: "Dashboard",
+      customers: "Kundschaft",
+      newCustomer: "Neue Kundin / neuer Kunde",
+      agenda: "Kalender",
+      recipes: "Rezeptvorlagen",
+      packages: "Pakete",
+      team: "Team",
+      settings: "Einstellungen",
+      password: "Passwort"
+    },
+    logout: "Abmelden",
+    logoutBusy: "Abmelden...",
+    label: "Dashboard",
+    title: "Heute im Salon",
+    subtitle:
+      "Direkter Überblick über Termine, Behandlungen, neue Kundschaft und offene Pakete für {salonNaam}.",
+    openAgenda: "Kalender öffnen",
+    newCustomer: "Neue Kundin / neuer Kunde",
+    stats: {
+      appointmentsToday: "Termine heute",
+      openAppointments: "Offene Termine",
+      treatmentsToday: "Behandlungen heute",
+      newCustomersToday: "Neue Kundschaft heute",
+      activePackages: "Aktive Pakete",
+      activeStaff: "Aktive Mitarbeitende"
+    },
+    todayAppointmentsTitle: "Termine von heute",
+    todayAppointmentsText: "Praktisch, um den Tag zu starten, ohne zuerst in den vollständigen Kalender zu gehen.",
+    fullAgenda: "Vollständiger Kalender",
+    noAppointments: "Für heute sind noch keine Termine eingeplant.",
+    unassigned: "Noch nicht zugewiesen",
+    status: {
+      GEPLAND: "Geplant",
+      VOLTOOID: "Abgeschlossen",
+      GEANNULEERD: "Storniert",
+      NIET_GEKOMEN: "Nicht erschienen"
+    },
+    openPackagesTitle: "Offene Pakete",
+    openPackagesText: "Sieh schnell, welche Kundinnen oder Kunden noch aktive Pakete oder Stempelkarten haben.",
+    packagesButton: "Pakete",
+    noOpenPackages: "In diesem Salon gibt es aktuell keine aktiven Pakete.",
+    remaining: "Noch {remaining} von {total} übrig",
+    soldOn: "Verkauft am {date}",
+    openDossier: "Dossier öffnen",
+    latestTreatments: "Letzte Behandlungen",
+    noTreatments: "Es wurden noch keine Behandlungen erfasst.",
+    by: "von",
+    quickActions: "Schnellaktionen",
+    quickActionCards: {
+      newCustomer: {
+        title: "Neue Kundin / neuen Kunden anlegen",
+        text: "Lege direkt ein neues Kundendossier an. Für Login-Konten nutzt du Team."
+      },
+      newAppointment: {
+        title: "Neuen Termin planen",
+        text: "Öffne den Kalender und plane direkt einen neuen Kundentermin."
+      },
+      export: {
+        title: "CSV-Export herunterladen",
+        text: "Exportiere Kunden- und Behandlungsdaten für die Verwaltung."
+      }
+    }
+  }
+} as const;

@@ -32,7 +32,7 @@ export default async function PlatformLayout({
               {user.email}
             </p>
           </div>
-          <LogoutForm />
+          <LogoutForm label="Uitloggen" busyLabel="Afmelden..." />
         </div>
       </aside>
 

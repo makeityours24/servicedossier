@@ -11,8 +11,10 @@ function getTodayRange() {
   return { start, end };
 }
 
-export function formatTime(date: Date | string) {
-  return new Intl.DateTimeFormat("nl-NL", {
+export function formatTime(date: Date | string, locale?: string) {
+  const intlLocale = locale === "en" ? "en-GB" : locale === "de" ? "de-DE" : "nl-NL";
+
+  return new Intl.DateTimeFormat(intlLocale, {
     hour: "2-digit",
     minute: "2-digit"
   }).format(new Date(date));
