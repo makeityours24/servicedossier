@@ -10,6 +10,26 @@ const initialState: FormState = {};
 type PackageTypeFormProps = {
   action: (state: FormState, formData: FormData) => Promise<FormState>;
   submitLabel?: string;
+  dictionary?: {
+    packageName: string;
+    packageNamePlaceholder: string;
+    defaultTreatment: string;
+    defaultTreatmentPlaceholder: string;
+    sessionCount: string;
+    packagePrice: string;
+    packagePricePlaceholder: string;
+    singlePrice: string;
+    singlePricePlaceholder: string;
+    status: string;
+    active: string;
+    inactive: string;
+    displayType: string;
+    bundlePackage: string;
+    stampCard: string;
+    descriptionOptional: string;
+    descriptionPlaceholder: string;
+    saving: string;
+  };
   packageType?: {
     id: number;
     naam: string;
@@ -23,6 +43,27 @@ type PackageTypeFormProps = {
   };
 };
 
+const defaultDictionary = {
+  packageName: "Naam pakket",
+  packageNamePlaceholder: "Bijvoorbeeld 5x epileren",
+  defaultTreatment: "Standaardbehandeling",
+  defaultTreatmentPlaceholder: "Bijvoorbeeld Epileren",
+  sessionCount: "Aantal beurten",
+  packagePrice: "Pakketprijs",
+  packagePricePlaceholder: "Bijvoorbeeld 30,00",
+  singlePrice: "Losse prijs",
+  singlePricePlaceholder: "Bijvoorbeeld 7,50",
+  status: "Status",
+  active: "Actief",
+  inactive: "Inactief",
+  displayType: "Weergavetype",
+  bundlePackage: "Bundelpakket",
+  stampCard: "Digitale stempelkaart",
+  descriptionOptional: "Omschrijving (optioneel)",
+  descriptionPlaceholder: "Bijvoorbeeld voordeliger bundelpakket voor vaste klanten.",
+  saving: "Opslaan..."
+};
+
 function centsToEuroValue(value: number) {
   return (value / 100).toFixed(2);
 }
@@ -30,6 +71,7 @@ function centsToEuroValue(value: number) {
 export function PackageTypeForm({
   action,
   submitLabel = "Pakket opslaan",
+  dictionary = defaultDictionary,
   packageType
 }: PackageTypeFormProps) {
   const [state, formAction] = useActionState(action, initialState);
@@ -41,29 +83,29 @@ export function PackageTypeForm({
 
       <div className="formulier-grid">
         <div className="veld">
-          <label htmlFor="naam">Naam pakket</label>
+          <label htmlFor="naam">{dictionary.packageName}</label>
           <input
             id="naam"
             name="naam"
             defaultValue={packageType?.naam}
-            placeholder="Bijvoorbeeld 5x epileren"
+            placeholder={dictionary.packageNamePlaceholder}
             required
           />
         </div>
 
         <div className="veld">
-          <label htmlFor="standaardBehandeling">Standaardbehandeling</label>
+          <label htmlFor="standaardBehandeling">{dictionary.defaultTreatment}</label>
           <input
             id="standaardBehandeling"
             name="standaardBehandeling"
             defaultValue={packageType?.standaardBehandeling}
-            placeholder="Bijvoorbeeld Epileren"
+            placeholder={dictionary.defaultTreatmentPlaceholder}
             required
           />
         </div>
 
         <div className="veld">
-          <label htmlFor="totaalBeurten">Aantal beurten</label>
+          <label htmlFor="totaalBeurten">{dictionary.sessionCount}</label>
           <input
             id="totaalBeurten"
             name="totaalBeurten"
@@ -76,7 +118,7 @@ export function PackageTypeForm({
         </div>
 
         <div className="veld">
-          <label htmlFor="pakketPrijs">Pakketprijs</label>
+          <label htmlFor="pakketPrijs">{dictionary.packagePrice}</label>
           <input
             id="pakketPrijs"
             name="pakketPrijs"
@@ -84,13 +126,13 @@ export function PackageTypeForm({
             min="0.01"
             step="0.01"
             defaultValue={packageType ? centsToEuroValue(packageType.pakketPrijsCents) : ""}
-            placeholder="Bijvoorbeeld 30,00"
+            placeholder={dictionary.packagePricePlaceholder}
             required
           />
         </div>
 
         <div className="veld">
-          <label htmlFor="lossePrijs">Losse prijs</label>
+          <label htmlFor="lossePrijs">{dictionary.singlePrice}</label>
           <input
             id="lossePrijs"
             name="lossePrijs"
@@ -98,47 +140,47 @@ export function PackageTypeForm({
             min="0.01"
             step="0.01"
             defaultValue={packageType ? centsToEuroValue(packageType.lossePrijsCents) : ""}
-            placeholder="Bijvoorbeeld 7,50"
+            placeholder={dictionary.singlePricePlaceholder}
             required
           />
         </div>
 
         <div className="veld">
-          <label htmlFor="isActief">Status</label>
+          <label htmlFor="isActief">{dictionary.status}</label>
           <select
             id="isActief"
             name="isActief"
             defaultValue={packageType ? String(packageType.isActief) : "true"}
           >
-            <option value="true">Actief</option>
-            <option value="false">Inactief</option>
+            <option value="true">{dictionary.active}</option>
+            <option value="false">{dictionary.inactive}</option>
           </select>
         </div>
 
         <div className="veld">
-          <label htmlFor="weergaveType">Weergavetype</label>
+          <label htmlFor="weergaveType">{dictionary.displayType}</label>
           <select
             id="weergaveType"
             name="weergaveType"
             defaultValue={packageType?.weergaveType ?? "PAKKET"}
           >
-            <option value="PAKKET">Bundelpakket</option>
-            <option value="STEMPELKAART">Digitale stempelkaart</option>
+            <option value="PAKKET">{dictionary.bundlePackage}</option>
+            <option value="STEMPELKAART">{dictionary.stampCard}</option>
           </select>
         </div>
 
         <div className="veld-groot">
-          <label htmlFor="omschrijving">Omschrijving (optioneel)</label>
+          <label htmlFor="omschrijving">{dictionary.descriptionOptional}</label>
           <textarea
             id="omschrijving"
             name="omschrijving"
             defaultValue={packageType?.omschrijving ?? ""}
-            placeholder="Bijvoorbeeld voordeliger bundelpakket voor vaste klanten."
+            placeholder={dictionary.descriptionPlaceholder}
           />
         </div>
       </div>
 
-      <SubmitButton label={submitLabel} bezigLabel="Opslaan..." />
+      <SubmitButton label={submitLabel} bezigLabel={dictionary.saving} />
     </form>
   );
 }

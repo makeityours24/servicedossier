@@ -14,6 +14,7 @@ import { ReminderCopyButton } from "@/components/reminder-copy-button";
 import { TreatmentForm } from "@/components/treatment-form";
 import { TreatmentPhotoGallery } from "@/components/treatment-photo-gallery";
 import { requireSalonSession } from "@/lib/auth";
+import { customerDictionary, getCurrentLocale } from "@/lib/i18n";
 import { prisma } from "@/lib/prisma";
 import { buildAppointmentReminderMessage, formatCurrencyFromCents, formatDate, formatDateOnly } from "@/lib/utils";
 import { treatmentPresets as defaultTreatmentPresets } from "@/lib/treatment-presets";
@@ -34,6 +35,13 @@ export default async function KlantDetailPage({
   params,
   searchParams
 }: KlantDetailPageProps) {
+  const locale = await getCurrentLocale();
+  const copy = customerDictionary[locale];
+  const replace = (text: string, values: Record<string, string | number>) =>
+    Object.entries(values).reduce(
+      (result, [key, value]) => result.replaceAll(`{${key}}`, String(value)),
+      text
+    );
   const { id } = await params;
   const filters = await searchParams;
   const klantId = Number(id);
@@ -288,6 +296,16 @@ export default async function KlantDetailPage({
 
   const actieveKlantPakketten = customerPackages.filter((customerPackage) => customerPackage.status === "ACTIEF");
   const overigeKlantPakketten = customerPackages.filter((customerPackage) => customerPackage.status !== "ACTIEF");
+  const totaalOpenBeurten = actieveKlantPakketten.reduce(
+    (total, customerPackage) => total + customerPackage.resterendeBeurten,
+    0
+  );
+  const aantalActieveStempelkaarten = actieveKlantPakketten.filter(
+    (customerPackage) => customerPackage.weergaveTypeSnapshot === "STEMPELKAART"
+  ).length;
+  const aantalActieveBundels = actieveKlantPakketten.filter(
+    (customerPackage) => customerPackage.weergaveTypeSnapshot !== "STEMPELKAART"
+  ).length;
   const activePackagesForTreatment = actieveKlantPakketten.map((customerPackage) => ({
     id: customerPackage.id,
     naamSnapshot: customerPackage.naamSnapshot,
@@ -328,7 +346,7 @@ export default async function KlantDetailPage({
     <div className="rooster">
       <section className="bovenbalk">
         <div className="klant-kop">
-          <span className="logo-label">Klantdossier</span>
+          <span className="logo-label">{copy.customerRecord}</span>
           <h2 className="pagina-titel" style={{ fontSize: "2.2rem" }}>
             {klant.naam}
           </h2>
@@ -337,26 +355,60 @@ export default async function KlantDetailPage({
             <br />
             {klant.telefoonnummer}
           </p>
+          <div className="package-banner">
+            <div>
+              <strong>{copy.packageBannerTitle}</strong>
+              <p>
+                {actieveKlantPakketten.length > 0
+                  ? replace(copy.packageBannerText, {
+                      cards: actieveKlantPakketten.length,
+                      sessions: totaalOpenBeurten
+                    })
+                  : copy.packageBannerEmpty}
+              </p>
+              <div className="package-banner-actions">
+                <Link href="#pakket-overzicht" className="knop-secundair">
+                  {copy.packageBannerView}
+                </Link>
+                <Link href="#pakket-toevoegen" className="knop-zacht">
+                  {copy.packageBannerAdd}
+                </Link>
+              </div>
+            </div>
+            <span className="status-badge" data-inactive={actieveKlantPakketten.length === 0 ? "true" : undefined}>
+              {actieveKlantPakketten.length > 0
+                ? replace(copy.remainingCounter, {
+                    remaining: totaalOpenBeurten,
+                    total: actieveKlantPakketten.reduce(
+                      (total, customerPackage) => total + customerPackage.totaalBeurten,
+                      0
+                    )
+                  })
+                : copy.packageSummaryNone}
+            </span>
+          </div>
         </div>
 
         <div className="acties">
           <Link href={`/klanten/${klant.id}/bewerken`} className="knop-secundair">
-            Klant bewerken
+            {copy.editCustomer}
           </Link>
           <Link href={`/agenda?customerId=${klant.id}`} className="knop-zacht">
-            Afspraak plannen
+            {copy.scheduleAppointment}
           </Link>
           <Link href={`/klanten/${klant.id}/print`} className="knop-zacht">
-            Afdrukken
+            {copy.print}
           </Link>
           <a href={`/api/export?customerId=${klant.id}`} className="knop">
-            CSV export
+            {copy.exportCsv}
           </a>
           <form action={deleteCustomerAction}>
             <input type="hidden" name="customerId" value={klant.id} />
             <DeleteCustomerButton
               naam={klant.naam}
-              confirmMessage="Weet je zeker dat je {naam} wilt verwijderen? Alle behandelingen van deze klant worden ook verwijderd."
+              confirmMessage={copy.deleteCustomerConfirm}
+              label={copy.deleteCustomer}
+              busyLabel={copy.deletingCustomer}
             />
           </form>
         </div>
@@ -364,17 +416,57 @@ export default async function KlantDetailPage({
 
       <section className="detail-grid">
         <article className="kaart">
+          <div className="info-kaart" style={{ marginBottom: 18 }}>
+            <div className="acties" style={{ justifyContent: "space-between", alignItems: "flex-start" }}>
+              <div>
+                <h3>{copy.packageSummaryTitle}</h3>
+                <p className="meta" style={{ marginTop: 8 }}>
+                  {copy.packageSummaryText}
+                </p>
+              </div>
+              <span className="status-badge">
+                {actieveKlantPakketten.length > 0 ? copy.active : copy.packageSummaryNone}
+              </span>
+            </div>
+            <div className="info-grid" style={{ marginTop: 16 }}>
+              <article className="info-kaart package-summary-card">
+                <h3>{copy.activeCards}</h3>
+                <strong>{actieveKlantPakketten.length}</strong>
+                <p className="meta">
+                  {aantalActieveStempelkaarten} {copy.stampCardsLabel} · {aantalActieveBundels}{" "}
+                  {copy.bundlePackagesLabel}
+                </p>
+              </article>
+              <article className="info-kaart package-summary-card">
+                <h3>{copy.openSessionsTotal}</h3>
+                <strong>{totaalOpenBeurten}</strong>
+                <p className="meta">{copy.openSessionsHint}</p>
+              </article>
+              <article className="info-kaart package-summary-card">
+                <h3>{copy.activePackageTypes}</h3>
+                <strong>
+                  {
+                    new Set(
+                      actieveKlantPakketten.map((customerPackage) => customerPackage.naamSnapshot)
+                    ).size
+                  }
+                </strong>
+                <p className="meta">{copy.packagesTitle}</p>
+              </article>
+            </div>
+          </div>
+
           {aankomendeAfspraken.length > 0 ? (
             <div className="info-kaart" style={{ marginBottom: 18 }}>
               <div className="acties" style={{ justifyContent: "space-between", alignItems: "flex-start" }}>
                 <div>
-                  <h3>Komende afspraken</h3>
+                  <h3>{copy.upcomingAppointments}</h3>
                   <p className="meta" style={{ marginTop: 8 }}>
-                    Snel zicht op wat er voor deze klant al gepland staat.
+                    {copy.upcomingAppointmentsText}
                   </p>
                 </div>
                 <Link href={`/agenda?customerId=${klant.id}`} className="knop-secundair">
-                  Nieuwe afspraak
+                  {copy.newAppointment}
                 </Link>
               </div>
 
@@ -385,14 +477,14 @@ export default async function KlantDetailPage({
                       <div>
                         <h4>{afspraak.behandeling}</h4>
                         <p className="meta">
-                          {formatDate(afspraak.datumStart)}
+                          {formatDate(afspraak.datumStart, locale)}
                           <br />
-                          {afspraak.user?.naam ?? "Nog niet toegewezen"}
+                          {afspraak.user?.naam ?? copy.notAssigned}
                         </p>
                       </div>
                       <div className="acties">
                         <Link href={`/agenda/${afspraak.id}/bewerken`} className="knop-zacht">
-                          Open afspraak
+                          {copy.openAppointment}
                         </Link>
                         <ReminderCopyButton
                           phoneNumber={klant.telefoonnummer}
@@ -404,6 +496,7 @@ export default async function KlantDetailPage({
                             contactPhone:
                               user.salon.instellingen?.contactTelefoon ?? user.salon.telefoonnummer ?? null
                           })}
+                          labels={copy.reminderLabels}
                         />
                       </div>
                     </div>
@@ -415,13 +508,13 @@ export default async function KlantDetailPage({
             <div className="info-kaart" style={{ marginBottom: 18 }}>
               <div className="acties" style={{ justifyContent: "space-between", alignItems: "flex-start" }}>
                 <div>
-                  <h3>Komende afspraken</h3>
+                  <h3>{copy.upcomingAppointments}</h3>
                   <p className="meta" style={{ marginTop: 8 }}>
-                    Voor deze klant staan nog geen komende afspraken gepland.
+                    {copy.noUpcomingAppointments}
                   </p>
                 </div>
                 <Link href={`/agenda?customerId=${klant.id}`} className="knop-secundair">
-                  Afspraak plannen
+                  {copy.scheduleAppointment}
                 </Link>
               </div>
             </div>
@@ -430,41 +523,41 @@ export default async function KlantDetailPage({
           <div className="info-kaart" style={{ marginBottom: 18 }}>
             <div className="acties" style={{ justifyContent: "space-between", alignItems: "flex-start" }}>
               <div>
-                <h3>Profiel en haarinfo</h3>
+                <h3>{copy.profileTitle}</h3>
                 <p className="meta" style={{ marginTop: 8 }}>
-                  Werk hier snel geboortedatum, haartype, haarkleur, allergieen en stylistnotities bij.
+                  {copy.profileText}
                 </p>
               </div>
               <Link href={`/klanten/${klant.id}/bewerken#profiel`} className="knop-secundair">
-                Profiel bewerken
+                {copy.editProfile}
               </Link>
             </div>
           </div>
 
           <div className="info-grid" style={{ marginBottom: 18 }}>
             <article className="info-kaart">
-              <h3>Geboortedatum</h3>
+              <h3>{copy.birthDate}</h3>
               <p className="meta">
-                {klant.geboortedatum ? formatDateOnly(klant.geboortedatum) : "Nog niet ingevuld"}
+                {klant.geboortedatum ? formatDateOnly(klant.geboortedatum, locale) : copy.notFilledInYet}
               </p>
             </article>
             <article className="info-kaart">
-              <h3>Haartype</h3>
-              <p className="meta">{klant.haartype || "Nog niet ingevuld"}</p>
+              <h3>{copy.hairType}</h3>
+              <p className="meta">{klant.haartype || copy.notFilledInYet}</p>
             </article>
             <article className="info-kaart">
-              <h3>Haarkleur</h3>
-              <p className="meta">{klant.haarkleur || "Nog niet ingevuld"}</p>
+              <h3>{copy.hairColor}</h3>
+              <p className="meta">{klant.haarkleur || copy.notFilledInYet}</p>
             </article>
             <article className="info-kaart">
-              <h3>Allergieen</h3>
-              <p className="meta">{klant.allergieen || "Nog niet ingevuld"}</p>
+              <h3>{copy.allergies}</h3>
+              <p className="meta">{klant.allergieen || copy.notFilledInYet}</p>
             </article>
           </div>
 
           {klant.stylistNotities ? (
             <div className="info-kaart" style={{ marginBottom: 18 }}>
-              <h3>Notities stylist</h3>
+              <h3>{copy.stylistNotes}</h3>
               <p className="meta">{klant.stylistNotities}</p>
             </div>
           ) : null}
@@ -474,21 +567,21 @@ export default async function KlantDetailPage({
               <div className="acties" style={{ justifyContent: "space-between" }}>
                 <div>
                   <span className="logo-label" style={{ marginBottom: 12 }}>
-                    Laatste behandeling
+                    {copy.latestTreatment}
                   </span>
                   <h3 style={{ margin: 0 }}>{laatsteBehandeling.behandeling}</h3>
                 </div>
-                <span className="badge">{formatDate(laatsteBehandeling.datum)}</span>
+                <span className="badge">{formatDate(laatsteBehandeling.datum, locale)}</span>
               </div>
 
               <p className="meta" style={{ marginTop: 14 }}>
-                <strong>Behandelaar:</strong> {laatsteBehandeling.behandelaar}
+                <strong>{copy.stylist}:</strong> {laatsteBehandeling.behandelaar}
                 <br />
-                <strong>Recept:</strong> {laatsteBehandeling.recept}
+                <strong>{copy.recipe}:</strong> {laatsteBehandeling.recept}
                 {laatsteBehandeling.notities ? (
                   <>
                     <br />
-                    <strong>Notities:</strong> {laatsteBehandeling.notities}
+                    <strong>{copy.notes}:</strong> {laatsteBehandeling.notities}
                   </>
                 ) : null}
               </p>
@@ -498,13 +591,13 @@ export default async function KlantDetailPage({
                   href={`/klanten/${klant.id}?herhaalId=${laatsteBehandeling.id}#nieuwe-behandeling`}
                   className="knop"
                 >
-                  Laatste recept in formulier laden
+                  {copy.loadLatestRecipe}
                 </Link>
                 <Link
                   href={`/klanten/${klant.id}/behandelingen/${laatsteBehandeling.id}/bewerken`}
                   className="knop-secundair"
                 >
-                  Laatste behandeling bewerken
+                  {copy.editLatestTreatment}
                 </Link>
               </div>
             </div>
@@ -512,65 +605,66 @@ export default async function KlantDetailPage({
 
           <div className="print-balk">
             <div>
-              <h3>Behandelgeschiedenis</h3>
+              <h3>{copy.historyTitle}</h3>
               <p className="subtitel" style={{ marginTop: 6 }}>
-                Chronologisch overzicht met filter op datum of medewerker.
+                {copy.historyText}
               </p>
             </div>
           </div>
 
           <form className="filters" style={{ marginBottom: 18 }}>
             <div className="veld">
-              <label htmlFor="van">Van datum</label>
+              <label htmlFor="van">{copy.fromDate}</label>
               <input id="van" name="van" type="date" defaultValue={filters.van} />
             </div>
 
             <div className="veld">
-              <label htmlFor="tot">Tot datum</label>
+              <label htmlFor="tot">{copy.toDate}</label>
               <input id="tot" name="tot" type="date" defaultValue={filters.tot} />
             </div>
 
             <div className="veld">
-              <label htmlFor="medewerker">Medewerker</label>
+              <label htmlFor="medewerker">{copy.employee}</label>
               <input
                 id="medewerker"
                 name="medewerker"
                 defaultValue={filters.medewerker}
-                placeholder="Bijvoorbeeld Sanne"
+                placeholder={copy.employeePlaceholder}
               />
             </div>
 
             <button type="submit" className="knop-secundair">
-              Filteren
+              {copy.filter}
             </button>
           </form>
 
           {klant.behandelingen.length === 0 ? (
-            <div className="leeg">Er zijn nog geen behandelingen gevonden voor deze filters.</div>
+            <div className="leeg">{copy.noTreatmentsForFilters}</div>
           ) : (
             <div className="lijst">
               {klant.behandelingen.map((behandeling) => (
                 <article className="lijst-item" key={behandeling.id}>
                   <div className="acties" style={{ justifyContent: "space-between" }}>
-                    <span className="badge">{formatDate(behandeling.datum)}</span>
+                    <span className="badge">{formatDate(behandeling.datum, locale)}</span>
                     <span className="badge">{behandeling.behandelaar}</span>
                   </div>
                   <h4 style={{ marginTop: 14 }}>{behandeling.behandeling}</h4>
                   <p className="meta">
-                    <strong>Recept:</strong> {behandeling.recept}
+                    <strong>{copy.recipe}:</strong> {behandeling.recept}
                   </p>
                   {behandeling.notities ? (
                     <p className="meta">
-                      <strong>Notities:</strong> {behandeling.notities}
+                      <strong>{copy.notes}:</strong> {behandeling.notities}
                     </p>
                   ) : null}
                   {behandeling.photos.length > 0 ? (
                     <div style={{ marginTop: 16 }}>
-                      <h4 style={{ marginBottom: 10 }}>Foto&apos;s bij deze behandeling</h4>
+                      <h4 style={{ marginBottom: 10 }}>{copy.treatmentPhotos}</h4>
                       <TreatmentPhotoGallery
                         customerId={klant.id}
                         treatmentId={behandeling.id}
                         photos={behandeling.photos}
+                        dictionary={copy.photoGallery}
                       />
                     </div>
                   ) : null}
@@ -579,21 +673,22 @@ export default async function KlantDetailPage({
                       href={`/klanten/${klant.id}?herhaalId=${behandeling.id}#nieuwe-behandeling`}
                       className="knop-zacht"
                     >
-                      Recept in formulier laden
+                      {copy.loadRecipeIntoForm}
                     </Link>
                     <Link
                       href={`/klanten/${klant.id}/behandelingen/${behandeling.id}/bewerken`}
                       className="knop-secundair"
                     >
-                      Behandeling bewerken
+                      {copy.editTreatment}
                     </Link>
                     <form action={deleteTreatmentAction}>
                       <input type="hidden" name="customerId" value={klant.id} />
                       <input type="hidden" name="treatmentId" value={behandeling.id} />
                       <DeleteCustomerButton
                         naam={behandeling.behandeling}
-                        confirmMessage="Weet je zeker dat je behandeling {naam} wilt verwijderen?"
-                        label="Behandeling verwijderen"
+                        confirmMessage={copy.deleteTreatmentConfirm}
+                        label={copy.deleteTreatment}
+                        busyLabel={copy.deletingTreatment}
                       />
                     </form>
                   </div>
@@ -603,61 +698,71 @@ export default async function KlantDetailPage({
           )}
         </article>
 
-        <aside className="kaart">
-          <h3>Pakketten</h3>
+        <aside className="kaart" id="pakket-overzicht" style={{ scrollMarginTop: 24 }}>
+          <h3>{copy.packagesTitle}</h3>
           <p className="subtitel" style={{ marginTop: 8 }}>
-            Verkoop hier bundels of digitale stempelkaarten aan deze klant. Je kunt ook een bestaande
-            papieren kaart overnemen door alleen de huidige resterende beurten in te voeren.
+            {copy.packagesText}
           </p>
 
           <div className="lijst" style={{ marginTop: 18 }}>
             {customerPackages.length === 0 ? (
-              <div className="leeg">Deze klant heeft nog geen actieve of eerdere pakketten.</div>
+              <div className="leeg">{copy.noPackages}</div>
             ) : (
               <>
                 {actieveKlantPakketten.map((customerPackage) => (
-                  <article className="lijst-item" key={customerPackage.id}>
+                  <article className="lijst-item active-package-card" key={customerPackage.id}>
                     <div className="acties" style={{ justifyContent: "space-between", alignItems: "flex-start" }}>
                       <div>
+                        <span className="logo-label" style={{ marginBottom: 10 }}>
+                          {copy.activePackageCardLabel}
+                        </span>
                         <h4>{customerPackage.naamSnapshot}</h4>
                         <p className="meta">
-                          <strong>Behandeling:</strong> {customerPackage.standaardBehandelingSnapshot}
+                          <strong>{copy.packageTreatment}:</strong> {customerPackage.standaardBehandelingSnapshot}
                           <br />
-                          <strong>Type:</strong>{" "}
+                          <strong>{copy.packageType}:</strong>{" "}
                           {customerPackage.weergaveTypeSnapshot === "STEMPELKAART"
-                            ? "Digitale stempelkaart"
-                            : "Bundelpakket"}
+                            ? copy.digitalStampCard
+                            : copy.bundlePackage}
                           <br />
-                          <strong>Nog over:</strong> {customerPackage.resterendeBeurten} van {customerPackage.totaalBeurten}
+                          <strong>{copy.soldOn}:</strong> {formatDate(customerPackage.gekochtOp, locale)}
                           <br />
-                          <strong>Verkocht op:</strong> {formatDate(customerPackage.gekochtOp)}
+                          <strong>{copy.packagePrice}:</strong> {formatCurrencyFromCents(customerPackage.pakketPrijsCents)}
                           <br />
-                          <strong>Pakketprijs:</strong> {formatCurrencyFromCents(customerPackage.pakketPrijsCents)}
-                          <br />
-                          <strong>Losse prijs:</strong> {formatCurrencyFromCents(customerPackage.lossePrijsCents)} per beurt
+                          <strong>{copy.singlePrice}:</strong> {formatCurrencyFromCents(customerPackage.lossePrijsCents)}{" "}
+                          {copy.perSession}
                           {customerPackage.notities ? (
                             <>
                               <br />
-                              <strong>Notities:</strong> {customerPackage.notities}
+                              <strong>{copy.notes}:</strong> {customerPackage.notities}
                             </>
                           ) : null}
                         </p>
                       </div>
-                      <span className="status-badge">Actief</span>
+                      <div className="package-counter-card">
+                        <span className="status-badge">{copy.active}</span>
+                        <strong>{customerPackage.resterendeBeurten}</strong>
+                        <p>{replace(copy.remainingCounter, {
+                          remaining: customerPackage.resterendeBeurten,
+                          total: customerPackage.totaalBeurten
+                        })}</p>
+                      </div>
                     </div>
 
                     {customerPackage.weergaveTypeSnapshot === "STEMPELKAART" ? (
                       <div className="stempelkaart-paneel" style={{ marginTop: 14 }}>
                         <div className="stempelkaart-kop">
                           <div>
-                            <strong>Digitale stempelkaart</strong>
+                            <strong>{copy.digitalStampCardTitle}</strong>
                             <p className="meta" style={{ marginTop: 6 }}>
-                              {customerPackage.totaalBeurten - customerPackage.resterendeBeurten} afgestempeld,{" "}
-                              {customerPackage.resterendeBeurten} open
+                              {replace(copy.stampedSummary, {
+                                used: customerPackage.totaalBeurten - customerPackage.resterendeBeurten,
+                                remaining: customerPackage.resterendeBeurten
+                              })}
                             </p>
                           </div>
                           <span className="status-badge">
-                            {customerPackage.resterendeBeurten} over
+                            {replace(copy.remainingShort, { count: customerPackage.resterendeBeurten })}
                           </span>
                         </div>
                         <div className="stempelkaart">
@@ -670,7 +775,7 @@ export default async function KlantDetailPage({
                                 key={`${customerPackage.id}-${index}`}
                                 className="stempel"
                                 data-gebruikt={gebruikt ? "true" : "false"}
-                                title={gebruikt ? "Gebruikte beurt" : "Nog open"}
+                                title={gebruikt ? copy.usedSession : copy.openSession}
                               >
                                 {index + 1}
                               </span>
@@ -682,66 +787,77 @@ export default async function KlantDetailPage({
 
                     {customerPackage.usages.length > 0 ? (
                       <div className="kaart" style={{ marginTop: 14, padding: 16 }}>
-                        <h4 style={{ marginBottom: 10 }}>Gebruiksgeschiedenis</h4>
+                        <h4 style={{ marginBottom: 10 }}>{copy.usageHistory}</h4>
                         <div className="lijst">
                           {customerPackage.usages.map((usage) => (
                             <div className="lijst-item" key={usage.id}>
                               <p className="meta">
-                                <strong>{formatDate(usage.datum)}</strong>
+                                <strong>{formatDate(usage.datum, locale)}</strong>
                                 <br />
                                 <strong>
-                                  {usage.aantalAfgeboekt < 0 ? "Teruggezet:" : "Afgeboekt:"}
+                                  {usage.aantalAfgeboekt < 0 ? `${copy.restored}:` : `${copy.deducted}:`}
                                 </strong>{" "}
-                                {Math.abs(usage.aantalAfgeboekt)} beurt
-                                {Math.abs(usage.aantalAfgeboekt) > 1 ? "en" : ""}
+                                {Math.abs(usage.aantalAfgeboekt)}{" "}
+                                {Math.abs(usage.aantalAfgeboekt) > 1 ? copy.sessionsWord : copy.sessionWord}
                                 <br />
-                                <strong>Behandeling:</strong> {usage.treatment?.behandeling ?? "Handmatige correctie"}
+                                <strong>{copy.packageTreatment}:</strong>{" "}
+                                {usage.treatment?.behandeling ?? copy.manualCorrection}
                                 <br />
-                                <strong>Behandelaar:</strong> {usage.user?.naam ?? "Onbekend"}
+                                <strong>{copy.stylist}:</strong> {usage.user?.naam ?? copy.unknown}
                                 {usage.notitie ? (
                                   <>
                                     <br />
-                                    <strong>Reden:</strong> {usage.notitie}
+                                    <strong>{copy.reason}:</strong> {usage.notitie}
                                   </>
                                 ) : null}
                               </p>
                               {usage.treatment ? (
                                 <div className="acties" style={{ marginTop: 12 }}>
                                   <Link
-                                    href={`/klanten/${klant.id}/behandelingen/${usage.treatment.id}/bewerken`}
-                                    className="knop-secundair"
-                                  >
-                                    Gekoppelde behandeling bekijken
-                                  </Link>
-                                </div>
-                              ) : null}
+                                  href={`/klanten/${klant.id}/behandelingen/${usage.treatment.id}/bewerken`}
+                                  className="knop-secundair"
+                                >
+                                  {copy.viewLinkedTreatment}
+                                </Link>
+                              </div>
+                            ) : null}
                             </div>
                           ))}
                         </div>
                       </div>
                     ) : (
                       <div className="leeg" style={{ marginTop: 14 }}>
-                        Nog geen beurten van dit pakket afgeboekt.
+                        {copy.noUsageYet}
                       </div>
                     )}
 
                     <div className="kaart" style={{ marginTop: 14, padding: 16 }}>
-                      <h4 style={{ marginBottom: 8 }}>Correctie</h4>
+                      <h4 style={{ marginBottom: 8 }}>{copy.correctionTitle}</h4>
                       <p className="subtitel" style={{ marginBottom: 12 }}>
-                        Gebruik dit alleen als je een beurt vergeten bent af te boeken of juist moet
-                        terugzetten. De correctie blijft zichtbaar in de historie.
+                        {copy.correctionText}
                       </p>
                       <CustomerPackageCorrectionForm
                         customerPackageId={customerPackage.id}
                         action={correctCustomerPackageAction}
+                        dictionary={copy.correctionForm}
                       />
                     </div>
                   </article>
                 ))}
 
                 {overigeKlantPakketten.length > 0 ? (
-                  <div className="kaart" style={{ marginTop: 12, padding: 20 }}>
-                    <h4>Eerdere pakketten</h4>
+                  <details className="kaart collapsible-panel" style={{ marginTop: 12, padding: 20 }}>
+                    <summary className="collapsible-summary">
+                      <div>
+                        <h4>{copy.previousPackages}</h4>
+                        <p className="subtitel" style={{ marginTop: 6 }}>
+                          {copy.previousPackagesSummary}
+                        </p>
+                      </div>
+                      <span className="status-badge" data-inactive="true">
+                        {overigeKlantPakketten.length}
+                      </span>
+                    </summary>
                     <div className="lijst" style={{ marginTop: 16 }}>
                       {overigeKlantPakketten.map((customerPackage) => (
                         <article className="lijst-item" key={customerPackage.id}>
@@ -749,17 +865,23 @@ export default async function KlantDetailPage({
                             <div>
                               <h4>{customerPackage.naamSnapshot}</h4>
                               <p className="meta">
-                                <strong>Status:</strong> {customerPackage.status.replaceAll("_", " ")}
+                                <strong>{copy.status}:</strong> {copy.packageStatus[customerPackage.status]}
                                 <br />
-                                <strong>Type:</strong> {customerPackage.weergaveTypeSnapshot === "STEMPELKAART" ? "Digitale stempelkaart" : "Bundelpakket"}
+                                <strong>{copy.packageType}:</strong>{" "}
+                                {customerPackage.weergaveTypeSnapshot === "STEMPELKAART"
+                                  ? copy.digitalStampCard
+                                  : copy.bundlePackage}
                                 <br />
-                                <strong>Verbruikt:</strong> {customerPackage.totaalBeurten - customerPackage.resterendeBeurten} van {customerPackage.totaalBeurten}
+                                <strong>{copy.used}:</strong> {customerPackage.totaalBeurten - customerPackage.resterendeBeurten} /{" "}
+                                {customerPackage.totaalBeurten}
                                 <br />
-                                <strong>Verkocht op:</strong> {formatDate(customerPackage.gekochtOp)}
+                                <strong>{copy.soldOn}:</strong> {formatDate(customerPackage.gekochtOp, locale)}
                               </p>
                             </div>
                             <span className="status-badge" data-inactive="true">
-                              {customerPackage.status === "VOLLEDIG_GEBRUIKT" ? "Volledig gebruikt" : customerPackage.status.replaceAll("_", " ")}
+                              {customerPackage.status === "VOLLEDIG_GEBRUIKT"
+                                ? copy.fullyUsed
+                                : copy.packageStatus[customerPackage.status]}
                             </span>
                           </div>
 
@@ -776,7 +898,7 @@ export default async function KlantDetailPage({
                                       key={`${customerPackage.id}-${index}`}
                                       className="stempel"
                                       data-gebruikt={gebruikt ? "true" : "false"}
-                                      title={gebruikt ? "Gebruikte beurt" : "Nog open"}
+                                      title={gebruikt ? copy.usedSession : copy.openSession}
                                     >
                                       {index + 1}
                                     </span>
@@ -788,26 +910,27 @@ export default async function KlantDetailPage({
 
                           {customerPackage.usages.length > 0 ? (
                             <div className="kaart" style={{ marginTop: 14, padding: 16 }}>
-                              <h4 style={{ marginBottom: 10 }}>Gebruiksgeschiedenis</h4>
+                              <h4 style={{ marginBottom: 10 }}>{copy.usageHistory}</h4>
                               <div className="lijst">
                                 {customerPackage.usages.map((usage) => (
                                   <div className="lijst-item" key={usage.id}>
                                     <p className="meta">
-                                      <strong>{formatDate(usage.datum)}</strong>
+                                      <strong>{formatDate(usage.datum, locale)}</strong>
                                       <br />
                                       <strong>
-                                        {usage.aantalAfgeboekt < 0 ? "Teruggezet:" : "Afgeboekt:"}
+                                        {usage.aantalAfgeboekt < 0 ? `${copy.restored}:` : `${copy.deducted}:`}
                                       </strong>{" "}
-                                      {Math.abs(usage.aantalAfgeboekt)} beurt
-                                      {Math.abs(usage.aantalAfgeboekt) > 1 ? "en" : ""}
+                                      {Math.abs(usage.aantalAfgeboekt)}{" "}
+                                      {Math.abs(usage.aantalAfgeboekt) > 1 ? copy.sessionsWord : copy.sessionWord}
                                       <br />
-                                      <strong>Behandeling:</strong> {usage.treatment?.behandeling ?? "Handmatige correctie"}
+                                      <strong>{copy.packageTreatment}:</strong>{" "}
+                                      {usage.treatment?.behandeling ?? copy.manualCorrection}
                                       <br />
-                                      <strong>Behandelaar:</strong> {usage.user?.naam ?? "Onbekend"}
+                                      <strong>{copy.stylist}:</strong> {usage.user?.naam ?? copy.unknown}
                                       {usage.notitie ? (
                                         <>
                                           <br />
-                                          <strong>Reden:</strong> {usage.notitie}
+                                          <strong>{copy.reason}:</strong> {usage.notitie}
                                         </>
                                       ) : null}
                                     </p>
@@ -819,7 +942,7 @@ export default async function KlantDetailPage({
                         </article>
                       ))}
                     </div>
-                  </div>
+                  </details>
                 ) : null}
               </>
             )}
@@ -827,35 +950,36 @@ export default async function KlantDetailPage({
 
           <div
             className="kaart"
-            id="nieuwe-behandeling"
+            id="pakket-toevoegen"
             style={{ marginTop: 18, padding: 20, scrollMarginTop: 24 }}
           >
-            <h4>Pakket verkopen</h4>
+            <h4>{copy.sellPackageTitle}</h4>
             <p className="subtitel" style={{ marginTop: 8 }}>
-              Kies een actief pakkettype van deze salon en koppel het direct aan deze klant.
+              {copy.sellPackageText}
             </p>
             {availablePackageTypes.length === 0 ? (
               <div className="leeg" style={{ marginTop: 16 }}>
-                Er zijn nog geen actieve pakkettypes. Voeg eerst een pakket toe via Pakketten.
+                {copy.noActivePackageTypes}
               </div>
             ) : (
               <CustomerPackageForm
                 customerId={klant.id}
                 action={createCustomerPackageAction}
                 packageTypes={availablePackageTypes}
+                dictionary={copy.packageForm}
               />
             )}
           </div>
 
-          <div className="kaart" style={{ marginTop: 18, padding: 20 }}>
-          <h3>Nieuwe behandeling registreren</h3>
+          <div className="kaart" id="nieuwe-behandeling" style={{ marginTop: 18, padding: 20, scrollMarginTop: 24 }}>
+          <h3>{copy.treatmentFormTitle}</h3>
           <p className="subtitel" style={{ marginTop: 8 }}>
-            Voeg direct een nieuwe kleurbehandeling of andere behandeling toe aan dit dossier.
+            {copy.treatmentFormText}
           </p>
           {sjablonen.length > 0 ? (
             <div style={{ marginTop: 16 }}>
               <p className="meta" style={{ marginBottom: 12 }}>
-                Snel starten vanuit een receptsjabloon:
+                {copy.quickStartFromTemplate}
               </p>
               <div className="acties">
                 {sjablonen.map((template) => (
@@ -873,37 +997,41 @@ export default async function KlantDetailPage({
           {herhaalBehandeling ? (
             <div className="acties" style={{ marginTop: 16 }}>
               <span className="badge">
-                Recept geladen uit {formatDate(herhaalBehandeling.datum)}. Controleer de velden en sla daarna als nieuwe behandeling op.
+                {replace(copy.recipeLoadedFromTreatment, {
+                  date: formatDate(herhaalBehandeling.datum, locale)
+                })}
               </span>
               <Link href={`/klanten/${klant.id}`} className="knop-secundair">
-                Formulier leegmaken
+                {copy.clearForm}
               </Link>
             </div>
           ) : geselecteerdSjabloon ? (
             <div className="acties" style={{ marginTop: 16 }}>
               <span className="badge">
-                Sjabloon geladen: {geselecteerdSjabloon.naam}. Controleer de velden en sla daarna als nieuwe behandeling op.
+                {replace(copy.templateLoaded, { name: geselecteerdSjabloon.naam })}
               </span>
               <Link href={`/klanten/${klant.id}`} className="knop-secundair">
-                Formulier leegmaken
+                {copy.clearForm}
               </Link>
             </div>
           ) : geselecteerdeAfspraak ? (
             <div className="acties" style={{ marginTop: 16 }}>
               <span className="badge">
                 {geselecteerdeAfspraak.convertedTreatment
-                  ? "Van deze afspraak is al een behandeling gemaakt."
-                  : `Afspraak geladen uit ${formatDate(geselecteerdeAfspraak.datumStart)}. Sla op om deze afspraak als behandeling vast te leggen en eventuele stempelkaarten of pakketten af te boeken.`}
+                  ? copy.appointmentAlreadyConverted
+                  : replace(copy.appointmentLoaded, {
+                      date: formatDate(geselecteerdeAfspraak.datumStart, locale)
+                    })}
               </span>
               <Link href={`/klanten/${klant.id}`} className="knop-secundair">
-                Formulier leegmaken
+                {copy.clearForm}
               </Link>
               {geselecteerdeAfspraak.convertedTreatment ? (
                 <Link
                   href={`/klanten/${klant.id}/behandelingen/${geselecteerdeAfspraak.convertedTreatment.id}/bewerken`}
                   className="knop-zacht"
                 >
-                  Afgeronde behandeling openen
+                  {copy.openCompletedTreatment}
                 </Link>
               ) : null}
             </div>
@@ -922,12 +1050,13 @@ export default async function KlantDetailPage({
             }
             helperText={
               herhaalBehandeling
-                ? "De velden zijn vooringevuld vanuit een eerdere behandeling. Pas ze aan waar nodig en sla de nieuwe behandeling op."
+                ? copy.treatmentHelperFromPrevious
                 : geselecteerdSjabloon
-                  ? "De velden zijn vooringevuld vanuit een receptsjabloon. Pas ze aan waar nodig en sla de nieuwe behandeling op."
-                : undefined
+                  ? copy.treatmentHelperFromTemplate
+                  : undefined
             }
             activePackages={activePackagesForTreatment}
+            dictionary={copy.treatmentFormFields}
           />
           </div>
         </aside>

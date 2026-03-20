@@ -1,28 +1,32 @@
 import { CustomerForm } from "@/components/customer-form";
 import { createCustomerAction } from "@/app/(dashboard)/klanten/actions";
+import { customerDictionary, getCurrentLocale } from "@/lib/i18n";
 
-export default function NieuweKlantPage() {
+export default async function NieuweKlantPage() {
+  const locale = await getCurrentLocale();
+  const copy = customerDictionary[locale].customerFormNew;
+
   return (
     <div className="rooster">
       <section>
-        <span className="logo-label">Nieuwe klant</span>
+        <span className="logo-label">{copy.label}</span>
         <h2 className="pagina-titel" style={{ fontSize: "2.2rem" }}>
-          Klant registreren
+          {copy.title}
         </h2>
-        <p className="subtitel">
-          Maak een nieuw klantdossier aan zodat behandelingen en kleurrecepten direct gekoppeld kunnen worden.
-        </p>
+        <p className="subtitel">{copy.subtitle}</p>
       </section>
 
       <section className="kaart">
         <div className="info-kaart" style={{ marginBottom: 20 }}>
-          <h3>Klantdossier zonder login</h3>
-          <p className="meta">
-            Een klant die je hier aanmaakt krijgt geen eigen account om in te loggen. Gebruik deze
-            pagina alleen voor klantgegevens, kleurrecepten en behandelgeschiedenis.
-          </p>
+          <h3>{copy.noteTitle}</h3>
+          <p className="meta">{copy.noteText}</p>
         </div>
-        <CustomerForm action={createCustomerAction} submitLabel="Klant opslaan" />
+        <CustomerForm
+          action={createCustomerAction}
+          submitLabel={copy.submit}
+          busyLabel={copy.busy}
+          dictionary={customerDictionary[locale].customerFormFields}
+        />
       </section>
     </div>
   );

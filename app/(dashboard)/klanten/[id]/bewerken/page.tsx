@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { CustomerForm } from "@/components/customer-form";
 import { updateCustomerAction } from "@/app/(dashboard)/klanten/actions";
 import { requireSalonSession } from "@/lib/auth";
+import { customerDictionary, getCurrentLocale } from "@/lib/i18n";
 import { prisma } from "@/lib/prisma";
 
 type BewerkKlantPageProps = {
@@ -9,6 +10,7 @@ type BewerkKlantPageProps = {
 };
 
 export default async function BewerkKlantPage({ params }: BewerkKlantPageProps) {
+  const locale = await getCurrentLocale();
   const user = await requireSalonSession();
   const { id } = await params;
   const klantId = Number(id);
@@ -28,22 +30,24 @@ export default async function BewerkKlantPage({ params }: BewerkKlantPageProps) 
     notFound();
   }
 
+  const copy = customerDictionary[locale].customerFormEdit;
+
   return (
     <div className="rooster">
       <section>
-        <span className="logo-label">Klant bewerken</span>
+        <span className="logo-label">{copy.label}</span>
         <h2 className="pagina-titel" style={{ fontSize: "2.2rem" }}>
-          Gegevens aanpassen
+          {copy.title}
         </h2>
-        <p className="subtitel">
-          Werk hier ook geboortedatum, haartype, haarkleur, allergieen en notities van de stylist bij.
-        </p>
+        <p className="subtitel">{copy.subtitle}</p>
       </section>
 
       <section className="kaart" id="profiel">
         <CustomerForm
           action={updateCustomerAction}
-          submitLabel="Wijzigingen opslaan"
+          submitLabel={copy.submit}
+          busyLabel={copy.busy}
+          dictionary={customerDictionary[locale].customerFormFields}
           customer={klant}
         />
       </section>

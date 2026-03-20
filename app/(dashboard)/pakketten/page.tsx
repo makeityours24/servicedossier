@@ -7,10 +7,13 @@ import {
 import { DeleteCustomerButton } from "@/components/delete-customer-button";
 import { PackageTypeForm } from "@/components/package-type-form";
 import { requireSalonSession } from "@/lib/auth";
+import { getCurrentLocale, managementDictionary } from "@/lib/i18n";
 import { prisma } from "@/lib/prisma";
 import { describePackagePrice, formatCurrencyFromCents } from "@/lib/utils";
 
 export default async function PakkettenPage() {
+  const locale = await getCurrentLocale();
+  const copy = managementDictionary[locale].packages;
   const user = await requireSalonSession();
 
   const packageTypes = await prisma.packageType.findMany({
@@ -32,29 +35,25 @@ export default async function PakkettenPage() {
     <div className="rooster">
       <section className="bovenbalk">
         <div>
-          <span className="logo-label">Pakketten</span>
+          <span className="logo-label">{copy.label}</span>
           <h2 className="pagina-titel" style={{ fontSize: "2.2rem" }}>
-            Digitale stempelkaarten
+            {copy.title}
           </h2>
-          <p className="subtitel">
-            Beheer hier pakkettypes zoals 5x epileren of 6x toner. Deze vormen later de basis voor klantbundels en automatische afboeking per bezoek.
-          </p>
+          <p className="subtitel">{copy.subtitle}</p>
         </div>
       </section>
 
       <section className="twee-kolommen">
         <article className="kaart">
-          <h3>Pakkettypes van deze salon</h3>
+          <h3>{copy.packageTypesTitle}</h3>
           <div className="info-kaart" style={{ marginTop: 18 }}>
-            <strong>Architectuur</strong>
-            <p style={{ marginTop: 10 }}>
-              In deze eerste fase beheren we alleen de pakkettypes. Klantverkoop en afboeken per behandeling bouwen we daarna bovenop deze basis.
-            </p>
+            <strong>{copy.architectureTitle}</strong>
+            <p style={{ marginTop: 10 }}>{copy.architectureText}</p>
           </div>
 
           <div className="lijst" style={{ marginTop: 18 }}>
             {packageTypes.length === 0 ? (
-              <div className="leeg">Er zijn nog geen pakkettypes voor deze salon.</div>
+              <div className="leeg">{copy.empty}</div>
             ) : (
               <>
                 {actievePakketten.map((packageType) => (
@@ -63,36 +62,39 @@ export default async function PakkettenPage() {
                       <div>
                         <h4>{packageType.naam}</h4>
                         <p className="meta">
-                          <strong>Standaardbehandeling:</strong> {packageType.standaardBehandeling}
+                          <strong>{copy.defaultTreatment}:</strong> {packageType.standaardBehandeling}
                           <br />
-                          <strong>Type:</strong> {packageType.weergaveType === "STEMPELKAART" ? "Digitale stempelkaart" : "Bundelpakket"}
+                          <strong>{copy.type}:</strong>{" "}
+                          {packageType.weergaveType === "STEMPELKAART" ? copy.stampCard : copy.bundlePackage}
                           <br />
-                          <strong>Pakket:</strong> {describePackagePrice(packageType.pakketPrijsCents, packageType.lossePrijsCents, packageType.totaalBeurten)}
+                          <strong>{copy.packagePrice}:</strong>{" "}
+                          {describePackagePrice(packageType.pakketPrijsCents, packageType.lossePrijsCents, packageType.totaalBeurten)}
                           <br />
-                          <strong>Losse prijs:</strong> {formatCurrencyFromCents(packageType.lossePrijsCents)} per behandeling
+                          <strong>{copy.singlePrice}:</strong> {formatCurrencyFromCents(packageType.lossePrijsCents)} {copy.perTreatment}
                           <br />
-                          <strong>Gekoppelde klantpakketten:</strong> {packageType._count.customerPackages}
+                          <strong>{copy.linkedCustomerPackages}:</strong> {packageType._count.customerPackages}
                           {packageType.omschrijving ? (
                             <>
                               <br />
-                              <strong>Omschrijving:</strong> {packageType.omschrijving}
+                              <strong>{copy.description}:</strong> {packageType.omschrijving}
                             </>
                           ) : null}
                         </p>
                       </div>
-                      <span className="status-badge">Actief</span>
+                      <span className="status-badge">{copy.active}</span>
                     </div>
 
                     <div className="acties" style={{ marginTop: 16 }}>
                       <Link href={`/pakketten/${packageType.id}/bewerken`} className="knop-secundair">
-                        Bewerken
+                        {copy.edit}
                       </Link>
                       <form action={deactivatePackageTypeAction}>
                         <input type="hidden" name="packageTypeId" value={packageType.id} />
                         <DeleteCustomerButton
                           naam={packageType.naam}
-                          label="Uitschakelen"
-                          confirmMessage="Weet je zeker dat je pakkettype {naam} wilt uitschakelen? Het blijft wel bewaard voor bestaande klantpakketten."
+                          label={copy.deactivate}
+                          busyLabel={copy.deactivating}
+                          confirmMessage={copy.deactivateConfirm}
                         />
                       </form>
                     </div>
@@ -101,9 +103,9 @@ export default async function PakkettenPage() {
 
                 {inactievePakketten.length > 0 ? (
                   <div className="kaart" style={{ marginTop: 12, padding: 20 }}>
-                    <h4>Inactieve pakkettypes</h4>
+                    <h4>{copy.inactivePackageTypes}</h4>
                     <p className="subtitel" style={{ marginTop: 8 }}>
-                      Deze pakketten zijn niet meer verkoopbaar, maar blijven zichtbaar voor historie en bestaande klantbundels.
+                      {copy.inactiveText}
                     </p>
                     <div className="lijst" style={{ marginTop: 16 }}>
                       {inactievePakketten.map((packageType) => (
@@ -112,28 +114,30 @@ export default async function PakkettenPage() {
                             <div>
                               <h4>{packageType.naam}</h4>
                               <p className="meta">
-                                <strong>Standaardbehandeling:</strong> {packageType.standaardBehandeling}
+                                <strong>{copy.defaultTreatment}:</strong> {packageType.standaardBehandeling}
                                 <br />
-                                <strong>Type:</strong> {packageType.weergaveType === "STEMPELKAART" ? "Digitale stempelkaart" : "Bundelpakket"}
+                                <strong>{copy.type}:</strong>{" "}
+                                {packageType.weergaveType === "STEMPELKAART" ? copy.stampCard : copy.bundlePackage}
                                 <br />
-                                <strong>Pakket:</strong> {describePackagePrice(packageType.pakketPrijsCents, packageType.lossePrijsCents, packageType.totaalBeurten)}
+                                <strong>{copy.packagePrice}:</strong>{" "}
+                                {describePackagePrice(packageType.pakketPrijsCents, packageType.lossePrijsCents, packageType.totaalBeurten)}
                                 <br />
-                                <strong>Gekoppelde klantpakketten:</strong> {packageType._count.customerPackages}
+                                <strong>{copy.linkedCustomerPackages}:</strong> {packageType._count.customerPackages}
                               </p>
                             </div>
                             <span className="status-badge" data-inactive="true">
-                              Inactief
+                              {copy.inactive}
                             </span>
                           </div>
 
                           <div className="acties" style={{ marginTop: 16 }}>
                             <Link href={`/pakketten/${packageType.id}/bewerken`} className="knop-secundair">
-                              Bewerken
+                              {copy.edit}
                             </Link>
                             <form action={reactivatePackageTypeAction}>
                               <input type="hidden" name="packageTypeId" value={packageType.id} />
                               <button type="submit" className="knop-secundair">
-                                Opnieuw activeren
+                                {copy.reactivate}
                               </button>
                             </form>
                           </div>
@@ -148,11 +152,15 @@ export default async function PakkettenPage() {
         </article>
 
         <aside className="kaart">
-          <h3>Nieuw pakkettype</h3>
+          <h3>{copy.newPackageType}</h3>
           <p className="subtitel" style={{ marginTop: 8 }}>
-            Definieer hier eerst het pakket dat deze salon verkoopt. Daarna kunnen we het aan klanten koppelen en later per behandeling afboeken.
+            {copy.newPackageTypeText}
           </p>
-          <PackageTypeForm action={createPackageTypeAction} submitLabel="Pakkettype toevoegen" />
+          <PackageTypeForm
+            action={createPackageTypeAction}
+            submitLabel={copy.addPackageType}
+            dictionary={copy.form}
+          />
         </aside>
       </section>
     </div>

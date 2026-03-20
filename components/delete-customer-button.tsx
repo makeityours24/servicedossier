@@ -6,12 +6,14 @@ type DeleteCustomerButtonProps = {
   naam: string;
   confirmMessage: string;
   label?: string;
+  busyLabel?: string;
 };
 
 export function DeleteCustomerButton({
   naam,
   confirmMessage,
-  label = "Verwijderen"
+  label = "Verwijderen",
+  busyLabel = "Verwijderen..."
 }: DeleteCustomerButtonProps) {
   const { pending } = useFormStatus();
 
@@ -28,7 +30,7 @@ export function DeleteCustomerButton({
         }
       }}
     >
-      {pending ? "Verwijderen..." : label}
+      {pending ? busyLabel : label}
     </button>
   );
 }

@@ -6,6 +6,7 @@ import { TreatmentPhotoForm } from "@/components/treatment-photo-form";
 import { TreatmentPhotoGallery } from "@/components/treatment-photo-gallery";
 import { TreatmentForm } from "@/components/treatment-form";
 import { requireSalonSession } from "@/lib/auth";
+import { customerDictionary, getCurrentLocale } from "@/lib/i18n";
 import { prisma } from "@/lib/prisma";
 
 type BewerkBehandelingPageProps = {
@@ -15,6 +16,9 @@ type BewerkBehandelingPageProps = {
 export default async function BewerkBehandelingPage({
   params
 }: BewerkBehandelingPageProps) {
+  const locale = await getCurrentLocale();
+  const copy = customerDictionary[locale].editTreatmentPage;
+  const formCopy = customerDictionary[locale].treatmentFormFields;
   const user = await requireSalonSession();
   const { id, treatmentId } = await params;
   const klantId = Number(id);
@@ -124,17 +128,15 @@ export default async function BewerkBehandelingPage({
     <div className="rooster">
       <section className="bovenbalk">
         <div>
-          <span className="logo-label">Behandeling bewerken</span>
+          <span className="logo-label">{copy.label}</span>
           <h2 className="pagina-titel" style={{ fontSize: "2.2rem" }}>
             {klant.naam}
           </h2>
-          <p className="subtitel">
-            Pas deze behandeling aan zonder het klantdossier of de rest van de historie te verliezen.
-          </p>
+          <p className="subtitel">{copy.subtitle}</p>
         </div>
 
         <Link href={`/klanten/${klant.id}`} className="knop-secundair">
-          Terug naar dossier
+          {copy.backToDossier}
         </Link>
       </section>
 
@@ -144,7 +146,7 @@ export default async function BewerkBehandelingPage({
           medewerkerNaam={user.naam}
           medewerkers={medewerkers}
           action={updateTreatmentAction}
-          submitLabel="Behandeling opslaan"
+          submitLabel={copy.saveTreatment}
           treatment={{
             ...behandeling,
             behandelaarUserId: behandeling.userId,
@@ -152,14 +154,15 @@ export default async function BewerkBehandelingPage({
             customerPackageId: behandeling.packageUsages[0]?.customerPackageId ?? null
           }}
           activePackages={activePackages}
+          dictionary={formCopy}
         />
       </section>
 
       <section className="twee-kolommen">
         <article className="kaart">
-          <h3>Foto&apos;s bij deze behandeling</h3>
+          <h3>{copy.treatmentPhotosTitle}</h3>
           <p className="subtitel" style={{ marginTop: 8 }}>
-            Voeg hier voor- en nafoto&apos;s toe als visuele dossieropbouw of bewijs bij een klacht.
+            {copy.treatmentPhotosText}
           </p>
           <div style={{ marginTop: 18 }}>
             <TreatmentPhotoGallery
@@ -167,19 +170,21 @@ export default async function BewerkBehandelingPage({
               treatmentId={behandeling.id}
               photos={behandeling.photos}
               showDelete
+              dictionary={customerDictionary[locale].photoGallery}
             />
           </div>
         </article>
 
         <aside className="kaart">
-          <h3>Nieuwe foto uploaden</h3>
+          <h3>{copy.uploadPhotoTitle}</h3>
           <p className="subtitel" style={{ marginTop: 8 }}>
-            Upload eerst via de bewerkpagina, zodat de foto altijd direct aan de juiste behandeling gekoppeld blijft.
+            {copy.uploadPhotoText}
           </p>
           <TreatmentPhotoForm
             customerId={klant.id}
             treatmentId={behandeling.id}
             action={uploadTreatmentPhotoAction}
+            dictionary={customerDictionary[locale].photoForm}
           />
         </aside>
       </section>

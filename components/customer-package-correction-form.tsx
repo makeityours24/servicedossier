@@ -10,11 +10,33 @@ const initialState: FormState = {};
 type CustomerPackageCorrectionFormProps = {
   customerPackageId: number;
   action: (state: FormState, formData: FormData) => Promise<FormState>;
+  dictionary?: {
+    correction: string;
+    deductManually: string;
+    restoreSession: string;
+    sessionCount: string;
+    correctionReason: string;
+    reasonPlaceholder: string;
+    save: string;
+    saving: string;
+  };
+};
+
+const defaultDictionary = {
+  correction: "Correctie",
+  deductManually: "Beurt handmatig afboeken",
+  restoreSession: "Beurt terugzetten",
+  sessionCount: "Aantal beurten",
+  correctionReason: "Reden van correctie",
+  reasonPlaceholder: "Bijvoorbeeld vergeten af te boeken op papieren kaart.",
+  save: "Correctie opslaan",
+  saving: "Opslaan..."
 };
 
 export function CustomerPackageCorrectionForm({
   customerPackageId,
-  action
+  action,
+  dictionary = defaultDictionary
 }: CustomerPackageCorrectionFormProps) {
   const [state, formAction] = useActionState(action, initialState);
 
@@ -25,15 +47,15 @@ export function CustomerPackageCorrectionForm({
 
       <div className="formulier-grid">
         <div className="veld">
-          <label htmlFor={`richting-${customerPackageId}`}>Correctie</label>
+          <label htmlFor={`richting-${customerPackageId}`}>{dictionary.correction}</label>
           <select id={`richting-${customerPackageId}`} name="richting" defaultValue="AFBOEKEN">
-            <option value="AFBOEKEN">Beurt handmatig afboeken</option>
-            <option value="TERUGZETTEN">Beurt terugzetten</option>
+            <option value="AFBOEKEN">{dictionary.deductManually}</option>
+            <option value="TERUGZETTEN">{dictionary.restoreSession}</option>
           </select>
         </div>
 
         <div className="veld">
-          <label htmlFor={`aantal-${customerPackageId}`}>Aantal beurten</label>
+          <label htmlFor={`aantal-${customerPackageId}`}>{dictionary.sessionCount}</label>
           <input
             id={`aantal-${customerPackageId}`}
             name="aantal"
@@ -46,17 +68,17 @@ export function CustomerPackageCorrectionForm({
         </div>
 
         <div className="veld-groot">
-          <label htmlFor={`notitie-${customerPackageId}`}>Reden van correctie</label>
+          <label htmlFor={`notitie-${customerPackageId}`}>{dictionary.correctionReason}</label>
           <textarea
             id={`notitie-${customerPackageId}`}
             name="notitie"
-            placeholder="Bijvoorbeeld vergeten af te boeken op papieren kaart."
+            placeholder={dictionary.reasonPlaceholder}
             required
           />
         </div>
       </div>
 
-      <SubmitButton label="Correctie opslaan" bezigLabel="Opslaan..." />
+      <SubmitButton label={dictionary.save} bezigLabel={dictionary.saving} />
     </form>
   );
 }

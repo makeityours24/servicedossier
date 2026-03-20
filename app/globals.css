@@ -543,6 +543,50 @@ textarea {
   color: rgba(70, 59, 59, 0.9);
 }
 
+.package-summary-card {
+  display: grid;
+  gap: 8px;
+  align-content: start;
+}
+
+.package-summary-card strong {
+  display: block;
+  font-size: 2rem;
+  line-height: 1;
+  letter-spacing: -0.05em;
+  color: var(--accent-donker);
+}
+
+.package-banner {
+  margin-top: 16px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 16px 18px;
+  border-radius: 18px;
+  border: 1px solid rgba(180, 35, 35, 0.14);
+  background: linear-gradient(135deg, rgba(255, 247, 247, 0.96) 0%, rgba(255, 255, 255, 0.94) 100%);
+  box-shadow: var(--schaduw-zacht);
+}
+
+.package-banner strong {
+  display: block;
+  margin-bottom: 6px;
+}
+
+.package-banner p {
+  margin: 0;
+  color: var(--subtekst);
+}
+
+.package-banner-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 14px;
+}
+
 .onboarding-paneel {
   margin-top: 18px;
   padding: 20px;
@@ -1067,6 +1111,58 @@ textarea {
   border-radius: 18px;
   border: 1px solid rgba(180, 35, 35, 0.14);
   background: linear-gradient(135deg, rgba(255, 247, 247, 0.96) 0%, rgba(255, 255, 255, 0.92) 100%);
+}
+
+.active-package-card {
+  border-color: rgba(180, 35, 35, 0.16);
+  background: linear-gradient(145deg, rgba(255, 250, 250, 0.98) 0%, rgba(255, 255, 255, 0.94) 100%);
+}
+
+.package-counter-card {
+  min-width: 132px;
+  display: grid;
+  gap: 8px;
+  justify-items: end;
+  text-align: right;
+}
+
+.package-counter-card strong {
+  font-size: 2.3rem;
+  line-height: 1;
+  letter-spacing: -0.06em;
+  color: var(--accent-donker);
+}
+
+.package-counter-card p {
+  margin: 0;
+  color: var(--subtekst);
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+.collapsible-panel {
+  overflow: hidden;
+}
+
+.collapsible-summary {
+  list-style: none;
+  cursor: pointer;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.collapsible-summary::-webkit-details-marker {
+  display: none;
+}
+
+.collapsible-summary h4 {
+  margin: 0;
+}
+
+.collapsible-panel[open] .collapsible-summary {
+  margin-bottom: 12px;
 }
 
 .stempelkaart-kop {

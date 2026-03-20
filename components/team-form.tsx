@@ -10,6 +10,20 @@ const initialState: FormState = {};
 type TeamFormProps = {
   action: (state: FormState, formData: FormData) => Promise<FormState>;
   submitLabel?: string;
+  dictionary?: {
+    name: string;
+    email: string;
+    password: string;
+    newPasswordOptional: string;
+    role: string;
+    status: string;
+    owner: string;
+    admin: string;
+    staff: string;
+    active: string;
+    disabled: string;
+    saving: string;
+  };
   medewerker?: {
     id: number;
     naam: string;
@@ -20,9 +34,25 @@ type TeamFormProps = {
   wachtwoordVerplicht?: boolean;
 };
 
+const defaultDictionary = {
+  name: "Naam",
+  email: "E-mailadres",
+  password: "Wachtwoord",
+  newPasswordOptional: "Nieuw wachtwoord (optioneel)",
+  role: "Rol",
+  status: "Status",
+  owner: "Eigenaar",
+  admin: "Admin",
+  staff: "Medewerker",
+  active: "Actief",
+  disabled: "Uitgeschakeld",
+  saving: "Opslaan..."
+};
+
 export function TeamForm({
   action,
   submitLabel = "Medewerker toevoegen",
+  dictionary = defaultDictionary,
   medewerker,
   wachtwoordVerplicht = true
 }: TeamFormProps) {
@@ -35,41 +65,41 @@ export function TeamForm({
 
       <div className="formulier-grid">
         <div className="veld">
-          <label htmlFor="naam">Naam</label>
+          <label htmlFor="naam">{dictionary.name}</label>
           <input id="naam" name="naam" defaultValue={medewerker?.naam} required />
         </div>
 
         <div className="veld">
-          <label htmlFor="email">E-mailadres</label>
+          <label htmlFor="email">{dictionary.email}</label>
           <input id="email" name="email" type="email" defaultValue={medewerker?.email} required />
         </div>
 
         <div className="veld">
           <label htmlFor="wachtwoord">
-            {wachtwoordVerplicht ? "Wachtwoord" : "Nieuw wachtwoord (optioneel)"}
+            {wachtwoordVerplicht ? dictionary.password : dictionary.newPasswordOptional}
           </label>
           <input id="wachtwoord" name="wachtwoord" type="password" required={wachtwoordVerplicht} />
         </div>
 
         <div className="veld">
-          <label htmlFor="rol">Rol</label>
+          <label htmlFor="rol">{dictionary.role}</label>
           <select id="rol" name="rol" defaultValue={medewerker?.rol ?? "MEDEWERKER"}>
-            <option value="OWNER">Eigenaar</option>
-            <option value="ADMIN">Admin</option>
-            <option value="MEDEWERKER">Medewerker</option>
+            <option value="OWNER">{dictionary.owner}</option>
+            <option value="ADMIN">{dictionary.admin}</option>
+            <option value="MEDEWERKER">{dictionary.staff}</option>
           </select>
         </div>
 
         <div className="veld">
-          <label htmlFor="status">Status</label>
+          <label htmlFor="status">{dictionary.status}</label>
           <select id="status" name="status" defaultValue={medewerker?.status ?? "ACTIEF"}>
-            <option value="ACTIEF">Actief</option>
-            <option value="UITGESCHAKELD">Uitgeschakeld</option>
+            <option value="ACTIEF">{dictionary.active}</option>
+            <option value="UITGESCHAKELD">{dictionary.disabled}</option>
           </select>
         </div>
       </div>
 
-      <SubmitButton label={submitLabel} bezigLabel="Opslaan..." />
+      <SubmitButton label={submitLabel} bezigLabel={dictionary.saving} />
     </form>
   );
 }

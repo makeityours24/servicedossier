@@ -11,6 +11,25 @@ const initialState: FormState = {};
 type CustomerPackageFormProps = {
   customerId: number;
   action: (state: FormState, formData: FormData) => Promise<FormState>;
+  dictionary?: {
+    inputType: string;
+    newSoldPackage: string;
+    carryOverCard: string;
+    carryOverHelp: string;
+    packageType: string;
+    choosePackage: string;
+    stampCard: string;
+    bundlePackage: string;
+    remainingSessions: string;
+    remainingSessionsPlaceholder: string;
+    notesOptional: string;
+    carryOverNotesPlaceholder: string;
+    soldNotesPlaceholder: string;
+    takeOverCard: string;
+    takingOver: string;
+    sellPackage: string;
+    selling: string;
+  };
   packageTypes: Array<{
     id: number;
     naam: string;
@@ -19,9 +38,31 @@ type CustomerPackageFormProps = {
   }>;
 };
 
+const defaultDictionary = {
+  inputType: "Type invoer",
+  newSoldPackage: "Nieuw verkocht pakket",
+  carryOverCard: "Bestaande kaart overnemen",
+  carryOverHelp:
+    "Gebruik bestaande kaart overnemen als je een papieren stempelkaart of bundel met alleen de huidige stand wilt invoeren.",
+  packageType: "Pakkettype",
+  choosePackage: "Kies een pakket",
+  stampCard: "digitale stempelkaart",
+  bundlePackage: "bundelpakket",
+  remainingSessions: "Nog resterende beurten",
+  remainingSessionsPlaceholder: "Bijvoorbeeld 4",
+  notesOptional: "Notities (optioneel)",
+  carryOverNotesPlaceholder: "Bijvoorbeeld overgenomen van papieren stempelkaart.",
+  soldNotesPlaceholder: "Bijvoorbeeld verkocht als bundel voor vaste klant.",
+  takeOverCard: "Kaart overnemen",
+  takingOver: "Overnemen...",
+  sellPackage: "Pakket verkopen",
+  selling: "Verkopen..."
+};
+
 export function CustomerPackageForm({
   customerId,
   action,
+  dictionary = defaultDictionary,
   packageTypes
 }: CustomerPackageFormProps) {
   const [state, formAction] = useActionState(action, initialState);
@@ -34,34 +75,33 @@ export function CustomerPackageForm({
 
       <div className="formulier-grid">
         <div className="veld-groot">
-          <label htmlFor="invoerType">Type invoer</label>
+          <label htmlFor="invoerType">{dictionary.inputType}</label>
           <select
             id="invoerType"
             name="invoerType"
             value={invoerType}
             onChange={(event) => setInvoerType(event.target.value as "NIEUW" | "OVERNAME")}
           >
-            <option value="NIEUW">Nieuw verkocht pakket</option>
-            <option value="OVERNAME">Bestaande kaart overnemen</option>
+            <option value="NIEUW">{dictionary.newSoldPackage}</option>
+            <option value="OVERNAME">{dictionary.carryOverCard}</option>
           </select>
           <p className="subtitel" style={{ marginTop: 8 }}>
-            Gebruik <strong>bestaande kaart overnemen</strong> als je een papieren stempelkaart of bundel
-            met alleen de huidige stand wilt invoeren.
+            {dictionary.carryOverHelp}
           </p>
         </div>
 
         <div className="veld-groot">
-          <label htmlFor="packageTypeId">Pakkettype</label>
+          <label htmlFor="packageTypeId">{dictionary.packageType}</label>
           <select id="packageTypeId" name="packageTypeId" required defaultValue="">
             <option value="" disabled>
-              Kies een pakket
+              {dictionary.choosePackage}
             </option>
             {packageTypes.map((packageType) => (
               <option key={packageType.id} value={packageType.id}>
                 {packageType.naam} ({packageType.totaalBeurten} beurten,{" "}
                 {packageType.weergaveType === "STEMPELKAART"
-                  ? "digitale stempelkaart"
-                  : "bundelpakket"}
+                  ? dictionary.stampCard
+                  : dictionary.bundlePackage}
                 )
               </option>
             ))}
@@ -70,35 +110,35 @@ export function CustomerPackageForm({
 
         {invoerType === "OVERNAME" ? (
           <div className="veld">
-            <label htmlFor="resterendeBeurten">Nog resterende beurten</label>
+            <label htmlFor="resterendeBeurten">{dictionary.remainingSessions}</label>
             <input
               id="resterendeBeurten"
               name="resterendeBeurten"
               type="number"
               min="0"
-              placeholder="Bijvoorbeeld 4"
+              placeholder={dictionary.remainingSessionsPlaceholder}
               required
             />
           </div>
         ) : null}
 
         <div className="veld-groot">
-          <label htmlFor="notities">Notities (optioneel)</label>
+          <label htmlFor="notities">{dictionary.notesOptional}</label>
           <textarea
             id="notities"
             name="notities"
             placeholder={
               invoerType === "OVERNAME"
-                ? "Bijvoorbeeld overgenomen van papieren stempelkaart."
-                : "Bijvoorbeeld verkocht als bundel voor vaste klant."
+                ? dictionary.carryOverNotesPlaceholder
+                : dictionary.soldNotesPlaceholder
             }
           />
         </div>
       </div>
 
       <SubmitButton
-        label={invoerType === "OVERNAME" ? "Kaart overnemen" : "Pakket verkopen"}
-        bezigLabel={invoerType === "OVERNAME" ? "Overnemen..." : "Verkopen..."}
+        label={invoerType === "OVERNAME" ? dictionary.takeOverCard : dictionary.sellPackage}
+        bezigLabel={invoerType === "OVERNAME" ? dictionary.takingOver : dictionary.selling}
       />
     </form>
   );

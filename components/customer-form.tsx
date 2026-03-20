@@ -18,6 +18,24 @@ const initialState: FormState = {};
 type CustomerFormProps = {
   action: (state: FormState, formData: FormData) => Promise<FormState>;
   submitLabel: string;
+  busyLabel?: string;
+  dictionary?: {
+    draftInfo: string;
+    name: string;
+    phone: string;
+    birthDate: string;
+    hairType: string;
+    hairTypePlaceholder: string;
+    hairColor: string;
+    hairColorPlaceholder: string;
+    address: string;
+    allergies: string;
+    allergiesPlaceholder: string;
+    stylistNotes: string;
+    stylistNotesPlaceholder: string;
+    saveBusy: string;
+    cancel: string;
+  };
   customer?: {
     id?: number;
     naam: string;
@@ -31,7 +49,31 @@ type CustomerFormProps = {
   };
 };
 
-export function CustomerForm({ action, submitLabel, customer }: CustomerFormProps) {
+const defaultDictionary = {
+  draftInfo: "Concept wordt lokaal bewaard zolang je bezig bent.",
+  name: "Naam",
+  phone: "Telefoonnummer",
+  birthDate: "Geboortedatum",
+  hairType: "Haartype",
+  hairTypePlaceholder: "Bijvoorbeeld krullend, fijn, dik",
+  hairColor: "Haarkleur",
+  hairColorPlaceholder: "Bijvoorbeeld donkerblond, koper, zwart",
+  address: "Adres",
+  allergies: "Allergieen",
+  allergiesPlaceholder: "Bijvoorbeeld gevoelig voor blondering, parfum of specifieke producten",
+  stylistNotes: "Notities stylist",
+  stylistNotesPlaceholder: "Bijvoorbeeld aandachtspunten, voorkeuren of belangrijke observaties",
+  saveBusy: "Opslaan...",
+  cancel: "Annuleren"
+};
+
+export function CustomerForm({
+  action,
+  submitLabel,
+  busyLabel,
+  dictionary = defaultDictionary,
+  customer
+}: CustomerFormProps) {
   const [state, formAction] = useActionState(action, initialState);
   const storageKey = useMemo(
     () => `salondossier:customer-form:${customer?.id ?? "new"}`,
@@ -154,17 +196,17 @@ export function CustomerForm({ action, submitLabel, customer }: CustomerFormProp
       {customer?.id ? <input type="hidden" name="customerId" value={customer.id} /> : null}
       <FormMessage error={state.error} success={state.success} />
       {!state.error && !state.success && hasDraft ? (
-        <p className="melding-info">Concept wordt lokaal bewaard zolang je bezig bent.</p>
+        <p className="melding-info">{dictionary.draftInfo}</p>
       ) : null}
 
       <div className="formulier-grid">
         <div className="veld">
-          <label htmlFor="naam">Naam</label>
+          <label htmlFor="naam">{dictionary.name}</label>
           <input id="naam" name="naam" value={naam} onChange={(event) => setNaam(event.target.value)} required />
         </div>
 
         <div className="veld">
-          <label htmlFor="telefoonnummer">Telefoonnummer</label>
+          <label htmlFor="telefoonnummer">{dictionary.phone}</label>
           <input
             id="telefoonnummer"
             name="telefoonnummer"
@@ -175,7 +217,7 @@ export function CustomerForm({ action, submitLabel, customer }: CustomerFormProp
         </div>
 
         <div className="veld">
-          <label htmlFor="geboortedatum">Geboortedatum</label>
+          <label htmlFor="geboortedatum">{dictionary.birthDate}</label>
           <input
             id="geboortedatum"
             name="geboortedatum"
@@ -186,59 +228,59 @@ export function CustomerForm({ action, submitLabel, customer }: CustomerFormProp
         </div>
 
         <div className="veld">
-          <label htmlFor="haartype">Haartype</label>
+          <label htmlFor="haartype">{dictionary.hairType}</label>
           <input
             id="haartype"
             name="haartype"
             value={haartype}
             onChange={(event) => setHaartype(event.target.value)}
-            placeholder="Bijvoorbeeld krullend, fijn, dik"
+            placeholder={dictionary.hairTypePlaceholder}
           />
         </div>
 
         <div className="veld">
-          <label htmlFor="haarkleur">Haarkleur</label>
+          <label htmlFor="haarkleur">{dictionary.hairColor}</label>
           <input
             id="haarkleur"
             name="haarkleur"
             value={haarkleur}
             onChange={(event) => setHaarkleur(event.target.value)}
-            placeholder="Bijvoorbeeld donkerblond, koper, zwart"
+            placeholder={dictionary.hairColorPlaceholder}
           />
         </div>
 
         <div className="veld-groot">
-          <label htmlFor="adres">Adres</label>
+          <label htmlFor="adres">{dictionary.address}</label>
           <textarea id="adres" name="adres" value={adres} onChange={(event) => setAdres(event.target.value)} required />
         </div>
 
         <div className="veld-groot">
-          <label htmlFor="allergieen">Allergieen</label>
+          <label htmlFor="allergieen">{dictionary.allergies}</label>
           <textarea
             id="allergieen"
             name="allergieen"
             value={allergieen}
             onChange={(event) => setAllergieen(event.target.value)}
-            placeholder="Bijvoorbeeld gevoelig voor blondering, parfum of specifieke producten"
+            placeholder={dictionary.allergiesPlaceholder}
           />
         </div>
 
         <div className="veld-groot">
-          <label htmlFor="stylistNotities">Notities stylist</label>
+          <label htmlFor="stylistNotities">{dictionary.stylistNotes}</label>
           <textarea
             id="stylistNotities"
             name="stylistNotities"
             value={stylistNotities}
             onChange={(event) => setStylistNotities(event.target.value)}
-            placeholder="Bijvoorbeeld aandachtspunten, voorkeuren of belangrijke observaties"
+            placeholder={dictionary.stylistNotesPlaceholder}
           />
         </div>
       </div>
 
       <div className="knoppenrij">
-        <SubmitButton label={submitLabel} bezigLabel="Opslaan..." />
+        <SubmitButton label={submitLabel} bezigLabel={busyLabel ?? dictionary.saveBusy} />
         <Link href="/klanten" className="knop-secundair">
-          Annuleren
+          {dictionary.cancel}
         </Link>
       </div>
     </form>

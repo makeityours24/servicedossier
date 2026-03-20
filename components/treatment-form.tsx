@@ -16,6 +16,25 @@ type TreatmentFormProps = {
   }>;
   action: (state: FormState, formData: FormData) => Promise<FormState>;
   submitLabel?: string;
+  busyLabel?: string;
+  dictionary?: {
+    draftInfo: string;
+    quickChoices: string;
+    dateTime: string;
+    stylist: string;
+    chooseStylist: string;
+    treatment: string;
+    treatmentPlaceholder: string;
+    recipe: string;
+    recipePlaceholder: string;
+    notesOptional: string;
+    notesPlaceholder: string;
+    deductPackageOptional: string;
+    noPackage: string;
+    stampCard: string;
+    packageLabel: string;
+    saveBusy: string;
+  };
   treatment?: {
     id?: number;
     appointmentId?: number | null;
@@ -38,12 +57,33 @@ type TreatmentFormProps = {
   }>;
 };
 
+const defaultDictionary = {
+  draftInfo: "Concept wordt lokaal bewaard zolang je bezig bent.",
+  quickChoices: "Snelle keuze voor veelgebruikte behandelingen:",
+  dateTime: "Datum en tijd",
+  stylist: "Behandelaar",
+  chooseStylist: "Kies een behandelaar",
+  treatment: "Behandeling",
+  treatmentPlaceholder: "Bijvoorbeeld uitgroei kleuren",
+  recipe: "Recept",
+  recipePlaceholder: "Bijvoorbeeld 7.0 + 7.1, 3% oxidatie, 25 minuten",
+  notesOptional: "Notities (optioneel)",
+  notesPlaceholder: "Extra opmerkingen of advies",
+  deductPackageOptional: "Afboeken van pakket (optioneel)",
+  noPackage: "Geen pakket gebruiken",
+  stampCard: "stempelkaart",
+  packageLabel: "pakket",
+  saveBusy: "Opslaan..."
+};
+
 export function TreatmentForm({
   customerId,
   medewerkerNaam,
   medewerkers,
   action,
   submitLabel = "Behandeling opslaan",
+  busyLabel,
+  dictionary = defaultDictionary,
   treatment,
   helperText,
   treatmentPresets = [],
@@ -176,12 +216,12 @@ export function TreatmentForm({
       ) : null}
       <FormMessage error={state.error} success={state.success} />
       {!state.error && !state.success && hasDraft ? (
-        <p className="melding-info">Concept wordt lokaal bewaard zolang je bezig bent.</p>
+        <p className="melding-info">{dictionary.draftInfo}</p>
       ) : null}
       {helperText ? <p className="subtitel" style={{ marginTop: 0 }}>{helperText}</p> : null}
       <div>
         <p className="meta" style={{ marginBottom: 12 }}>
-          Snelle keuze voor veelgebruikte behandelingen:
+          {dictionary.quickChoices}
         </p>
         <div className="acties">
           {treatmentPresets.map((preset) => (
@@ -199,7 +239,7 @@ export function TreatmentForm({
 
       <div className="formulier-grid">
         <div className="veld">
-          <label htmlFor="datum">Datum en tijd</label>
+          <label htmlFor="datum">{dictionary.dateTime}</label>
           <input
             id="datum"
             name="datum"
@@ -211,7 +251,7 @@ export function TreatmentForm({
         </div>
 
         <div className="veld">
-          <label htmlFor="behandelaarUserId">Behandelaar</label>
+          <label htmlFor="behandelaarUserId">{dictionary.stylist}</label>
           <select
             id="behandelaarUserId"
             name="behandelaarUserId"
@@ -220,7 +260,7 @@ export function TreatmentForm({
             required
           >
             <option value="" disabled>
-              Kies een behandelaar
+              {dictionary.chooseStylist}
             </option>
             {medewerkers.map((medewerker) => (
               <option key={medewerker.id} value={medewerker.id}>
@@ -232,11 +272,11 @@ export function TreatmentForm({
         </div>
 
         <div className="veld-groot">
-          <label htmlFor="behandeling">Behandeling</label>
+          <label htmlFor="behandeling">{dictionary.treatment}</label>
           <input
             id="behandeling"
             name="behandeling"
-            placeholder="Bijvoorbeeld uitgroei kleuren"
+            placeholder={dictionary.treatmentPlaceholder}
             value={behandeling}
             onChange={(event) => setBehandeling(event.target.value)}
             required
@@ -244,11 +284,11 @@ export function TreatmentForm({
         </div>
 
         <div className="veld-groot">
-          <label htmlFor="recept">Recept</label>
+          <label htmlFor="recept">{dictionary.recipe}</label>
           <textarea
             id="recept"
             name="recept"
-            placeholder="Bijvoorbeeld 7.0 + 7.1, 3% oxidatie, 25 minuten"
+            placeholder={dictionary.recipePlaceholder}
             value={recept}
             onChange={(event) => setRecept(event.target.value)}
             required
@@ -256,32 +296,32 @@ export function TreatmentForm({
         </div>
 
         <div className="veld-groot">
-          <label htmlFor="notities">Notities (optioneel)</label>
+          <label htmlFor="notities">{dictionary.notesOptional}</label>
           <textarea
             id="notities"
             name="notities"
-            placeholder="Extra opmerkingen of advies"
+            placeholder={dictionary.notesPlaceholder}
             value={notities}
             onChange={(event) => setNotities(event.target.value)}
           />
         </div>
 
         <div className="veld-groot">
-          <label htmlFor="customerPackageId">Afboeken van pakket (optioneel)</label>
+          <label htmlFor="customerPackageId">{dictionary.deductPackageOptional}</label>
           <select
             id="customerPackageId"
             name="customerPackageId"
             value={customerPackageId}
             onChange={(event) => setCustomerPackageId(event.target.value)}
           >
-            <option value="">Geen pakket gebruiken</option>
+            <option value="">{dictionary.noPackage}</option>
             {activePackages.map((customerPackage) => (
               <option key={customerPackage.id} value={customerPackage.id}>
                 {customerPackage.naamSnapshot} - nog {customerPackage.resterendeBeurten} van{" "}
                 {customerPackage.totaalBeurten} (
                 {customerPackage.weergaveTypeSnapshot === "STEMPELKAART"
-                  ? "stempelkaart"
-                  : "pakket"}
+                  ? dictionary.stampCard
+                  : dictionary.packageLabel}
                 )
               </option>
             ))}
@@ -289,7 +329,7 @@ export function TreatmentForm({
         </div>
       </div>
 
-      <SubmitButton label={submitLabel} bezigLabel="Opslaan..." />
+      <SubmitButton label={submitLabel} bezigLabel={busyLabel ?? dictionary.saveBusy} />
     </form>
   );
 }

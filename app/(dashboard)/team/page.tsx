@@ -3,9 +3,12 @@ import { createMedewerkerAction, deleteMedewerkerAction } from "@/app/(dashboard
 import { DeleteCustomerButton } from "@/components/delete-customer-button";
 import { TeamForm } from "@/components/team-form";
 import { requireSalonSession } from "@/lib/auth";
+import { getCurrentLocale, managementDictionary } from "@/lib/i18n";
 import { prisma } from "@/lib/prisma";
 
 export default async function TeamPage() {
+  const locale = await getCurrentLocale();
+  const copy = managementDictionary[locale].team;
   const user = await requireSalonSession();
 
   const medewerkers = await prisma.user.findMany({
@@ -20,36 +23,28 @@ export default async function TeamPage() {
     <div className="rooster">
       <section className="bovenbalk">
         <div>
-          <span className="logo-label">Team</span>
+          <span className="logo-label">{copy.label}</span>
           <h2 className="pagina-titel" style={{ fontSize: "2.2rem" }}>
-            Medewerkersbeheer
+            {copy.title}
           </h2>
-          <p className="subtitel">
-            Beheer medewerkers binnen deze salonomgeving, inclusief rol, status en toegangsgegevens.
-          </p>
+          <p className="subtitel">{copy.subtitle}</p>
         </div>
       </section>
 
       <section className="info-grid">
         <article className="info-kaart">
-          <h3>Loginaccounts beheer je hier</h3>
-          <p className="meta">
-            Medewerkers die je op deze pagina toevoegt, krijgen een eigen account om in te loggen in
-            deze salonomgeving.
-          </p>
+          <h3>{copy.loginAccountsTitle}</h3>
+          <p className="meta">{copy.loginAccountsText}</p>
         </article>
         <article className="info-kaart">
-          <h3>Klanten hebben geen login</h3>
-          <p className="meta">
-            Klanten voeg je toe via <strong>Nieuwe klant</strong>. Dat zijn klantdossiers zonder eigen
-            inlogmogelijkheid.
-          </p>
+          <h3>{copy.clientsNoLoginTitle}</h3>
+          <p className="meta">{copy.clientsNoLoginText}</p>
         </article>
       </section>
 
       <section className="twee-kolommen">
         <article className="kaart">
-          <h3>Bestaande medewerkers</h3>
+          <h3>{copy.existingStaff}</h3>
           <div className="lijst" style={{ marginTop: 18 }}>
             {medewerkers.map((medewerker) => (
               <div className="lijst-item" key={medewerker.id}>
@@ -57,17 +52,19 @@ export default async function TeamPage() {
                 <p className="meta">
                   {medewerker.email}
                   <br />
-                  Rol: {medewerker.rol} · Status: {medewerker.status}
+                  {copy.role}: {copy.roles[medewerker.rol]} · {copy.status}: {copy.statuses[medewerker.status]}
                 </p>
                 <div className="acties" style={{ marginTop: 16 }}>
                   <Link href={`/team/${medewerker.id}/bewerken`} className="knop-secundair">
-                    Bewerken
+                    {copy.edit}
                   </Link>
                   <form action={deleteMedewerkerAction}>
                     <input type="hidden" name="medewerkerId" value={medewerker.id} />
                     <DeleteCustomerButton
                       naam={medewerker.naam}
-                      confirmMessage="Weet je zeker dat je medewerker {naam} wilt verwijderen? Dit account kan daarna niet meer inloggen."
+                      confirmMessage={copy.deleteConfirm}
+                      label={copy.delete}
+                      busyLabel={copy.deleting}
                     />
                   </form>
                 </div>
@@ -77,11 +74,9 @@ export default async function TeamPage() {
         </article>
 
         <aside className="kaart">
-          <h3>Nieuwe medewerker</h3>
-          <p className="subtitel" style={{ marginTop: 8 }}>
-            Voeg een nieuwe medewerker toe die direct binnen de huidige salon kan inloggen.
-          </p>
-          <TeamForm action={createMedewerkerAction} />
+          <h3>{copy.newStaff}</h3>
+          <p className="subtitel" style={{ marginTop: 8 }}>{copy.newStaffText}</p>
+          <TeamForm action={createMedewerkerAction} submitLabel={copy.addStaff} dictionary={copy.form} />
         </aside>
       </section>
     </div>

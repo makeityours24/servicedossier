@@ -15,22 +15,47 @@ type TreatmentPhotoGalleryProps = {
     } | null;
   }>;
   showDelete?: boolean;
+  dictionary?: {
+    empty: string;
+    before: string;
+    after: string;
+    general: string;
+    altPhoto: string;
+    delete: string;
+    file: string;
+    uploadedBy: string;
+  };
 };
 
-function humanPhotoTypeLabel(soort: "VOOR" | "NA" | "ALGEMEEN") {
-  if (soort === "VOOR") return "Voor";
-  if (soort === "NA") return "Na";
-  return "Algemeen";
+const defaultDictionary = {
+  empty: "Er zijn nog geen foto's aan deze behandeling gekoppeld.",
+  before: "Voor",
+  after: "Na",
+  general: "Algemeen",
+  altPhoto: "foto",
+  delete: "Verwijderen",
+  file: "Bestand",
+  uploadedBy: "Geüpload door"
+};
+
+function humanPhotoTypeLabel(
+  soort: "VOOR" | "NA" | "ALGEMEEN",
+  dictionary: TreatmentPhotoGalleryProps["dictionary"] = defaultDictionary
+) {
+  if (soort === "VOOR") return dictionary.before;
+  if (soort === "NA") return dictionary.after;
+  return dictionary.general;
 }
 
 export function TreatmentPhotoGallery({
   customerId,
   treatmentId,
   photos,
-  showDelete = false
+  showDelete = false,
+  dictionary = defaultDictionary
 }: TreatmentPhotoGalleryProps) {
   if (photos.length === 0) {
-    return <div className="leeg">Er zijn nog geen foto&apos;s aan deze behandeling gekoppeld.</div>;
+    return <div className="leeg">{dictionary.empty}</div>;
   }
 
   return (
@@ -41,30 +66,30 @@ export function TreatmentPhotoGallery({
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={`/api/treatment-photos/${photo.id}`}
-              alt={`${humanPhotoTypeLabel(photo.soort)} foto`}
+              alt={`${humanPhotoTypeLabel(photo.soort, dictionary)} ${dictionary.altPhoto}`}
             />
           </div>
           <div className="treatment-photo-meta">
             <div className="acties" style={{ justifyContent: "space-between", alignItems: "flex-start" }}>
-              <span className="status-badge">{humanPhotoTypeLabel(photo.soort)}</span>
+              <span className="status-badge">{humanPhotoTypeLabel(photo.soort, dictionary)}</span>
               {showDelete ? (
                 <form action={deleteTreatmentPhotoAction}>
                   <input type="hidden" name="customerId" value={customerId} />
                   <input type="hidden" name="treatmentId" value={treatmentId} />
                   <input type="hidden" name="photoId" value={photo.id} />
                   <button type="submit" className="knop-secundair">
-                    Verwijderen
+                    {dictionary.delete}
                   </button>
                 </form>
               ) : null}
             </div>
             {photo.notitie ? <p className="meta">{photo.notitie}</p> : null}
             <p className="meta">
-              <strong>Bestand:</strong> {photo.bestandNaam}
+              <strong>{dictionary.file}:</strong> {photo.bestandNaam}
               {photo.uploadedByUser?.naam ? (
                 <>
                   <br />
-                  <strong>Geüpload door:</strong> {photo.uploadedByUser.naam}
+                  <strong>{dictionary.uploadedBy}:</strong> {photo.uploadedByUser.naam}
                 </>
               ) : null}
             </p>
