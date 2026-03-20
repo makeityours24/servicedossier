@@ -152,15 +152,15 @@ export const homeDictionary = {
   },
   en: {
     heroKicker: "Digital client records for hair salons",
-    heroTitle: "Everything about your client in one place your team will actually use.",
+    heroTitle: "Everything about every client in one place your salon team will actually use.",
     heroSubtitle:
-      "SalonDossier helps salons keep treatments, colour formulas, appointments, packages, digital stamp cards and treatment photos together in one central place.",
+      "SalonDossier helps salons keep client records, colour formulas, appointments, packages, digital stamp cards and treatment photos together in one clear workflow.",
     login: "Log in",
     viewFeatures: "View features",
     voordelen: [
-      "Client records, treatments and colour formulas together in one place",
+      "Client records, services and colour formulas together in one place",
       "Digital packages and stamp cards with automatic deductions per visit",
-      "Daily and team agenda views for multiple stylists at once",
+      "Appointment book with daily and team views for multiple stylists at once",
       "Photos per treatment as visual documentation for complaints or comparison"
     ],
     demoLabel: "What salons notice right away",
@@ -169,22 +169,22 @@ export const homeDictionary = {
       "In a demo you can immediately show that you are not only storing client data, but also connecting formulas, packages, appointments and photos in a logical way.",
     demoItems: [
       { title: "Find formulas instantly", text: "Reuse previous treatments without typing everything again." },
-      { title: "Digitise stamp cards", text: "Packages and stamp cards stay linked to the client file." },
-      { title: "Agenda by stylist", text: "See who is booked each day and turn appointments into treatments." },
+      { title: "Digitise stamp cards", text: "Packages and stamp cards stay linked to the client record." },
+      { title: "Appointment book by stylist", text: "See who is booked each day and turn appointments into services." },
       { title: "Photos as proof", text: "Before and after photos stay linked to the correct treatment." }
     ],
     sectionWhat: "What you get",
     sectionWhatTitle: "A salon workflow that fits together naturally",
     sectionWhatText:
-      "Not a collection of separate tools, but one workspace where client records, appointments, treatments, photos and packages support each other.",
+      "Not a collection of separate tools, but one workspace where client records, the appointment book, services, photos and packages support each other.",
     highlights: [
       {
         title: "No more searching",
-        text: "All formulas, treatments, appointments and photos stay linked to the same client. No scattered notes, no paper stamp cards, no doubt about what was done last time."
+        text: "All formulas, services, appointments and photos stay linked to the same client. No scattered notes, no paper stamp cards, no doubt about what was done last time."
       },
       {
         title: "Built for salons",
-        text: "Work with multiple staff members, plan appointments per stylist, sell packages or stamp cards and turn an appointment directly into a treatment."
+        text: "Work with multiple staff members, manage appointments per stylist, sell packages or stamp cards and turn an appointment directly into a service record."
       },
       {
         title: "Calmer working days",
@@ -194,21 +194,21 @@ export const homeDictionary = {
     modulesLabel: "Modules",
     modulesTitle: "What is already included in SalonDossier",
     modules: [
-      "Client records and treatment history",
+      "Client records and service history",
       "Colour formulas and reusable templates",
       "Packages and digital stamp cards",
-      "Agenda with list and team view",
-      "Treatment photos as file evidence",
+      "Appointment book with list and team view",
+      "Treatment photos as visual proof",
       "Multiple staff members with their own login"
     ],
     pricingLabel: "Pricing",
     pricingTitle: "Simple pricing for salons that want clarity",
     pricingText:
-      "SalonDossier is built for salons that want to manage client files, treatments, colour formulas, appointments, packages, digital stamp cards and treatment photos without a heavy all-in-one system.",
+      "SalonDossier is built for salons that want to manage client records, services, colour formulas, appointments, packages, digital stamp cards and treatment photos without a heavy all-in-one system.",
     demoRequestLabel: "Request a demo",
     demoRequestTitle: "See in 15 minutes how SalonDossier would work in your salon.",
     demoRequestText:
-      "We briefly walk through your workflow and show how client files, appointments, packages, stamp cards and treatment photos fit your salon.",
+      "We briefly walk through your workflow and show how client records, appointments, packages, stamp cards and treatment photos fit your salon.",
     demoSteps: [
       { title: "1. Short intake", text: "We discuss how your salon works today and where time or clarity is currently lost." },
       { title: "2. Focused demo", text: "You only see the parts that matter for your salon and team." },
@@ -225,8 +225,8 @@ export const homeDictionary = {
         audience: "For solo salons and smaller teams.",
         features: [
           "client records",
-          "treatments and colour formulas",
-          "agenda",
+          "services and colour formulas",
+          "appointment book",
           "packages and digital stamp cards",
           "treatment photos",
           "standard updates and support"
@@ -240,7 +240,7 @@ export const homeDictionary = {
         features: [
           "everything in Start",
           "team usage",
-          "team agenda",
+          "team appointment book",
           "priority support",
           "faster access to new features",
           "more guidance"
@@ -261,32 +261,32 @@ export const homeDictionary = {
     ]
   },
   de: {
-    heroKicker: "Digitales Kundendossier für Friseursalons",
-    heroTitle: "Alles über deine Kundin oder deinen Kunden an einem Ort, den dein Team wirklich nutzt.",
+    heroKicker: "Digitale Kundenkartei für Friseursalons",
+    heroTitle: "Alles über deine Kundschaft an einem Ort, den dein Team wirklich nutzt.",
     heroSubtitle:
-      "SalonDossier hilft Salons dabei, Behandlungen, Farbrezepte, Termine, Pakete, digitale Stempelkarten und Behandlungsfotos zentral festzuhalten und schnell wiederzufinden.",
+      "SalonDossier hilft Salons dabei, Kundenkartei, Farbrezepte, Termine, Pakete, digitale Stempelkarten und Behandlungsfotos zentral festzuhalten und schnell wiederzufinden.",
     login: "Anmelden",
     viewFeatures: "Funktionen ansehen",
     voordelen: [
-      "Kundendossiers, Behandlungen und Farbrezepte an einem Ort",
+      "Kundenkartei, Leistungen und Farbrezepte an einem Ort",
       "Digitale Pakete und Stempelkarten mit automatischer Abbuchung pro Besuch",
-      "Tages- und Teamansicht für mehrere Behandler gleichzeitig",
+      "Terminbuch mit Tages- und Teamansicht für mehrere Mitarbeitende gleichzeitig",
       "Fotos pro Behandlung als visuelle Dokumentation bei Beschwerden oder Vergleichen"
     ],
     demoLabel: "Was Salons sofort merken",
-    demoTitle: "Von losen Notizen zu einem vollständigen Kundenbild",
+    demoTitle: "Von losen Notizen zu einer vollständigen Kundenkartei",
     demoText:
       "In einer Demo zeigst du sofort, dass nicht nur Kundendaten gespeichert werden, sondern auch Rezepte, Pakete, Termine und Fotos logisch miteinander verbunden sind.",
     demoItems: [
       { title: "Rezepte schnell finden", text: "Frühere Behandlungen wiederverwenden, ohne alles neu einzugeben." },
-      { title: "Stempelkarten digitalisieren", text: "Pakete und Stempelkarten bleiben mit der Kundenakte verbunden." },
-      { title: "Kalender pro Behandler", text: "Sieh täglich, wer belegt ist, und wandle Termine direkt in Behandlungen um." },
+      { title: "Stempelkarten digitalisieren", text: "Pakete und Stempelkarten bleiben mit der Kundenkartei verbunden." },
+      { title: "Terminbuch pro Mitarbeitendem", text: "Sieh täglich, wer belegt ist, und wandle Termine direkt in Behandlungen um." },
       { title: "Fotos als Nachweis", text: "Vorher- und Nachherfotos bleiben mit der richtigen Behandlung verknüpft." }
     ],
     sectionWhat: "Was du bekommst",
     sectionWhatTitle: "Ein Salon-Workflow, der logisch zusammenpasst",
     sectionWhatText:
-      "Keine Sammlung einzelner Tools, sondern ein Arbeitsplatz, in dem Kundendossier, Kalender, Behandlungen, Fotos und Pakete sich gegenseitig ergänzen.",
+      "Keine Sammlung einzelner Tools, sondern ein Arbeitsplatz, in dem Kundenkartei, Terminbuch, Behandlungen, Fotos und Pakete sich gegenseitig ergänzen.",
     highlights: [
       {
         title: "Nie wieder suchen",
@@ -294,7 +294,7 @@ export const homeDictionary = {
       },
       {
         title: "Für Salons gemacht",
-        text: "Arbeite mit mehreren Mitarbeitenden, plane Termine pro Behandler, verkaufe Pakete oder Stempelkarten und wandle einen Termin direkt in eine Behandlung um."
+        text: "Arbeite mit mehreren Mitarbeitenden, plane Termine pro Mitarbeitendem, verkaufe Pakete oder Stempelkarten und wandle einen Termin direkt in eine Behandlung um."
       },
       {
         title: "Mehr Ruhe im Arbeitstag",
@@ -304,21 +304,21 @@ export const homeDictionary = {
     modulesLabel: "Module",
     modulesTitle: "Was jetzt schon in SalonDossier enthalten ist",
     modules: [
-      "Kundendossiers und Behandlungshistorie",
+      "Kundenkartei und Behandlungshistorie",
       "Farbrezepte und Vorlagen",
       "Pakete und digitale Stempelkarten",
-      "Kalender mit Listen- und Teamansicht",
+      "Terminbuch mit Listen- und Teamansicht",
       "Behandlungsfotos als Nachweis",
       "Mehrere Mitarbeitende mit eigenem Login"
     ],
     pricingLabel: "Preise",
     pricingTitle: "Einfache Preise für Salons, die Übersicht wollen",
     pricingText:
-      "SalonDossier ist für Salons gedacht, die Kundendossiers, Behandlungen, Farbrezepte, Termine, Pakete, digitale Stempelkarten und Behandlungsfotos zentral verwalten möchten, ohne ein schweres All-in-One-System.",
+      "SalonDossier ist für Salons gedacht, die Kundenkartei, Behandlungen, Farbrezepte, Termine, Pakete, digitale Stempelkarten und Behandlungsfotos zentral verwalten möchten, ohne ein schweres All-in-One-System.",
     demoRequestLabel: "Demo anfragen",
     demoRequestTitle: "Sieh in 15 Minuten, wie SalonDossier in deinem Salon funktionieren würde.",
     demoRequestText:
-      "Wir gehen kurz deinen Ablauf durch und zeigen direkt, wie Kundendossiers, Termine, Pakete, Stempelkarten und Behandlungsfotos in deinen Salon passen.",
+      "Wir gehen kurz deinen Ablauf durch und zeigen direkt, wie Kundenkartei, Termine, Pakete, Stempelkarten und Behandlungsfotos in deinen Salon passen.",
     demoSteps: [
       { title: "1. Kurzes Gespräch", text: "Wir besprechen, wie ihr heute arbeitet und wo aktuell Zeit oder Übersicht verloren geht." },
       { title: "2. Gezielte Demo", text: "Du siehst nur die Teile, die für deinen Salon und dein Team relevant sind." },
@@ -334,9 +334,9 @@ export const homeDictionary = {
         period: "pro Monat",
         audience: "Für Solo-Salons und kleinere Teams.",
         features: [
-          "Kundendossiers",
+          "Kundenkartei",
           "Behandlungen und Farbrezepte",
-          "Kalender",
+          "Terminbuch",
           "Pakete und digitale Stempelkarten",
           "Behandlungsfotos",
           "Standard-Updates und Support"
@@ -350,7 +350,7 @@ export const homeDictionary = {
         features: [
           "alles aus Start",
           "Teamnutzung",
-          "Teamkalender",
+          "Team-Terminbuch",
           "priorisierter Support",
           "schnellerer Zugang zu neuen Funktionen",
           "mehr Begleitung"
@@ -523,11 +523,11 @@ export const dashboardDictionary = {
     nav: {
       dashboard: "Dashboard",
       customers: "Clients",
-      newCustomer: "New client (file)",
-      agenda: "Agenda",
+      newCustomer: "New client record",
+      agenda: "Appointment Book",
       recipes: "Recipe templates",
       packages: "Packages",
-      team: "Team",
+      team: "Staff",
       settings: "Settings",
       password: "Password"
     },
@@ -537,8 +537,8 @@ export const dashboardDictionary = {
     title: "Today in the salon",
     subtitle:
       "A direct overview of appointments, treatments, new clients and open packages for {salonNaam}.",
-    openAgenda: "Open agenda",
-    newCustomer: "New client",
+    openAgenda: "Open appointment book",
+    newCustomer: "New client record",
     stats: {
       appointmentsToday: "Appointments today",
       openAppointments: "Open appointments",
@@ -548,8 +548,8 @@ export const dashboardDictionary = {
       activeStaff: "Active staff"
     },
     todayAppointmentsTitle: "Today's appointments",
-    todayAppointmentsText: "Useful for opening the day without going to the full agenda first.",
-    fullAgenda: "Full agenda",
+    todayAppointmentsText: "Useful for opening the day without going to the full appointment book first.",
+    fullAgenda: "Full appointment book",
     noAppointments: "There are no appointments scheduled for today yet.",
     unassigned: "Not assigned yet",
     status: {
@@ -571,12 +571,12 @@ export const dashboardDictionary = {
     quickActions: "Quick actions",
     quickActionCards: {
       newCustomer: {
-        title: "Register new client",
-        text: "Add a new client file right away. Use Team for login accounts."
+        title: "Create new client record",
+        text: "Add a new client record right away. Use Staff for login accounts."
       },
       newAppointment: {
-        title: "Plan new appointment",
-        text: "Open the agenda and schedule a new client appointment directly."
+        title: "Book new appointment",
+        text: "Open the appointment book and schedule a new client appointment directly."
       },
       export: {
         title: "Download CSV export",
@@ -590,9 +590,9 @@ export const dashboardDictionary = {
     madeBy: "Erstellt von",
     nav: {
       dashboard: "Dashboard",
-      customers: "Kundschaft",
-      newCustomer: "Neue Kundin / neuer Kunde",
-      agenda: "Kalender",
+      customers: "Kunden",
+      newCustomer: "Neue Kundenkartei",
+      agenda: "Terminbuch",
       recipes: "Rezeptvorlagen",
       packages: "Pakete",
       team: "Team",
@@ -605,8 +605,8 @@ export const dashboardDictionary = {
     title: "Heute im Salon",
     subtitle:
       "Direkter Überblick über Termine, Behandlungen, neue Kundschaft und offene Pakete für {salonNaam}.",
-    openAgenda: "Kalender öffnen",
-    newCustomer: "Neue Kundin / neuer Kunde",
+    openAgenda: "Terminbuch öffnen",
+    newCustomer: "Neue Kundenkartei",
     stats: {
       appointmentsToday: "Termine heute",
       openAppointments: "Offene Termine",
@@ -615,9 +615,9 @@ export const dashboardDictionary = {
       activePackages: "Aktive Pakete",
       activeStaff: "Aktive Mitarbeitende"
     },
-    todayAppointmentsTitle: "Termine von heute",
-    todayAppointmentsText: "Praktisch, um den Tag zu starten, ohne zuerst in den vollständigen Kalender zu gehen.",
-    fullAgenda: "Vollständiger Kalender",
+    todayAppointmentsTitle: "Termine heute",
+    todayAppointmentsText: "Praktisch, um den Tag zu starten, ohne zuerst ins vollständige Terminbuch zu gehen.",
+    fullAgenda: "Vollständiges Terminbuch",
     noAppointments: "Für heute sind noch keine Termine eingeplant.",
     unassigned: "Noch nicht zugewiesen",
     status: {
@@ -639,12 +639,12 @@ export const dashboardDictionary = {
     quickActions: "Schnellaktionen",
     quickActionCards: {
       newCustomer: {
-        title: "Neue Kundin / neuen Kunden anlegen",
-        text: "Lege direkt ein neues Kundendossier an. Für Login-Konten nutzt du Team."
+        title: "Neue Kundenkartei anlegen",
+        text: "Lege direkt eine neue Kundenkartei an. Für Login-Konten nutzt du Team."
       },
       newAppointment: {
-        title: "Neuen Termin planen",
-        text: "Öffne den Kalender und plane direkt einen neuen Kundentermin."
+        title: "Neuen Termin buchen",
+        text: "Öffne das Terminbuch und plane direkt einen neuen Kundentermin."
       },
       export: {
         title: "CSV-Export herunterladen",
