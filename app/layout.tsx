@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Montserrat } from "next/font/google";
+import { getCurrentLocale } from "@/lib/i18n";
 import "./globals.css";
 
 const montserrat = Montserrat({
@@ -13,9 +14,11 @@ export const metadata: Metadata = {
   description: "Digitaal klanten- en behandelingenlogboek voor kapsalons."
 };
 
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  const locale = await getCurrentLocale();
+
   return (
-    <html lang="nl">
+    <html lang={locale}>
       <body className={montserrat.variable}>{children}</body>
     </html>
   );

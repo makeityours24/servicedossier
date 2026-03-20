@@ -14,6 +14,25 @@ type LoginFormProps = {
   logoUrl?: string | null;
   tenantGedetecteerd: boolean;
   presetError?: string;
+  dictionary: {
+    title: string;
+    subtitle: string;
+    salonCodeLabel: string;
+    salonCodePlaceholder: string;
+    emailLabel: string;
+    emailPlaceholder: string;
+    passwordLabel: string;
+    loginLabel: string;
+    loginBusy: string;
+    salonLoginTitle: string;
+    salonLoginText: string;
+    platformLoginTitle: string;
+    platformLoginText: string;
+    tenantActiveTitle: string;
+    tenantActiveText: string;
+    noSalonHint: string;
+    madeBy: string;
+  };
 };
 
 export function LoginForm({
@@ -21,7 +40,8 @@ export function LoginForm({
   salonNaam,
   logoUrl,
   tenantGedetecteerd,
-  presetError
+  presetError,
+  dictionary
 }: LoginFormProps) {
   const [state, formAction] = useActionState(loginAction, initialState);
 
@@ -37,10 +57,8 @@ export function LoginForm({
         />
         <span className="logo-label">{salonNaam}</span>
       </div>
-      <h1 className="pagina-titel">Inloggen voor medewerkers</h1>
-      <p className="subtitel">
-        Registreer klanten, bewaar kleurrecepten en houd de volledige behandelgeschiedenis centraal bij.
-      </p>
+      <h1 className="pagina-titel">{dictionary.title}</h1>
+      <p className="subtitel">{dictionary.subtitle}</p>
 
       <form action={formAction} className="formulier">
         <input type="hidden" name="salonSlug" value={salonSlug ?? ""} />
@@ -48,34 +66,34 @@ export function LoginForm({
 
         {!tenantGedetecteerd ? (
           <div className="veld">
-            <label htmlFor="salonCode">Saloncode of subdomein (optioneel)</label>
+            <label htmlFor="salonCode">{dictionary.salonCodeLabel}</label>
             <input
               id="salonCode"
               name="salonCode"
-              placeholder="Bijvoorbeeld my-style"
+              placeholder={dictionary.salonCodePlaceholder}
               defaultValue={salonSlug ?? ""}
             />
           </div>
         ) : null}
 
         <div className="veld">
-          <label htmlFor="email">E-mailadres</label>
-          <input id="email" name="email" type="email" placeholder="naam@salon.nl" required />
+          <label htmlFor="email">{dictionary.emailLabel}</label>
+          <input id="email" name="email" type="email" placeholder={dictionary.emailPlaceholder} required />
         </div>
 
         <div className="veld">
-          <label htmlFor="wachtwoord">Wachtwoord</label>
+          <label htmlFor="wachtwoord">{dictionary.passwordLabel}</label>
           <input id="wachtwoord" name="wachtwoord" type="password" required />
         </div>
 
-        <SubmitButton label="Inloggen" bezigLabel="Controleren..." />
+        <SubmitButton label={dictionary.loginLabel} bezigLabel={dictionary.loginBusy} />
       </form>
 
       <div className="info-grid" style={{ marginTop: 20 }}>
         <article className="info-kaart">
-          <h3>Salon login</h3>
+          <h3>{dictionary.salonLoginTitle}</h3>
           <p className="meta">
-            Gebruik het medewerkeraccount van de salon. Voorbeeld:
+            {dictionary.salonLoginText}
             <br />
             <strong>admin@salonluna.nl</strong>
             <br />
@@ -85,29 +103,25 @@ export function LoginForm({
 
         {!tenantGedetecteerd ? (
           <article className="info-kaart">
-            <h3>Platform login</h3>
-            <p className="meta">
-              Log centraal in zonder saloncode voor platformbeheer en onboarding van nieuwe salons.
-            </p>
+            <h3>{dictionary.platformLoginTitle}</h3>
+            <p className="meta">{dictionary.platformLoginText}</p>
           </article>
         ) : (
           <article className="info-kaart">
-            <h3>Saloncontext actief</h3>
+            <h3>{dictionary.tenantActiveTitle}</h3>
             <p className="meta">
-              Je logt direct in voor <strong>{salonNaam}</strong>. De juiste saloncontext is al geselecteerd.
+              {dictionary.tenantActiveText.replace("{salonNaam}", salonNaam)}
             </p>
           </article>
         )}
       </div>
 
       {!tenantGedetecteerd ? (
-        <p className="subtitel" style={{ marginTop: 12 }}>
-          Zonder saloncode log je centraal in. Met een saloncode of subdomein log je direct in voor die salon.
-        </p>
+        <p className="subtitel" style={{ marginTop: 12 }}>{dictionary.noSalonHint}</p>
       ) : null}
 
       <p className="maker">
-        Gemaakt door <a href="https://miy24.nl" target="_blank" rel="noreferrer">miy24.nl</a>
+        {dictionary.madeBy} <a href="https://miy24.nl" target="_blank" rel="noreferrer">miy24.nl</a>
       </p>
     </section>
   );
