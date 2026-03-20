@@ -1,6 +1,13 @@
 import Link from "next/link";
 
 type TeamAgendaGridProps = {
+  locale?: "nl" | "en" | "de";
+  labels: {
+    scrollHint: string;
+    time: string;
+    unassigned: string;
+    minutes: string;
+  };
   dayStart: Date;
   medewerkers: Array<{
     id: number;
@@ -43,14 +50,16 @@ function getStatusClass(status: TeamAgendaGridProps["afspraken"][number]["status
   return "gepland";
 }
 
-function formatTime(date: Date) {
-  return new Intl.DateTimeFormat("nl-NL", {
+function formatTime(date: Date, locale?: "nl" | "en" | "de") {
+  const intlLocale = locale === "en" ? "en-GB" : locale === "de" ? "de-DE" : "nl-NL";
+
+  return new Intl.DateTimeFormat(intlLocale, {
     hour: "2-digit",
     minute: "2-digit"
   }).format(date);
 }
 
-export function TeamAgendaGrid({ dayStart, medewerkers, afspraken }: TeamAgendaGridProps) {
+export function TeamAgendaGrid({ dayStart, medewerkers, afspraken, locale, labels }: TeamAgendaGridProps) {
   const agendaHeight = getAgendaHeight();
   const tijdsloten = Array.from({ length: END_HOUR - START_HOUR + 1 }, (_, index) => START_HOUR + index);
   const ongepland = afspraken.filter((afspraak) => !afspraak.user);
@@ -62,7 +71,7 @@ export function TeamAgendaGrid({ dayStart, medewerkers, afspraken }: TeamAgendaG
     })),
     {
       id: -1,
-      naam: "Nog niet toegewezen",
+      naam: labels.unassigned,
       afspraken: ongepland
     }
   ].filter((kolom) => kolom.afspraken.length > 0 || kolom.id !== -1);
@@ -70,11 +79,11 @@ export function TeamAgendaGrid({ dayStart, medewerkers, afspraken }: TeamAgendaG
   return (
     <div className="team-agenda-wrapper">
       <div className="team-agenda-helper">
-        <span>Scroll naar rechts voor meer behandelaars</span>
+        <span>{labels.scrollHint}</span>
       </div>
       <div className="team-agenda-grid">
         <div className="team-agenda-tijdkolom">
-          <div className="team-agenda-kop">Tijd</div>
+          <div className="team-agenda-kop">{labels.time}</div>
           <div className="team-agenda-tijdlijn" style={{ height: agendaHeight }}>
             {tijdsloten.map((uur) => (
               <div
@@ -123,9 +132,9 @@ export function TeamAgendaGrid({ dayStart, medewerkers, afspraken }: TeamAgendaG
                       <strong>{afspraak.customer.naam}</strong>
                       <span>{afspraak.behandeling}</span>
                       <span>
-                        {formatTime(afspraak.datumStart)} - {formatTime(afspraak.datumEinde)}
+                        {formatTime(afspraak.datumStart, locale)} - {formatTime(afspraak.datumEinde, locale)}
                       </span>
-                      <span>{afspraak.duurMinuten} min</span>
+                      <span>{labels.minutes.replace("{count}", String(afspraak.duurMinuten))}</span>
                     </Link>
                   );
                 })}

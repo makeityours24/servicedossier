@@ -12,7 +12,38 @@ type AppointmentFormProps = {
   action: (state: FormState, formData: FormData) => Promise<FormState>;
   quickCreateCustomerAction?: (state: FormState, formData: FormData) => Promise<FormState>;
   submitLabel?: string;
+  busyLabel?: string;
   preselectedCustomerId?: number | null;
+  dictionary: {
+    addCustomerInlineTitle: string;
+    addCustomerInlineText: string;
+    quickCustomerUnavailable: string;
+    name: string;
+    phone: string;
+    address: string;
+    addressPlaceholder: string;
+    addCustomer: string;
+    addingCustomer: string;
+    customer: string;
+    close: string;
+    newCustomer: string;
+    chooseCustomer: string;
+    customerHint: string;
+    stylistOptional: string;
+    startTime: string;
+    duration: string;
+    endTime: string;
+    treatment: string;
+    treatmentPlaceholder: string;
+    agendaColor: string;
+    status: string;
+    unassigned: string;
+    statusOptions: Record<"GEPLAND" | "VOLTOOID" | "GEANNULEERD" | "NIET_GEKOMEN", string>;
+    completeHint: string;
+    notesOptional: string;
+    notesPlaceholder: string;
+    durations: Record<string, string>;
+  };
   customers: Array<{
     id: number;
     naam: string;
@@ -56,14 +87,16 @@ export function AppointmentForm({
   action,
   quickCreateCustomerAction,
   submitLabel = "Afspraak opslaan",
+  busyLabel = "Opslaan...",
   preselectedCustomerId,
+  dictionary,
   customers,
   medewerkers,
   appointment
 }: AppointmentFormProps) {
   const [state, formAction] = useActionState(action, initialState);
   const [quickCustomerState, quickCustomerAction] = useActionState(
-    quickCreateCustomerAction ?? (async () => ({ error: "Snelle klantaanmaak is hier niet beschikbaar." })),
+    quickCreateCustomerAction ?? (async () => ({ error: dictionary.quickCustomerUnavailable })),
     initialState
   );
   const [showQuickCustomerForm, setShowQuickCustomerForm] = useState(false);
@@ -117,32 +150,32 @@ export function AppointmentForm({
     <div>
       {showQuickCustomerForm && !appointment && quickCreateCustomerAction ? (
         <section className="kaart" style={{ marginBottom: 18 }}>
-          <h4 style={{ marginBottom: 8 }}>Nieuwe klant direct toevoegen</h4>
+          <h4 style={{ marginBottom: 8 }}>{dictionary.addCustomerInlineTitle}</h4>
           <p className="subtitel" style={{ marginBottom: 16 }}>
-            Zo hoef je de agenda niet te verlaten. Na opslaan wordt de klant automatisch geselecteerd.
+            {dictionary.addCustomerInlineText}
           </p>
           <form action={quickCustomerAction} className="formulier">
             <FormMessage error={quickCustomerState.error} success={quickCustomerState.success} />
             <div className="formulier-grid">
               <div className="veld">
-                <label htmlFor="quick-customer-naam">Naam</label>
+                <label htmlFor="quick-customer-naam">{dictionary.name}</label>
                 <input id="quick-customer-naam" name="naam" required />
               </div>
               <div className="veld">
-                <label htmlFor="quick-customer-telefoonnummer">Telefoonnummer</label>
+                <label htmlFor="quick-customer-telefoonnummer">{dictionary.phone}</label>
                 <input id="quick-customer-telefoonnummer" name="telefoonnummer" required />
               </div>
               <div className="veld-groot">
-                <label htmlFor="quick-customer-adres">Adres</label>
+                <label htmlFor="quick-customer-adres">{dictionary.address}</label>
                 <textarea
                   id="quick-customer-adres"
                   name="adres"
-                  placeholder="Bijvoorbeeld straat, huisnummer en woonplaats"
+                  placeholder={dictionary.addressPlaceholder}
                   required
                 />
               </div>
             </div>
-            <SubmitButton label="Klant toevoegen" bezigLabel="Toevoegen..." />
+            <SubmitButton label={dictionary.addCustomer} bezigLabel={dictionary.addingCustomer} />
           </form>
         </section>
       ) : null}
@@ -155,7 +188,7 @@ export function AppointmentForm({
           <div className="veld">
             <div className="acties" style={{ justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
               <label htmlFor="customerId" style={{ marginBottom: 0 }}>
-                Klant
+                {dictionary.customer}
               </label>
               {!appointment && quickCreateCustomerAction ? (
                 <button
@@ -163,7 +196,7 @@ export function AppointmentForm({
                   className="knop-zacht"
                   onClick={() => setShowQuickCustomerForm((current) => !current)}
                 >
-                  {showQuickCustomerForm ? "Sluiten" : "Nieuwe klant"}
+                  {showQuickCustomerForm ? dictionary.close : dictionary.newCustomer}
                 </button>
               ) : null}
             </div>
@@ -175,7 +208,7 @@ export function AppointmentForm({
               required
             >
               <option value="" disabled>
-                Kies een klant
+                {dictionary.chooseCustomer}
               </option>
               {customerOptions.map((customer) => (
                 <option key={customer.id} value={customer.id}>
@@ -185,15 +218,15 @@ export function AppointmentForm({
             </select>
             {!appointment && quickCreateCustomerAction ? (
               <p className="subtitel" style={{ marginTop: 8 }}>
-                Nieuwe klant nog niet in het systeem? Voeg hem hier direct toe en plan daarna verder.
+                {dictionary.customerHint}
               </p>
             ) : null}
           </div>
 
           <div className="veld">
-            <label htmlFor="userId">Behandelaar (optioneel)</label>
+            <label htmlFor="userId">{dictionary.stylistOptional}</label>
             <select id="userId" name="userId" defaultValue={appointment?.userId ?? ""}>
-              <option value="">Nog niet toegewezen</option>
+              <option value="">{dictionary.unassigned}</option>
               {medewerkers.map((medewerker) => (
                 <option key={medewerker.id} value={medewerker.id}>
                   {medewerker.naam}
@@ -203,7 +236,7 @@ export function AppointmentForm({
           </div>
 
           <div className="veld">
-            <label htmlFor="datumStart">Starttijd</label>
+            <label htmlFor="datumStart">{dictionary.startTime}</label>
             <input
               id="datumStart"
               name="datumStart"
@@ -215,26 +248,26 @@ export function AppointmentForm({
           </div>
 
           <div className="veld">
-            <label htmlFor="duurMinuten">Duur</label>
+            <label htmlFor="duurMinuten">{dictionary.duration}</label>
             <select
               id="duurMinuten"
               name="duurMinuten"
               defaultValue={String(appointment?.duurMinuten ?? 30)}
               onChange={(event) => setDuurMinuten(event.target.value)}
             >
-              <option value="15">15 minuten</option>
-              <option value="30">30 minuten</option>
-              <option value="45">45 minuten</option>
-              <option value="60">60 minuten</option>
-              <option value="90">90 minuten</option>
-              <option value="120">120 minuten</option>
-              <option value="150">150 minuten</option>
-              <option value="180">180 minuten</option>
+              <option value="15">{dictionary.durations["15"]}</option>
+              <option value="30">{dictionary.durations["30"]}</option>
+              <option value="45">{dictionary.durations["45"]}</option>
+              <option value="60">{dictionary.durations["60"]}</option>
+              <option value="90">{dictionary.durations["90"]}</option>
+              <option value="120">{dictionary.durations["120"]}</option>
+              <option value="150">{dictionary.durations["150"]}</option>
+              <option value="180">{dictionary.durations["180"]}</option>
             </select>
           </div>
 
           <div className="veld">
-            <label htmlFor="datumEindePreview">Eindtijd</label>
+            <label htmlFor="datumEindePreview">{dictionary.endTime}</label>
             <input
               id="datumEindePreview"
               type="datetime-local"
@@ -244,18 +277,18 @@ export function AppointmentForm({
           </div>
 
           <div className="veld-groot">
-            <label htmlFor="behandeling">Behandeling</label>
+            <label htmlFor="behandeling">{dictionary.treatment}</label>
             <input
               id="behandeling"
               name="behandeling"
               defaultValue={appointment?.behandeling}
-              placeholder="Bijvoorbeeld Uitgroei kleuren"
+              placeholder={dictionary.treatmentPlaceholder}
               required
             />
           </div>
 
           <div className="veld">
-            <label htmlFor="behandelingKleur">Kleur in agenda</label>
+            <label htmlFor="behandelingKleur">{dictionary.agendaColor}</label>
             <input
               id="behandelingKleur"
               name="behandelingKleur"
@@ -265,33 +298,32 @@ export function AppointmentForm({
           </div>
 
           <div className="veld">
-            <label htmlFor="status">Status</label>
+            <label htmlFor="status">{dictionary.status}</label>
             <select id="status" name="status" defaultValue={appointment?.status ?? "GEPLAND"}>
-              <option value="GEPLAND">Gepland</option>
-              {canMarkCompleted ? <option value="VOLTOOID">Voltooid</option> : null}
-              <option value="GEANNULEERD">Geannuleerd</option>
-              <option value="NIET_GEKOMEN">Niet gekomen</option>
+              <option value="GEPLAND">{dictionary.statusOptions.GEPLAND}</option>
+              {canMarkCompleted ? <option value="VOLTOOID">{dictionary.statusOptions.VOLTOOID}</option> : null}
+              <option value="GEANNULEERD">{dictionary.statusOptions.GEANNULEERD}</option>
+              <option value="NIET_GEKOMEN">{dictionary.statusOptions.NIET_GEKOMEN}</option>
             </select>
             {!canMarkCompleted && appointment ? (
               <p className="subtitel" style={{ marginTop: 8 }}>
-                Rond deze afspraak af via <strong>Behandeling registreren en afboeken</strong>. Dan
-                worden behandeling, pakket en stempelkaart direct goed verwerkt.
+                {dictionary.completeHint}
               </p>
             ) : null}
           </div>
 
           <div className="veld-groot">
-            <label htmlFor="notities">Notities (optioneel)</label>
+            <label htmlFor="notities">{dictionary.notesOptional}</label>
             <textarea
               id="notities"
               name="notities"
               defaultValue={appointment?.notities ?? ""}
-              placeholder="Bijvoorbeeld klant wil iets warmer resultaat of liever in de ochtend."
+              placeholder={dictionary.notesPlaceholder}
             />
           </div>
         </div>
 
-        <SubmitButton label={submitLabel} bezigLabel="Opslaan..." />
+        <SubmitButton label={submitLabel} bezigLabel={busyLabel} />
       </form>
     </div>
   );

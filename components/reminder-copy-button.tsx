@@ -6,9 +6,22 @@ import { buildWhatsAppReminderUrl } from "@/lib/utils";
 type ReminderCopyButtonProps = {
   message: string;
   phoneNumber?: string | null;
+  labels?: {
+    copied: string;
+    copy: string;
+    openWhatsApp: string;
+  };
 };
 
-export function ReminderCopyButton({ message, phoneNumber }: ReminderCopyButtonProps) {
+export function ReminderCopyButton({
+  message,
+  phoneNumber,
+  labels = {
+    copied: "Herinnering gekopieerd",
+    copy: "Herinnering kopiëren",
+    openWhatsApp: "Open in WhatsApp"
+  }
+}: ReminderCopyButtonProps) {
   const [copied, setCopied] = useState(false);
 
   async function handleCopy() {
@@ -24,7 +37,7 @@ export function ReminderCopyButton({ message, phoneNumber }: ReminderCopyButtonP
   return (
     <div className="acties">
       <button type="button" className="knop-zacht" onClick={handleCopy}>
-        {copied ? "Herinnering gekopieerd" : "Herinnering kopiëren"}
+        {copied ? labels.copied : labels.copy}
       </button>
       <a
         href={buildWhatsAppReminderUrl(message, phoneNumber)}
@@ -32,7 +45,7 @@ export function ReminderCopyButton({ message, phoneNumber }: ReminderCopyButtonP
         rel="noreferrer"
         className="knop-secundair"
       >
-        Open in WhatsApp
+        {labels.openWhatsApp}
       </a>
     </div>
   );

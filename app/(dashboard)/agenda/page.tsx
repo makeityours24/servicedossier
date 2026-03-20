@@ -8,6 +8,7 @@ import { ReminderCopyButton } from "@/components/reminder-copy-button";
 import { TeamAgendaGrid } from "@/components/team-agenda-grid";
 import { requireSalonSession } from "@/lib/auth";
 import { getAdjacentAgendaDates, getAgendaData, getDayRange } from "@/lib/agenda-queries";
+import { agendaDictionary, getCurrentLocale } from "@/lib/i18n";
 import { buildAppointmentReminderMessage, formatDate, formatDateParamLocal } from "@/lib/utils";
 
 type AgendaPageProps = {
@@ -20,6 +21,8 @@ type AgendaPageProps = {
 };
 
 export default async function AgendaPage({ searchParams }: AgendaPageProps) {
+  const locale = await getCurrentLocale();
+  const dict = agendaDictionary[locale];
   const user = await requireSalonSession();
   const filters = await searchParams;
   const { dayStart, dayEnd } = getDayRange(filters.datum);
@@ -39,13 +42,11 @@ export default async function AgendaPage({ searchParams }: AgendaPageProps) {
     <div className="rooster">
       <section className="bovenbalk">
         <div>
-          <span className="logo-label">Agenda</span>
+          <span className="logo-label">{dict.label}</span>
           <h2 className="pagina-titel" style={{ fontSize: "2.2rem" }}>
-            Dagagenda
+            {dict.title}
           </h2>
-          <p className="subtitel">
-            Plan afspraken per dag en houd eenvoudig zicht op klant, behandelaar en status.
-          </p>
+          <p className="subtitel">{dict.subtitle}</p>
         </div>
       </section>
 
@@ -53,14 +54,14 @@ export default async function AgendaPage({ searchParams }: AgendaPageProps) {
         <div className="acties" style={{ justifyContent: "space-between", alignItems: "end" }}>
           <form className="filters" style={{ marginBottom: 0 }}>
             <div className="veld">
-              <label htmlFor="datum">Datum</label>
+              <label htmlFor="datum">{dict.date}</label>
               <input id="datum" name="datum" type="date" defaultValue={selectedDateParam} />
             </div>
 
             <div className="veld">
-              <label htmlFor="medewerker">Behandelaar</label>
+              <label htmlFor="medewerker">{dict.stylist}</label>
               <select id="medewerker" name="medewerker" defaultValue={filters.medewerker ?? ""}>
-                <option value="">Alle behandelaars</option>
+                <option value="">{dict.allStylists}</option>
                 {medewerkers.map((medewerker) => (
                   <option key={medewerker.id} value={medewerker.id}>
                     {medewerker.naam}
@@ -70,7 +71,7 @@ export default async function AgendaPage({ searchParams }: AgendaPageProps) {
             </div>
 
             <button type="submit" className="knop-secundair">
-              Filteren
+              {dict.filter}
             </button>
           </form>
 
@@ -79,12 +80,13 @@ export default async function AgendaPage({ searchParams }: AgendaPageProps) {
               datum={selectedDateParam}
               weergave={weergave}
               medewerker={filters.medewerker}
+              labels={dict.views}
             />
             <Link href={`/agenda?datum=${vorigeDagParam}`} className="knop-zacht">
-              Vorige dag
+              {dict.previousDay}
             </Link>
             <Link href={`/agenda?datum=${volgendeDagParam}`} className="knop-zacht">
-              Volgende dag
+              {dict.nextDay}
             </Link>
           </div>
         </div>
@@ -94,19 +96,23 @@ export default async function AgendaPage({ searchParams }: AgendaPageProps) {
         <article className="kaart">
           <div className="print-balk">
             <div>
-              <h3>Afspraken op {formatDate(dayStart)}</h3>
+              <h3>{dict.appointmentsOn.replace("{date}", formatDate(dayStart, locale))}</h3>
               <p className="subtitel" style={{ marginTop: 6 }}>
-                {weergave === "team"
-                  ? "Teamweergave met kolommen per behandelaar voor salons met meerdere kappers tegelijk."
-                  : "Eenvoudig dagoverzicht met klant, behandeling, behandelaar en status."}
+                {weergave === "team" ? dict.teamViewText : dict.listViewText}
               </p>
             </div>
           </div>
 
           {appointments.length === 0 ? (
-            <div className="leeg">Er zijn nog geen afspraken gevonden voor deze dag en filtercombinatie.</div>
+            <div className="leeg">{dict.noAppointmentsForDay}</div>
           ) : weergave === "team" ? (
-            <TeamAgendaGrid dayStart={dayStart} medewerkers={medewerkers} afspraken={appointments} />
+            <TeamAgendaGrid
+              locale={locale}
+              labels={dict.teamGrid}
+              dayStart={dayStart}
+              medewerkers={medewerkers}
+              afspraken={appointments}
+            />
           ) : (
             <div className="lijst">
               {appointments.map((appointment) => (
@@ -115,19 +121,22 @@ export default async function AgendaPage({ searchParams }: AgendaPageProps) {
                     <div>
                       <h4>{appointment.customer.naam}</h4>
                       <p className="meta">
-                        <strong>{formatDate(appointment.datumStart)}</strong>
+                        <strong>{formatDate(appointment.datumStart, locale)}</strong>
                         <br />
-                        <strong>Behandeling:</strong> {appointment.behandeling}
+                        <strong>{dict.treatment}:</strong> {appointment.behandeling}
                         <br />
-                        <strong>Duur:</strong> {appointment.duurMinuten} minuten
+                        <strong>{dict.duration}:</strong> {dict.durationValue.replace(
+                          "{count}",
+                          String(appointment.duurMinuten)
+                        )}
                         <br />
-                        <strong>Behandelaar:</strong> {appointment.user?.naam ?? "Nog niet toegewezen"}
+                        <strong>{dict.stylistLabel}:</strong> {appointment.user?.naam ?? dict.unassigned}
                         <br />
-                        <strong>Status:</strong> {appointment.status.replaceAll("_", " ")}
+                        <strong>{dict.statusLabel}:</strong> {dict.status[appointment.status]}
                         {appointment.notities ? (
                           <>
                             <br />
-                            <strong>Notities:</strong> {appointment.notities}
+                            <strong>{dict.notes}:</strong> {appointment.notities}
                           </>
                         ) : null}
                       </p>
@@ -140,39 +149,38 @@ export default async function AgendaPage({ searchParams }: AgendaPageProps) {
                       }}
                       data-inactive={appointment.status === "GEANNULEERD" || appointment.status === "NIET_GEKOMEN" ? "true" : undefined}
                     >
-                      {appointment.status === "GEPLAND"
-                        ? "Gepland"
-                        : appointment.status === "VOLTOOID"
-                          ? "Voltooid"
-                          : appointment.status === "GEANNULEERD"
-                            ? "Geannuleerd"
-                            : "Niet gekomen"}
+                      {dict.status[appointment.status]}
                     </span>
                   </div>
 
                   <div className="acties" style={{ marginTop: 16 }}>
                     <Link href={`/agenda/${appointment.id}/bewerken`} className="knop-secundair">
-                      Bewerken
+                      {dict.edit}
                     </Link>
                     {appointment.convertedTreatment ? (
                       <Link
                         href={`/klanten/${appointment.customer.id}/behandelingen/${appointment.convertedTreatment.id}/bewerken`}
                         className="knop-zacht"
                       >
-                        Afgeronde behandeling openen
+                        {dict.openCompletedTreatment}
                       </Link>
                     ) : (
                       <Link
                         href={`/klanten/${appointment.customer.id}?afspraakId=${appointment.id}#nieuwe-behandeling`}
                         className="knop"
                       >
-                        Behandeling registreren en afboeken
+                        {dict.registerTreatmentAndDeduct}
                       </Link>
                     )}
                     <Link href={`/klanten/${appointment.customer.id}`} className="knop-zacht">
-                      Naar klantdossier
+                      {dict.toClientFile}
                     </Link>
                     <ReminderCopyButton
+                      labels={{
+                        copied: `${dict.reminderCopy} ✓`,
+                        copy: dict.reminderCopy,
+                        openWhatsApp: dict.openWhatsApp
+                      }}
                       phoneNumber={appointment.customer.telefoonnummer}
                       message={buildAppointmentReminderMessage({
                         customerName: appointment.customer.naam,
@@ -187,8 +195,8 @@ export default async function AgendaPage({ searchParams }: AgendaPageProps) {
                       <input type="hidden" name="appointmentId" value={appointment.id} />
                       <DeleteCustomerButton
                         naam={`${appointment.customer.naam} - ${appointment.behandeling}`}
-                        confirmMessage="Weet je zeker dat je afspraak {naam} wilt verwijderen?"
-                        label="Verwijderen"
+                        confirmMessage={dict.deleteAppointmentConfirm}
+                        label={dict.delete}
                       />
                     </form>
                   </div>
@@ -199,18 +207,21 @@ export default async function AgendaPage({ searchParams }: AgendaPageProps) {
         </article>
 
         <aside className="kaart">
-          <h3>Nieuwe afspraak</h3>
+          <h3>{dict.newAppointment}</h3>
           <p className="subtitel" style={{ marginTop: 8 }}>
-            Plan snel een nieuwe afspraak voor een bestaande klant. Dit is bewust een lichte dagagenda zonder zware planner.
+            {dict.newAppointmentText}
           </p>
           {customers.length === 0 ? (
             <div className="leeg" style={{ marginTop: 18 }}>
-              Voeg eerst een klant toe voordat je een afspraak kunt plannen.
+              {dict.addCustomerFirst}
             </div>
           ) : (
             <AppointmentForm
               action={createAppointmentAction}
               quickCreateCustomerAction={createQuickCustomerAction}
+              submitLabel={dict.form.saveAppointment}
+              busyLabel={dict.form.saving}
+              dictionary={dict.form}
               preselectedCustomerId={Number.isInteger(preselectedCustomerId) ? preselectedCustomerId : null}
               customers={customers}
               medewerkers={medewerkers}

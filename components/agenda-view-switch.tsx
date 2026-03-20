@@ -4,9 +4,13 @@ type AgendaViewSwitchProps = {
   datum: string;
   weergave: "lijst" | "team";
   medewerker?: string;
+  labels: {
+    list: string;
+    team: string;
+  };
 };
 
-export function AgendaViewSwitch({ datum, weergave, medewerker }: AgendaViewSwitchProps) {
+export function AgendaViewSwitch({ datum, weergave, medewerker, labels }: AgendaViewSwitchProps) {
   const baseParams = new URLSearchParams();
   baseParams.set("datum", datum);
 
@@ -26,13 +30,13 @@ export function AgendaViewSwitch({ datum, weergave, medewerker }: AgendaViewSwit
         href={`/agenda?${lijstParams.toString()}`}
         className={weergave === "lijst" ? "knop" : "knop-zacht"}
       >
-        Lijst
+        {labels.list}
       </Link>
       <Link
         href={`/agenda?${teamParams.toString()}`}
         className={weergave === "team" ? "knop" : "knop-zacht"}
       >
-        Team
+        {labels.team}
       </Link>
     </div>
   );

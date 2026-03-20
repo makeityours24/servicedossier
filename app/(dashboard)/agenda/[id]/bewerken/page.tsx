@@ -5,6 +5,7 @@ import { createQuickCustomerAction } from "@/app/(dashboard)/klanten/customer-ac
 import { AppointmentForm } from "@/components/appointment-form";
 import { ReminderCopyButton } from "@/components/reminder-copy-button";
 import { requireSalonSession } from "@/lib/auth";
+import { agendaDictionary, getCurrentLocale } from "@/lib/i18n";
 import { prisma } from "@/lib/prisma";
 import { buildAppointmentReminderMessage, formatDateParamLocal } from "@/lib/utils";
 
@@ -21,6 +22,8 @@ function getDurationInMinutes(start: Date, end: Date) {
 }
 
 export default async function BewerkAfspraakPage({ params }: BewerkAfspraakPageProps) {
+  const locale = await getCurrentLocale();
+  const dict = agendaDictionary[locale];
   const user = await requireSalonSession();
   const { id } = await params;
   const appointmentId = Number(id);
@@ -89,17 +92,17 @@ export default async function BewerkAfspraakPage({ params }: BewerkAfspraakPageP
     <div className="rooster">
       <section className="bovenbalk">
         <div>
-          <span className="logo-label">Agenda</span>
+          <span className="logo-label">{dict.label}</span>
           <h2 className="pagina-titel" style={{ fontSize: "2.2rem" }}>
-            Afspraak bewerken
+            {dict.editAppointmentTitle}
           </h2>
           <p className="subtitel">
-            Werk deze afspraak bij voor {appointment.customer.naam} zonder het dagoverzicht te verliezen.
+            {dict.editAppointmentText.replace("{customerName}", appointment.customer.naam)}
           </p>
         </div>
 
         <Link href={`/agenda?datum=${formatDateParamLocal(appointment.datumStart)}`} className="knop-secundair">
-          Terug naar agenda
+          {dict.backToAgenda}
         </Link>
       </section>
 
@@ -110,17 +113,22 @@ export default async function BewerkAfspraakPage({ params }: BewerkAfspraakPageP
               href={`/klanten/${appointment.customerId}/behandelingen/${appointment.convertedTreatment.id}/bewerken`}
               className="knop-zacht"
             >
-              Afgeronde behandeling openen
+              {dict.openCompletedTreatment}
             </Link>
           ) : (
             <Link
               href={`/klanten/${appointment.customerId}?afspraakId=${appointment.id}#nieuwe-behandeling`}
               className="knop"
             >
-              Behandeling registreren en afboeken
+              {dict.registerTreatmentAndDeduct}
             </Link>
           )}
           <ReminderCopyButton
+            labels={{
+              copied: `${dict.reminderCopy} ✓`,
+              copy: dict.reminderCopy,
+              openWhatsApp: dict.openWhatsApp
+            }}
             phoneNumber={appointment.customer.telefoonnummer}
             message={buildAppointmentReminderMessage({
               customerName: appointment.customer.naam,
@@ -136,7 +144,9 @@ export default async function BewerkAfspraakPage({ params }: BewerkAfspraakPageP
         <AppointmentForm
           action={updateAppointmentAction}
           quickCreateCustomerAction={createQuickCustomerAction}
-          submitLabel="Afspraak opslaan"
+          submitLabel={dict.form.saveAppointment}
+          busyLabel={dict.form.saving}
+          dictionary={dict.form}
           customers={customers}
           medewerkers={medewerkers}
           appointment={{
