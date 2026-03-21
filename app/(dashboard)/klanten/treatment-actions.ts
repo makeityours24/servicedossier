@@ -8,6 +8,7 @@ import { prisma } from "@/lib/prisma";
 import { createAuditLog, getRequestIp } from "@/lib/security";
 import {
   applyPackageUsage,
+  getPackageStatusForRemainingSessions,
   rollbackPackageUsage,
   validateAppointmentConversion
 } from "@/lib/treatment-workflows";
@@ -67,7 +68,7 @@ async function attachTreatmentPackageUsage(params: {
   datum: Date;
 }) {
   if (!params.customerPackageId) {
-    return;
+    return null;
   }
 
   const customerPackage = await prisma.customerPackage.findFirst({
@@ -112,6 +113,13 @@ async function attachTreatmentPackageUsage(params: {
       status: usageResult.status
     }
   });
+
+  return {
+    customerPackageId: customerPackage.id,
+    packageName: customerPackage.naamSnapshot,
+    resterendeBeurten: usageResult.resterendeBeurten,
+    status: usageResult.status
+  };
 }
 
 export async function createTreatmentAction(
@@ -218,7 +226,7 @@ export async function createTreatmentAction(
       }
     });
 
-    await attachTreatmentPackageUsage({
+    const packageUsage = await attachTreatmentPackageUsage({
       salonId: user.salonId,
       customerId: parsed.data.customerId,
       treatmentId: treatment.id,
@@ -239,7 +247,14 @@ export async function createTreatmentAction(
     revalidatePath(`/klanten/${parsed.data.customerId}`);
     revalidatePath("/dashboard");
     revalidatePath("/agenda");
-    return { success: "Behandeling is opgeslagen." };
+    const nextState: FormState = { success: "Behandeling is opgeslagen." };
+
+    if (packageUsage?.status === getPackageStatusForRemainingSessions(0)) {
+      nextState.suggestionHref = `/klanten/${parsed.data.customerId}#pakket-toevoegen`;
+      nextState.suggestionLabel = "Nieuwe kaart toevoegen";
+    }
+
+    return nextState;
   } catch (error) {
     return {
       error: error instanceof Error ? error.message : "Opslaan van de behandeling is mislukt."
@@ -325,7 +340,7 @@ export async function updateTreatmentAction(
       }
     });
 
-    await attachTreatmentPackageUsage({
+    const packageUsage = await attachTreatmentPackageUsage({
       salonId: user.salonId,
       customerId: parsed.data.customerId,
       treatmentId,
@@ -336,7 +351,14 @@ export async function updateTreatmentAction(
 
     revalidatePath(`/klanten/${parsed.data.customerId}`);
     revalidatePath(`/klanten/${parsed.data.customerId}/print`);
-    return { success: "Behandeling is bijgewerkt." };
+    const nextState: FormState = { success: "Behandeling is bijgewerkt." };
+
+    if (packageUsage?.status === getPackageStatusForRemainingSessions(0)) {
+      nextState.suggestionHref = `/klanten/${parsed.data.customerId}#pakket-toevoegen`;
+      nextState.suggestionLabel = "Nieuwe kaart toevoegen";
+    }
+
+    return nextState;
   } catch (error) {
     return {
       error: error instanceof Error ? error.message : "Bijwerken van de behandeling is mislukt."

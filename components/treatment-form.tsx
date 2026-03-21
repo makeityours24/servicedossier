@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useActionState, useEffect, useState } from "react";
 import { FormMessage } from "@/components/form-message";
 import { SubmitButton } from "@/components/submit-button";
@@ -34,6 +35,8 @@ type TreatmentFormProps = {
     stampCard: string;
     packageLabel: string;
     saveBusy: string;
+    soldOutSuggestionText: string;
+    soldOutSuggestionLabel: string;
   };
   treatment?: {
     id?: number;
@@ -73,7 +76,9 @@ const defaultDictionary = {
   noPackage: "Geen pakket gebruiken",
   stampCard: "stempelkaart",
   packageLabel: "pakket",
-  saveBusy: "Opslaan..."
+  saveBusy: "Opslaan...",
+  soldOutSuggestionText: "Deze kaart is nu volledig gebruikt. Je kunt direct een nieuwe kaart toevoegen.",
+  soldOutSuggestionLabel: "Nieuwe kaart toevoegen"
 };
 
 export function TreatmentForm({
@@ -215,6 +220,14 @@ export function TreatmentForm({
         <input type="hidden" name="appointmentId" value={treatment.appointmentId} />
       ) : null}
       <FormMessage error={state.error} success={state.success} />
+      {state.success && state.suggestionHref && state.suggestionLabel ? (
+        <div className="melding-info" style={{ display: "flex", justifyContent: "space-between", gap: 12 }}>
+          <span>{state.suggestionText ?? dictionary.soldOutSuggestionText}</span>
+          <Link href={state.suggestionHref} className="knop-zacht">
+            {state.suggestionLabel ?? dictionary.soldOutSuggestionLabel}
+          </Link>
+        </div>
+      ) : null}
       {!state.error && !state.success && hasDraft ? (
         <p className="melding-info">{dictionary.draftInfo}</p>
       ) : null}

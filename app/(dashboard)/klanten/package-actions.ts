@@ -11,6 +11,13 @@ import {
   getPackageStatusForRemainingSessions
 } from "@/lib/treatment-workflows";
 
+function buildNewPackageSuggestion(customerId: number) {
+  return {
+    suggestionHref: `/klanten/${customerId}#pakket-toevoegen`,
+    suggestionLabel: "Nieuwe kaart toevoegen"
+  };
+}
+
 export async function createCustomerPackageAction(
   _: FormState,
   formData: FormData
@@ -129,12 +136,18 @@ export async function createCustomerPackageAction(
     });
 
     revalidatePath(`/klanten/${customer.id}`);
-    return {
+    const nextState: FormState = {
       success:
         parsed.data.invoerType === "OVERNAME"
           ? "Bestaande kaart is met de huidige stand overgenomen."
           : "Pakket is aan de klant toegevoegd."
     };
+
+    if (resterendeBeurten === 0) {
+      Object.assign(nextState, buildNewPackageSuggestion(customer.id));
+    }
+
+    return nextState;
   } catch {
     return { error: "Opslaan van het klantpakket is mislukt." };
   }
@@ -244,11 +257,17 @@ export async function correctCustomerPackageAction(
 
     revalidatePath(`/klanten/${customerPackage.customerId}`);
     revalidatePath("/dashboard");
-    return {
+    const nextState: FormState = {
       success: isTerugzetten
         ? "Correctie opgeslagen. De beurt is teruggezet."
         : "Correctie opgeslagen. De beurt is afgeboekt."
     };
+
+    if (!isTerugzetten && nieuweResterendeBeurten === 0) {
+      Object.assign(nextState, buildNewPackageSuggestion(customerPackage.customerId));
+    }
+
+    return nextState;
   } catch (error) {
     return {
       error: error instanceof Error ? error.message : "Opslaan van de correctie is mislukt."

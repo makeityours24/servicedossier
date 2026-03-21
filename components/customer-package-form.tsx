@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { useActionState } from "react";
 import type { FormState } from "@/components/customer-form";
@@ -29,6 +30,8 @@ type CustomerPackageFormProps = {
     takingOver: string;
     sellPackage: string;
     selling: string;
+    soldOutSuggestionText: string;
+    soldOutSuggestionLabel: string;
   };
   packageTypes: Array<{
     id: number;
@@ -56,7 +59,9 @@ const defaultDictionary = {
   takeOverCard: "Kaart overnemen",
   takingOver: "Overnemen...",
   sellPackage: "Pakket verkopen",
-  selling: "Verkopen..."
+  selling: "Verkopen...",
+  soldOutSuggestionText: "Deze kaart is nu volledig gebruikt. Je kunt direct een nieuwe kaart toevoegen.",
+  soldOutSuggestionLabel: "Nieuwe kaart toevoegen"
 };
 
 export function CustomerPackageForm({
@@ -72,6 +77,14 @@ export function CustomerPackageForm({
     <form action={formAction} className="formulier">
       <input type="hidden" name="customerId" value={customerId} />
       <FormMessage error={state.error} success={state.success} />
+      {state.success && state.suggestionHref && state.suggestionLabel ? (
+        <div className="melding-info" style={{ display: "flex", justifyContent: "space-between", gap: 12 }}>
+          <span>{state.suggestionText ?? dictionary.soldOutSuggestionText}</span>
+          <Link href={state.suggestionHref} className="knop-zacht">
+            {state.suggestionLabel ?? dictionary.soldOutSuggestionLabel}
+          </Link>
+        </div>
+      ) : null}
 
       <div className="formulier-grid">
         <div className="veld-groot">

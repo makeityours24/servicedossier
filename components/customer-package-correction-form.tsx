@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useActionState } from "react";
 import type { FormState } from "@/components/customer-form";
 import { FormMessage } from "@/components/form-message";
@@ -19,6 +20,8 @@ type CustomerPackageCorrectionFormProps = {
     reasonPlaceholder: string;
     save: string;
     saving: string;
+    soldOutSuggestionText: string;
+    soldOutSuggestionLabel: string;
   };
 };
 
@@ -30,7 +33,9 @@ const defaultDictionary = {
   correctionReason: "Reden van correctie",
   reasonPlaceholder: "Bijvoorbeeld vergeten af te boeken op papieren kaart.",
   save: "Correctie opslaan",
-  saving: "Opslaan..."
+  saving: "Opslaan...",
+  soldOutSuggestionText: "Deze kaart is nu volledig gebruikt. Je kunt direct een nieuwe kaart toevoegen.",
+  soldOutSuggestionLabel: "Nieuwe kaart toevoegen"
 };
 
 export function CustomerPackageCorrectionForm({
@@ -44,6 +49,14 @@ export function CustomerPackageCorrectionForm({
     <form action={formAction} className="formulier" style={{ marginTop: 14 }}>
       <input type="hidden" name="customerPackageId" value={customerPackageId} />
       <FormMessage error={state.error} success={state.success} />
+      {state.success && state.suggestionHref && state.suggestionLabel ? (
+        <div className="melding-info" style={{ display: "flex", justifyContent: "space-between", gap: 12 }}>
+          <span>{state.suggestionText ?? dictionary.soldOutSuggestionText}</span>
+          <Link href={state.suggestionHref} className="knop-zacht">
+            {state.suggestionLabel ?? dictionary.soldOutSuggestionLabel}
+          </Link>
+        </div>
+      ) : null}
 
       <div className="formulier-grid">
         <div className="veld">

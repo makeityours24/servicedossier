@@ -1213,7 +1213,9 @@ export const customerDictionary = {
       noPackage: "Geen pakket gebruiken",
       stampCard: "stempelkaart",
       packageLabel: "pakket",
-      saveBusy: "Opslaan..."
+      saveBusy: "Opslaan...",
+      soldOutSuggestionText: "Deze kaart is nu volledig gebruikt. Je kunt direct een nieuwe kaart toevoegen.",
+      soldOutSuggestionLabel: "Nieuwe kaart toevoegen"
     },
     packageForm: {
       inputType: "Type invoer",
@@ -1233,7 +1235,9 @@ export const customerDictionary = {
       takeOverCard: "Kaart overnemen",
       takingOver: "Overnemen...",
       sellPackage: "Pakket verkopen",
-      selling: "Verkopen..."
+      selling: "Verkopen...",
+      soldOutSuggestionText: "Deze kaart is nu volledig gebruikt. Je kunt direct een nieuwe kaart toevoegen.",
+      soldOutSuggestionLabel: "Nieuwe kaart toevoegen"
     },
     correctionForm: {
       correction: "Correctie",
@@ -1243,7 +1247,9 @@ export const customerDictionary = {
       correctionReason: "Reden van correctie",
       reasonPlaceholder: "Bijvoorbeeld vergeten af te boeken op papieren kaart.",
       save: "Correctie opslaan",
-      saving: "Opslaan..."
+      saving: "Opslaan...",
+      soldOutSuggestionText: "Deze kaart is nu volledig gebruikt. Je kunt direct een nieuwe kaart toevoegen.",
+      soldOutSuggestionLabel: "Nieuwe kaart toevoegen"
     },
     photoGallery: {
       empty: "Er zijn nog geen foto's aan deze behandeling gekoppeld.",
@@ -1462,7 +1468,9 @@ export const customerDictionary = {
       noPackage: "Do not use a package",
       stampCard: "stamp card",
       packageLabel: "package",
-      saveBusy: "Saving..."
+      saveBusy: "Saving...",
+      soldOutSuggestionText: "This card is now fully used. You can add a new card right away.",
+      soldOutSuggestionLabel: "Add new card"
     },
     packageForm: {
       inputType: "Entry type",
@@ -1482,7 +1490,9 @@ export const customerDictionary = {
       takeOverCard: "Carry over card",
       takingOver: "Carrying over...",
       sellPackage: "Sell package",
-      selling: "Selling..."
+      selling: "Selling...",
+      soldOutSuggestionText: "This card is now fully used. You can add a new card right away.",
+      soldOutSuggestionLabel: "Add new card"
     },
     correctionForm: {
       correction: "Correction",
@@ -1492,7 +1502,9 @@ export const customerDictionary = {
       correctionReason: "Reason for correction",
       reasonPlaceholder: "For example forgot to deduct it from the paper card.",
       save: "Save correction",
-      saving: "Saving..."
+      saving: "Saving...",
+      soldOutSuggestionText: "This card is now fully used. You can add a new card right away.",
+      soldOutSuggestionLabel: "Add new card"
     },
     photoGallery: {
       empty: "There are no photos linked to this treatment yet.",
@@ -1712,7 +1724,9 @@ export const customerDictionary = {
       noPackage: "Kein Paket verwenden",
       stampCard: "Stempelkarte",
       packageLabel: "Paket",
-      saveBusy: "Speichern..."
+      saveBusy: "Speichern...",
+      soldOutSuggestionText: "Diese Karte ist jetzt vollständig verbraucht. Du kannst direkt eine neue Karte hinzufügen.",
+      soldOutSuggestionLabel: "Neue Karte hinzufügen"
     },
     packageForm: {
       inputType: "Erfassungsart",
@@ -1732,7 +1746,9 @@ export const customerDictionary = {
       takeOverCard: "Karte übernehmen",
       takingOver: "Übernehmen...",
       sellPackage: "Paket verkaufen",
-      selling: "Verkaufen..."
+      selling: "Verkaufen...",
+      soldOutSuggestionText: "Diese Karte ist jetzt vollständig verbraucht. Du kannst direkt eine neue Karte hinzufügen.",
+      soldOutSuggestionLabel: "Neue Karte hinzufügen"
     },
     correctionForm: {
       correction: "Korrektur",
@@ -1742,7 +1758,9 @@ export const customerDictionary = {
       correctionReason: "Grund der Korrektur",
       reasonPlaceholder: "Zum Beispiel vergessen, auf der Papierkarte abzubuchen.",
       save: "Korrektur speichern",
-      saving: "Speichern..."
+      saving: "Speichern...",
+      soldOutSuggestionText: "Diese Karte ist jetzt vollständig verbraucht. Du kannst direkt eine neue Karte hinzufügen.",
+      soldOutSuggestionLabel: "Neue Karte hinzufügen"
     },
     photoGallery: {
       empty: "Mit dieser Behandlung sind noch keine Fotos verknüpft.",

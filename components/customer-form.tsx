@@ -11,6 +11,9 @@ export type FormState = {
   success?: string;
   createdCustomerId?: number;
   createdCustomerName?: string;
+  suggestionText?: string;
+  suggestionHref?: string;
+  suggestionLabel?: string;
 };
 
 const initialState: FormState = {};
