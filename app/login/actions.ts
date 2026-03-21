@@ -1,7 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { clearSession, hashPassword, setSession } from "@/lib/auth";
+import { clearSession, hashPassword, needsPasswordRehash, setSession, verifyPassword } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import {
   assertLoginAllowed,
@@ -101,6 +101,7 @@ export async function loginAction(_: LoginState, formData: FormData): Promise<Lo
       id: true,
       wachtwoord: true,
       salonId: true,
+      sessionVersion: true,
       isPlatformAdmin: true,
       moetWachtwoordWijzigen: true,
       status: true,
@@ -113,7 +114,11 @@ export async function loginAction(_: LoginState, formData: FormData): Promise<Lo
     }
   });
 
-  if (!user || user.status !== "ACTIEF" || user.wachtwoord !== hashPassword(parsed.data.wachtwoord)) {
+  const isPasswordValid = user
+    ? await verifyPassword(parsed.data.wachtwoord, user.wachtwoord)
+    : false;
+
+  if (!user || user.status !== "ACTIEF" || !isPasswordValid) {
     await registerFailedLogin({
       key: throttle.key,
       email: parsed.data.email,
@@ -191,6 +196,16 @@ export async function loginAction(_: LoginState, formData: FormData): Promise<Lo
     ipAddress,
     salonSlug: salonInput || undefined
   });
+
+  if (needsPasswordRehash(user.wachtwoord)) {
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        wachtwoord: await hashPassword(parsed.data.wachtwoord)
+      }
+    });
+  }
+
   await createAuditLog({
     salonId: user.salonId,
     actorUserId: user.id,
@@ -200,7 +215,7 @@ export async function loginAction(_: LoginState, formData: FormData): Promise<Lo
     message: "Succesvolle login.",
     ipAddress
   });
-  await setSession(user.id);
+  await setSession(user.id, user.sessionVersion);
   redirect(user.moetWachtwoordWijzigen ? "/account/wachtwoord" : user.isPlatformAdmin ? "/platform" : "/dashboard");
 }
 

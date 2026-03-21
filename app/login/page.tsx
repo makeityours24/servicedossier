@@ -8,6 +8,7 @@ type LoginPageProps = {
   searchParams: Promise<{
     salon?: string;
     fout?: string;
+    bericht?: string;
   }>;
 };
 
@@ -43,11 +44,16 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
       : params.fout === "niet-gevonden"
         ? dict.notFoundError
         : undefined;
+  const presetSuccess =
+    params.bericht === "reset-voltooid"
+      ? dict.resetCompleted
+      : undefined;
 
-  const redirectPath = `/login${params.salon || params.fout ? `?${new URLSearchParams(
+  const redirectPath = `/login${params.salon || params.fout || params.bericht ? `?${new URLSearchParams(
     Object.entries({
       ...(params.salon ? { salon: params.salon } : {}),
-      ...(params.fout ? { fout: params.fout } : {})
+      ...(params.fout ? { fout: params.fout } : {}),
+      ...(params.bericht ? { bericht: params.bericht } : {})
     })
   ).toString()}` : ""}`;
 
@@ -62,6 +68,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
         logoUrl={salon?.instellingen?.logoUrl}
         tenantGedetecteerd={tenantGedetecteerd}
         presetError={presetError}
+        presetSuccess={presetSuccess}
         dictionary={dict}
       />
     </main>

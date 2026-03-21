@@ -1,20 +1,19 @@
-import { createHash } from "crypto";
 import { PrismaClient } from "@prisma/client";
+import { hashPassword } from "../lib/password";
 
 const prisma = new PrismaClient();
 
-function hashPassword(value: string) {
-  return createHash("sha256").update(value).digest("hex");
-}
-
 async function main() {
+  const platformPasswordHash = await hashPassword("Platform123!");
+  const ownerPasswordHash = await hashPassword("Welkom123!");
+
   await prisma.user.upsert({
     where: { email: "platform@miy24.nl" },
     update: {},
     create: {
       naam: "Platform Beheer",
       email: "platform@miy24.nl",
-      wachtwoord: hashPassword("Platform123!"),
+      wachtwoord: platformPasswordHash,
       moetWachtwoordWijzigen: false,
       isPlatformAdmin: true,
       rol: "ADMIN",
@@ -58,7 +57,7 @@ async function main() {
       salonId: salon.id,
       naam: "Sanne de Vries",
       email: "admin@salonluna.nl",
-      wachtwoord: hashPassword("Welkom123!"),
+      wachtwoord: ownerPasswordHash,
       moetWachtwoordWijzigen: false,
       isPlatformAdmin: false,
       rol: "OWNER",

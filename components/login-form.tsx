@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useActionState } from "react";
 import { loginAction, type LoginState } from "@/app/login/actions";
 import { FormMessage } from "@/components/form-message";
@@ -14,6 +15,7 @@ type LoginFormProps = {
   logoUrl?: string | null;
   tenantGedetecteerd: boolean;
   presetError?: string;
+  presetSuccess?: string;
   dictionary: {
     title: string;
     subtitle: string;
@@ -31,6 +33,8 @@ type LoginFormProps = {
     tenantActiveTitle: string;
     tenantActiveText: string;
     noSalonHint: string;
+    forgotPasswordLabel: string;
+    forgotPasswordHref: string;
     madeBy: string;
   };
 };
@@ -41,6 +45,7 @@ export function LoginForm({
   logoUrl,
   tenantGedetecteerd,
   presetError,
+  presetSuccess,
   dictionary
 }: LoginFormProps) {
   const [state, formAction] = useActionState(loginAction, initialState);
@@ -62,7 +67,7 @@ export function LoginForm({
 
       <form action={formAction} className="formulier">
         <input type="hidden" name="salonSlug" value={salonSlug ?? ""} />
-        <FormMessage error={state.error ?? presetError} />
+        <FormMessage error={state.error ?? presetError} success={presetSuccess} />
 
         {!tenantGedetecteerd ? (
           <div className="veld">
@@ -85,6 +90,10 @@ export function LoginForm({
           <label htmlFor="wachtwoord">{dictionary.passwordLabel}</label>
           <input id="wachtwoord" name="wachtwoord" type="password" required />
         </div>
+
+        <Link href={dictionary.forgotPasswordHref} className="link-tekst">
+          {dictionary.forgotPasswordLabel}
+        </Link>
 
         <SubmitButton label={dictionary.loginLabel} bezigLabel={dictionary.loginBusy} />
       </form>

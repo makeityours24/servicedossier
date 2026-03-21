@@ -3,7 +3,13 @@ import { createHmac, timingSafeEqual } from "crypto";
 export const SESSION_COOKIE = "salon_session";
 
 function getSessionSecret() {
-  return process.env.SESSION_SECRET ?? "lokale-ontwikkel-sleutel";
+  const secret = process.env.SESSION_SECRET?.trim();
+
+  if (!secret) {
+    throw new Error("SESSION_SECRET ontbreekt.");
+  }
+
+  return secret;
 }
 
 function sign(payload: string) {
@@ -31,8 +37,8 @@ function verifySignedValue(value: string) {
   return payload;
 }
 
-export function createSessionValue(userId: number) {
-  const payload = `${userId}:${Date.now()}`;
+export function createSessionValue(userId: number, sessionVersion: number) {
+  const payload = `${userId}:${sessionVersion}:${Date.now()}`;
   return `${payload}.${sign(payload)}`;
 }
 
@@ -42,7 +48,16 @@ export function verifySessionValue(value: string) {
     return null;
   }
 
-  const [userId] = payload.split(":");
+  const [userId, sessionVersion] = payload.split(":");
   const parsedUserId = Number(userId);
-  return Number.isInteger(parsedUserId) ? parsedUserId : null;
+  const parsedSessionVersion = Number(sessionVersion);
+
+  if (!Number.isInteger(parsedUserId) || !Number.isInteger(parsedSessionVersion)) {
+    return null;
+  }
+
+  return {
+    userId: parsedUserId,
+    sessionVersion: parsedSessionVersion
+  };
 }

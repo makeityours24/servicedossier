@@ -1,12 +1,8 @@
-import { createHash } from "crypto";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { SESSION_COOKIE, createSessionValue, verifySessionValue } from "@/lib/auth-shared";
+export { hashPassword, needsPasswordRehash, verifyPassword } from "@/lib/password";
 import { prisma } from "@/lib/prisma";
-
-export function hashPassword(value: string) {
-  return createHash("sha256").update(value).digest("hex");
-}
 
 type SessionUser = NonNullable<Awaited<ReturnType<typeof getSessionUser>>>;
 type SalonSessionUser = SessionUser & {
@@ -22,19 +18,20 @@ export async function getSessionUser() {
     return null;
   }
 
-  const userId = verifySessionValue(session);
-  if (!userId) {
+  const sessionData = verifySessionValue(session);
+  if (!sessionData) {
     return null;
   }
 
-  return prisma.user.findUnique({
-    where: { id: userId },
+  const user = await prisma.user.findUnique({
+    where: { id: sessionData.userId },
     select: {
       id: true,
       salonId: true,
       isPlatformAdmin: true,
       naam: true,
       email: true,
+      sessionVersion: true,
       moetWachtwoordWijzigen: true,
       rol: true,
       status: true,
@@ -62,6 +59,13 @@ export async function getSessionUser() {
       }
     }
   });
+
+  if (!user || user.sessionVersion !== sessionData.sessionVersion) {
+    await clearSession();
+    return null;
+  }
+
+  return user;
 }
 
 export async function requireSession(options?: { allowPasswordChange?: boolean }) {
@@ -104,9 +108,9 @@ export async function requirePlatformAdmin() {
   return user;
 }
 
-export async function setSession(userId: number) {
+export async function setSession(userId: number, sessionVersion: number) {
   const cookieStore = await cookies();
-  cookieStore.set(SESSION_COOKIE, createSessionValue(userId), {
+  cookieStore.set(SESSION_COOKIE, createSessionValue(userId, sessionVersion), {
     httpOnly: true,
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",

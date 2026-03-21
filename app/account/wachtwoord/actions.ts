@@ -3,9 +3,16 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import type { FormState } from "@/components/customer-form";
-import { hashPassword, requireSession } from "@/lib/auth";
+import { clearSession, hashPassword, requireSession, setSession, verifyPassword } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { createAuditLog, getRequestIp } from "@/lib/security";
+import {
+  assertSensitiveActionAllowed,
+  clearSensitiveActionThrottle,
+  createAuditLog,
+  getRequestIp,
+  revokeUserSessions,
+  registerSensitiveActionAttempt
+} from "@/lib/security";
 import { passwordChangeSchema } from "@/lib/validation";
 
 export async function changePasswordAction(
@@ -14,6 +21,12 @@ export async function changePasswordAction(
 ): Promise<FormState> {
   const user = await requireSession({ allowPasswordChange: true });
   const ipAddress = await getRequestIp();
+  const throttle = await assertSensitiveActionAllowed({
+    action: "PASSWORD_CHANGE",
+    actorUserId: user.id,
+    salonId: user.salonId,
+    ipAddress
+  });
   const parsed = passwordChangeSchema.safeParse({
     huidigWachtwoord: formData.get("huidigWachtwoord") || "",
     nieuwWachtwoord: formData.get("nieuwWachtwoord"),
@@ -24,13 +37,28 @@ export async function changePasswordAction(
     return { error: parsed.error.issues[0]?.message ?? "Controleer de wachtwoordgegevens." };
   }
 
+  if (!throttle.allowed) {
+    return { error: throttle.error };
+  }
+
   if (!user.moetWachtwoordWijzigen) {
     const volledigeUser = await prisma.user.findUnique({
       where: { id: user.id },
       select: { wachtwoord: true }
     });
 
-    if (!volledigeUser || volledigeUser.wachtwoord !== hashPassword(parsed.data.huidigWachtwoord || "")) {
+    const isCurrentPasswordValid = volledigeUser
+      ? await verifyPassword(parsed.data.huidigWachtwoord || "", volledigeUser.wachtwoord)
+      : false;
+
+    if (!isCurrentPasswordValid) {
+      await registerSensitiveActionAttempt({
+        key: throttle.key,
+        action: "PASSWORD_CHANGE",
+        actorUserId: user.id,
+        salonId: user.salonId,
+        ipAddress
+      });
       return { error: "Het huidige wachtwoord is onjuist." };
     }
   }
@@ -38,7 +66,7 @@ export async function changePasswordAction(
   await prisma.user.update({
     where: { id: user.id },
     data: {
-      wachtwoord: hashPassword(parsed.data.nieuwWachtwoord),
+      wachtwoord: await hashPassword(parsed.data.nieuwWachtwoord),
       moetWachtwoordWijzigen: false
     }
   });
@@ -52,6 +80,10 @@ export async function changePasswordAction(
     message: "Wachtwoord gewijzigd.",
     ipAddress
   });
+  await clearSensitiveActionThrottle(throttle.key);
+  const updatedSession = await revokeUserSessions(user.id);
+  await clearSession();
+  await setSession(user.id, updatedSession.sessionVersion);
 
   revalidatePath("/dashboard");
   revalidatePath("/platform");

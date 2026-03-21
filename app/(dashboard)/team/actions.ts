@@ -5,21 +5,39 @@ import { redirect } from "next/navigation";
 import type { FormState } from "@/components/customer-form";
 import { requireSalonSession, hashPassword } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { createAuditLog, getRequestIp } from "@/lib/security";
+import {
+  getTeamDeletePolicyError,
+  getTeamUpdatePolicyError,
+  hasTeamManagementRights
+} from "@/lib/security-policies";
+import {
+  assertSensitiveActionAllowed,
+  clearSensitiveActionThrottle,
+  createAuditLog,
+  getRequestIp,
+  registerSensitiveActionAttempt
+} from "@/lib/security";
 import { medewerkerSchema, medewerkerUpdateSchema } from "@/lib/validation";
-
-function hasTeamBeheerRechten(rol: "OWNER" | "ADMIN" | "MEDEWERKER") {
-  return rol === "OWNER" || rol === "ADMIN";
-}
 
 export async function createMedewerkerAction(
   _: FormState,
   formData: FormData
 ): Promise<FormState> {
   const user = await requireSalonSession();
+  const ipAddress = await getRequestIp();
+  const throttle = await assertSensitiveActionAllowed({
+    action: "TEAM_CREATE",
+    actorUserId: user.id,
+    salonId: user.salonId,
+    ipAddress
+  });
 
-  if (!hasTeamBeheerRechten(user.rol)) {
+  if (!hasTeamManagementRights(user.rol)) {
     return { error: "Alleen eigenaren en admins kunnen medewerkers beheren." };
+  }
+
+  if (!throttle.allowed) {
+    return { error: throttle.error };
   }
 
   const parsed = medewerkerSchema.safeParse({
@@ -35,21 +53,43 @@ export async function createMedewerkerAction(
   }
 
   try {
-    await prisma.user.create({
+    const medewerker = await prisma.user.create({
       data: {
         salonId: user.salonId,
         naam: parsed.data.naam,
         email: parsed.data.email.toLowerCase(),
-        wachtwoord: hashPassword(parsed.data.wachtwoord),
+        wachtwoord: await hashPassword(parsed.data.wachtwoord),
         moetWachtwoordWijzigen: true,
         rol: parsed.data.rol,
         status: parsed.data.status
       }
     });
 
+    await createAuditLog({
+      salonId: user.salonId,
+      actorUserId: user.id,
+      action: "USER_CREATED",
+      entityType: "USER",
+      entityId: medewerker.id,
+      message: "Medewerker aangemaakt.",
+      ipAddress,
+      metadata: {
+        rol: parsed.data.rol,
+        status: parsed.data.status
+      }
+    });
+    await clearSensitiveActionThrottle(throttle.key);
+
     revalidatePath("/team");
     return { success: "Medewerker is toegevoegd." };
   } catch {
+    await registerSensitiveActionAttempt({
+      key: throttle.key,
+      action: "TEAM_CREATE",
+      actorUserId: user.id,
+      salonId: user.salonId,
+      ipAddress
+    });
     return { error: "Opslaan is mislukt. Mogelijk bestaat het e-mailadres al." };
   }
 }
@@ -59,9 +99,20 @@ export async function updateMedewerkerAction(
   formData: FormData
 ): Promise<FormState> {
   const user = await requireSalonSession();
+  const ipAddress = await getRequestIp();
+  const throttle = await assertSensitiveActionAllowed({
+    action: "TEAM_UPDATE",
+    actorUserId: user.id,
+    salonId: user.salonId,
+    ipAddress
+  });
 
-  if (!hasTeamBeheerRechten(user.rol)) {
+  if (!hasTeamManagementRights(user.rol)) {
     return { error: "Alleen eigenaren en admins kunnen medewerkers beheren." };
+  }
+
+  if (!throttle.allowed) {
+    return { error: throttle.error };
   }
 
   const parsed = medewerkerUpdateSchema.safeParse({
@@ -86,20 +137,13 @@ export async function updateMedewerkerAction(
       },
       select: {
         id: true,
-        rol: true
+        rol: true,
+        status: true
       }
     });
 
     if (!bestaandeMedewerker) {
       return { error: "Deze medewerker hoort niet bij deze salon." };
-    }
-
-    if (user.rol !== "OWNER" && parsed.data.rol === "OWNER") {
-      return { error: "Alleen een eigenaar kan een andere eigenaar toewijzen." };
-    }
-
-    if (bestaandeMedewerker.id === user.id && parsed.data.status === "UITGESCHAKELD") {
-      return { error: "Je kunt je eigen account niet uitschakelen." };
     }
 
     const ownerCount = await prisma.user.count({
@@ -110,12 +154,18 @@ export async function updateMedewerkerAction(
       }
     });
 
-    const ownerVerdwijnt =
-      bestaandeMedewerker.rol === "OWNER" &&
-      (parsed.data.rol !== "OWNER" || parsed.data.status === "UITGESCHAKELD");
+    const policyError = getTeamUpdatePolicyError({
+      actorRole: user.rol,
+      actorId: user.id,
+      targetUserId: bestaandeMedewerker.id,
+      currentTargetRole: bestaandeMedewerker.rol,
+      nextTargetRole: parsed.data.rol,
+      nextStatus: parsed.data.status,
+      ownerCount
+    });
 
-    if (ownerVerdwijnt && ownerCount <= 1) {
-      return { error: "Deze salon moet minimaal één actieve eigenaar behouden." };
+    if (policyError) {
+      return { error: policyError };
     }
 
     await prisma.user.update({
@@ -127,17 +177,42 @@ export async function updateMedewerkerAction(
         status: parsed.data.status,
         ...(parsed.data.wachtwoord
           ? {
-              wachtwoord: hashPassword(parsed.data.wachtwoord),
+              wachtwoord: await hashPassword(parsed.data.wachtwoord),
               moetWachtwoordWijzigen: true
             }
           : {})
       }
     });
 
+    await createAuditLog({
+      salonId: user.salonId,
+      actorUserId: user.id,
+      action: "USER_UPDATED",
+      entityType: "USER",
+      entityId: parsed.data.medewerkerId,
+      message: "Medewerker bijgewerkt.",
+      ipAddress,
+      metadata: {
+        vorigeRol: bestaandeMedewerker.rol,
+        nieuweRol: parsed.data.rol,
+        vorigeStatus: bestaandeMedewerker.status,
+        nieuweStatus: parsed.data.status,
+        wachtwoordGeroteerd: Boolean(parsed.data.wachtwoord)
+      }
+    });
+    await clearSensitiveActionThrottle(throttle.key);
+
     revalidatePath("/team");
     revalidatePath(`/team/${parsed.data.medewerkerId}/bewerken`);
     return { success: "Medewerker is bijgewerkt." };
   } catch {
+    await registerSensitiveActionAttempt({
+      key: throttle.key,
+      action: "TEAM_UPDATE",
+      actorUserId: user.id,
+      salonId: user.salonId,
+      ipAddress
+    });
     return { error: "Bijwerken is mislukt. Mogelijk bestaat het e-mailadres al." };
   }
 }
@@ -145,9 +220,19 @@ export async function updateMedewerkerAction(
 export async function deleteMedewerkerAction(formData: FormData): Promise<void> {
   const user = await requireSalonSession();
   const ipAddress = await getRequestIp();
+  const throttle = await assertSensitiveActionAllowed({
+    action: "TEAM_DELETE",
+    actorUserId: user.id,
+    salonId: user.salonId,
+    ipAddress
+  });
 
-  if (!hasTeamBeheerRechten(user.rol)) {
+  if (!hasTeamManagementRights(user.rol)) {
     throw new Error("Alleen eigenaren en admins kunnen medewerkers beheren.");
+  }
+
+  if (!throttle.allowed) {
+    throw new Error(throttle.error);
   }
 
   const medewerkerId = Number(formData.get("medewerkerId"));
@@ -172,22 +257,26 @@ export async function deleteMedewerkerAction(formData: FormData): Promise<void> 
     throw new Error("Medewerker niet gevonden.");
   }
 
-  if (medewerker.id === user.id) {
-    throw new Error("Je kunt je eigen account niet verwijderen.");
-  }
+  const ownerCount = medewerker.rol === "OWNER"
+    ? await prisma.user.count({
+        where: {
+          salonId: user.salonId,
+          isPlatformAdmin: false,
+          rol: "OWNER"
+        }
+      })
+    : 0;
 
-  if (medewerker.rol === "OWNER") {
-    const ownerCount = await prisma.user.count({
-      where: {
-        salonId: user.salonId,
-        isPlatformAdmin: false,
-        rol: "OWNER"
-      }
-    });
+  const policyError = getTeamDeletePolicyError({
+    actorRole: user.rol,
+    actorId: user.id,
+    targetUserId: medewerker.id,
+    targetUserRole: medewerker.rol,
+    ownerCount
+  });
 
-    if (ownerCount <= 1) {
-      throw new Error("Deze salon moet minimaal één eigenaar behouden.");
-    }
+  if (policyError) {
+    throw new Error(policyError);
   }
 
   await prisma.user.delete({
@@ -203,6 +292,7 @@ export async function deleteMedewerkerAction(formData: FormData): Promise<void> 
     message: "Medewerker verwijderd.",
     ipAddress
   });
+  await clearSensitiveActionThrottle(throttle.key);
 
   revalidatePath("/team");
   redirect("/team");

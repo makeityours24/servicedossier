@@ -393,8 +393,11 @@ export const loginDictionary = {
     tenantActiveText: "Je logt direct in voor {salonNaam}. De juiste saloncontext is al geselecteerd.",
     noSalonHint:
       "Zonder saloncode log je centraal in. Met een saloncode of subdomein log je direct in voor die salon.",
+    forgotPasswordLabel: "Wachtwoord vergeten?",
+    forgotPasswordHref: "/wachtwoord-vergeten",
     pausedError: "Deze salon is tijdelijk gepauzeerd. Neem contact op met de beheerder.",
     notFoundError: "Deze saloncode is niet gevonden.",
+    resetCompleted: "Je wachtwoord is opnieuw ingesteld. Log in met je nieuwe wachtwoord.",
     madeBy: "Gemaakt door"
   },
   en: {
@@ -417,8 +420,11 @@ export const loginDictionary = {
     tenantActiveText: "You are logging in directly for {salonNaam}. The correct salon context is already selected.",
     noSalonHint:
       "Without a salon code you log in centrally. With a salon code or subdomain you log in directly for that salon.",
+    forgotPasswordLabel: "Forgot your password?",
+    forgotPasswordHref: "/wachtwoord-vergeten",
     pausedError: "This salon is temporarily paused. Please contact the administrator.",
     notFoundError: "This salon code could not be found.",
+    resetCompleted: "Your password has been reset. Log in with your new password.",
     madeBy: "Made by"
   },
   de: {
@@ -441,9 +447,75 @@ export const loginDictionary = {
     tenantActiveText: "Du meldest dich direkt für {salonNaam} an. Der richtige Salonkontext ist bereits gewählt.",
     noSalonHint:
       "Ohne Saloncode meldest du dich zentral an. Mit einem Saloncode oder einer Subdomain meldest du dich direkt für diesen Salon an.",
+    forgotPasswordLabel: "Passwort vergessen?",
+    forgotPasswordHref: "/wachtwoord-vergeten",
     pausedError: "Dieser Salon ist vorübergehend pausiert. Bitte kontaktiere die Verwaltung.",
     notFoundError: "Dieser Saloncode wurde nicht gefunden.",
+    resetCompleted: "Dein Passwort wurde zurückgesetzt. Melde dich mit deinem neuen Passwort an.",
     madeBy: "Erstellt von"
+  }
+} as const;
+
+export const passwordResetDictionary = {
+  nl: {
+    requestTitle: "Wachtwoord opnieuw instellen",
+    requestSubtitle:
+      "Vul het e-mailadres van je account in. Als het bekend is, sturen we een resetlink.",
+    emailLabel: "E-mailadres",
+    requestLabel: "Resetlink versturen",
+    requestBusy: "Verzenden...",
+    requestSuccess:
+      "Als dit account bestaat, is er een resetlink verstuurd. Controleer je inbox en spammap.",
+    requestBack: "Terug naar login",
+    completeTitle: "Kies een nieuw wachtwoord",
+    completeSubtitle:
+      "Deze resetlink is eenmalig en blijft 60 minuten geldig. Kies hieronder een nieuw wachtwoord.",
+    newPasswordLabel: "Nieuw wachtwoord",
+    confirmPasswordLabel: "Bevestig nieuw wachtwoord",
+    completeLabel: "Wachtwoord opslaan",
+    completeBusy: "Opslaan...",
+    invalidToken: "Deze resetlink is ongeldig of verlopen.",
+    backToLogin: "Terug naar login"
+  },
+  en: {
+    requestTitle: "Reset your password",
+    requestSubtitle:
+      "Enter the email address of your account. If it exists, we will send a reset link.",
+    emailLabel: "Email address",
+    requestLabel: "Send reset link",
+    requestBusy: "Sending...",
+    requestSuccess:
+      "If this account exists, a reset link has been sent. Please check your inbox and spam folder.",
+    requestBack: "Back to login",
+    completeTitle: "Choose a new password",
+    completeSubtitle:
+      "This reset link can only be used once and stays valid for 60 minutes. Choose a new password below.",
+    newPasswordLabel: "New password",
+    confirmPasswordLabel: "Confirm new password",
+    completeLabel: "Save password",
+    completeBusy: "Saving...",
+    invalidToken: "This reset link is invalid or has expired.",
+    backToLogin: "Back to login"
+  },
+  de: {
+    requestTitle: "Passwort zurücksetzen",
+    requestSubtitle:
+      "Gib die E-Mail-Adresse deines Kontos ein. Falls sie bekannt ist, senden wir einen Reset-Link.",
+    emailLabel: "E-Mail-Adresse",
+    requestLabel: "Reset-Link senden",
+    requestBusy: "Senden...",
+    requestSuccess:
+      "Falls dieses Konto existiert, wurde ein Reset-Link versendet. Bitte prüfe auch deinen Spam-Ordner.",
+    requestBack: "Zurück zum Login",
+    completeTitle: "Neues Passwort wählen",
+    completeSubtitle:
+      "Dieser Reset-Link ist nur einmal gültig und läuft nach 60 Minuten ab. Wähle unten ein neues Passwort.",
+    newPasswordLabel: "Neues Passwort",
+    confirmPasswordLabel: "Neues Passwort bestätigen",
+    completeLabel: "Passwort speichern",
+    completeBusy: "Speichern...",
+    invalidToken: "Dieser Reset-Link ist ungültig oder abgelaufen.",
+    backToLogin: "Zurück zum Login"
   }
 } as const;
 

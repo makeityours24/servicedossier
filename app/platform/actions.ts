@@ -5,7 +5,13 @@ import { redirect } from "next/navigation";
 import { hashPassword, requirePlatformAdmin } from "@/lib/auth";
 import { getSalonLoginUrl } from "@/lib/app-url";
 import { prisma } from "@/lib/prisma";
-import { createAuditLog, getRequestIp } from "@/lib/security";
+import {
+  assertSensitiveActionAllowed,
+  clearSensitiveActionThrottle,
+  createAuditLog,
+  getRequestIp,
+  registerSensitiveActionAttempt
+} from "@/lib/security";
 import { platformSalonSchema, platformSalonUpdateSchema } from "@/lib/validation";
 
 export type PlatformSalonFormState = {
@@ -34,6 +40,11 @@ export async function createSalonAction(
 ): Promise<PlatformSalonFormState> {
   const actor = await requirePlatformAdmin();
   const ipAddress = await getRequestIp();
+  const throttle = await assertSensitiveActionAllowed({
+    action: "PLATFORM_SALON_CREATE",
+    actorUserId: actor.id,
+    ipAddress
+  });
 
   const parsed = platformSalonSchema.safeParse({
     naam: formData.get("naam"),
@@ -48,6 +59,10 @@ export async function createSalonAction(
 
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Controleer de ingevoerde gegevens." };
+  }
+
+  if (!throttle.allowed) {
+    return { error: throttle.error };
   }
 
   const slug = slugify(parsed.data.naam);
@@ -109,7 +124,7 @@ export async function createSalonAction(
           salonId: salon.id,
           naam: parsed.data.eigenaarNaam,
           email: parsed.data.eigenaarEmail.toLowerCase(),
-          wachtwoord: hashPassword(parsed.data.eigenaarWachtwoord),
+          wachtwoord: await hashPassword(parsed.data.eigenaarWachtwoord),
           moetWachtwoordWijzigen: true,
           isPlatformAdmin: false,
           rol: "OWNER",
@@ -132,6 +147,7 @@ export async function createSalonAction(
         eigenaarEmail: parsed.data.eigenaarEmail.toLowerCase()
       }
     });
+    await clearSensitiveActionThrottle(throttle.key);
     return {
       success: "Salon en eigenaar zijn aangemaakt.",
       onboarding: {
@@ -142,6 +158,12 @@ export async function createSalonAction(
       }
     };
   } catch {
+    await registerSensitiveActionAttempt({
+      key: throttle.key,
+      action: "PLATFORM_SALON_CREATE",
+      actorUserId: actor.id,
+      ipAddress
+    });
     return { error: "Aanmaken is mislukt. Mogelijk bestaat de salon of het e-mailadres al." };
   }
 }
@@ -152,6 +174,11 @@ export async function updateSalonAction(
 ): Promise<PlatformSalonFormState> {
   const actor = await requirePlatformAdmin();
   const ipAddress = await getRequestIp();
+  const throttle = await assertSensitiveActionAllowed({
+    action: "PLATFORM_SALON_UPDATE",
+    actorUserId: actor.id,
+    ipAddress
+  });
 
   const parsed = platformSalonUpdateSchema.safeParse({
     salonId: formData.get("salonId"),
@@ -164,6 +191,10 @@ export async function updateSalonAction(
 
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Controleer de ingevoerde gegevens." };
+  }
+
+  if (!throttle.allowed) {
+    return { error: throttle.error };
   }
 
   const slug = slugify(parsed.data.naam);
@@ -225,8 +256,15 @@ export async function updateSalonAction(
         status: parsed.data.status
       }
     });
+    await clearSensitiveActionThrottle(throttle.key);
     return { success: "Salon is bijgewerkt." };
   } catch {
+    await registerSensitiveActionAttempt({
+      key: throttle.key,
+      action: "PLATFORM_SALON_UPDATE",
+      actorUserId: actor.id,
+      ipAddress
+    });
     return { error: "Bijwerken is mislukt. Mogelijk bestaat de salonnaam al." };
   }
 }
@@ -234,6 +272,15 @@ export async function updateSalonAction(
 export async function deleteSalonAction(formData: FormData): Promise<void> {
   const actor = await requirePlatformAdmin();
   const ipAddress = await getRequestIp();
+  const throttle = await assertSensitiveActionAllowed({
+    action: "PLATFORM_SALON_DELETE",
+    actorUserId: actor.id,
+    ipAddress
+  });
+
+  if (!throttle.allowed) {
+    throw new Error(throttle.error);
+  }
 
   const salonId = Number(formData.get("salonId"));
 
@@ -262,6 +309,7 @@ export async function deleteSalonAction(formData: FormData): Promise<void> {
     message: "Salon verwijderd.",
     ipAddress
   });
+  await clearSensitiveActionThrottle(throttle.key);
 
   revalidatePath("/platform");
   redirect("/platform");

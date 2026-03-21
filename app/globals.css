@@ -472,6 +472,13 @@ textarea {
   font-weight: 700;
 }
 
+.link-tekst {
+  color: var(--accent-donker);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+}
+
 .taalwisselaar {
   display: inline-flex;
   gap: 8px;
