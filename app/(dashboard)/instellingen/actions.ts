@@ -1,8 +1,10 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import type { Prisma } from "@prisma/client";
 import type { FormState } from "@/components/customer-form";
 import { requireSalonSession } from "@/lib/auth";
+import { getDefaultTreatmentPresets, normalizeBranchType } from "@/lib/branch-profile";
 import { prisma } from "@/lib/prisma";
 import {
   assertSensitiveActionAllowed,
@@ -12,6 +14,17 @@ import {
   registerSensitiveActionAttempt
 } from "@/lib/security";
 import { salonSettingsSchema } from "@/lib/validation";
+
+const salonSettingsSelect = {
+  weergavenaam: true,
+  branchType: true,
+  contactEmail: true,
+  contactTelefoon: true,
+  adres: true,
+  primaireKleur: true,
+  logoUrl: true,
+  treatmentPresets: true
+} satisfies Prisma.SalonSettingsSelect;
 
 export async function updateSalonSettingsAction(
   _: FormState,
@@ -28,6 +41,7 @@ export async function updateSalonSettingsAction(
 
   const parsed = salonSettingsSchema.safeParse({
     weergavenaam: formData.get("weergavenaam"),
+    branchType: formData.get("branchType"),
     contactEmail: formData.get("contactEmail") || "",
     contactTelefoon: formData.get("contactTelefoon") || "",
     adres: formData.get("adres") || "",
@@ -45,50 +59,48 @@ export async function updateSalonSettingsAction(
   }
 
   try {
+    const selectedBranchType = normalizeBranchType(parsed.data.branchType);
     const treatmentPresets = parsed.data.treatmentPresets
       .split("\n")
       .map((value) => value.trim())
       .filter(Boolean)
       .slice(0, 12);
+    const effectiveTreatmentPresets =
+      treatmentPresets.length > 0 ? treatmentPresets : getDefaultTreatmentPresets(selectedBranchType);
 
     const existingSettings = await prisma.salonSettings.findUnique({
       where: { salonId: user.salonId },
-      select: {
-        weergavenaam: true,
-        contactEmail: true,
-        contactTelefoon: true,
-        adres: true,
-        primaireKleur: true,
-        logoUrl: true,
-        treatmentPresets: true
-      }
+      select: salonSettingsSelect
     });
 
     await prisma.salonSettings.upsert({
       where: { salonId: user.salonId },
       update: {
         weergavenaam: parsed.data.weergavenaam,
+        branchType: selectedBranchType,
         contactEmail: parsed.data.contactEmail || null,
         contactTelefoon: parsed.data.contactTelefoon || null,
         adres: parsed.data.adres || null,
         primaireKleur: parsed.data.primaireKleur,
         logoUrl: parsed.data.logoUrl || null,
-        treatmentPresets
+        treatmentPresets: effectiveTreatmentPresets
       },
       create: {
         salonId: user.salonId,
         weergavenaam: parsed.data.weergavenaam,
+        branchType: selectedBranchType,
         contactEmail: parsed.data.contactEmail || null,
         contactTelefoon: parsed.data.contactTelefoon || null,
         adres: parsed.data.adres || null,
         primaireKleur: parsed.data.primaireKleur,
         logoUrl: parsed.data.logoUrl || null,
-        treatmentPresets
+        treatmentPresets: effectiveTreatmentPresets
       }
     });
 
     const changedFields = [
       existingSettings?.weergavenaam !== parsed.data.weergavenaam ? "weergavenaam" : null,
+      existingSettings?.branchType !== selectedBranchType ? "branchType" : null,
       (existingSettings?.contactEmail ?? null) !== (parsed.data.contactEmail || null) ? "contactEmail" : null,
       (existingSettings?.contactTelefoon ?? null) !== (parsed.data.contactTelefoon || null)
         ? "contactTelefoon"
@@ -96,7 +108,7 @@ export async function updateSalonSettingsAction(
       (existingSettings?.adres ?? null) !== (parsed.data.adres || null) ? "adres" : null,
       existingSettings?.primaireKleur !== parsed.data.primaireKleur ? "primaireKleur" : null,
       (existingSettings?.logoUrl ?? null) !== (parsed.data.logoUrl || null) ? "logoUrl" : null,
-      JSON.stringify(existingSettings?.treatmentPresets ?? []) !== JSON.stringify(treatmentPresets)
+      JSON.stringify(existingSettings?.treatmentPresets ?? []) !== JSON.stringify(effectiveTreatmentPresets)
         ? "treatmentPresets"
         : null
     ].filter(Boolean);
@@ -111,7 +123,8 @@ export async function updateSalonSettingsAction(
       ipAddress,
       metadata: {
         changedFields,
-        treatmentPresetCount: treatmentPresets.length
+        branchType: selectedBranchType,
+        treatmentPresetCount: effectiveTreatmentPresets.length
       }
     });
     await clearSensitiveActionThrottle(throttle.key);

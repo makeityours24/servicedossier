@@ -14,6 +14,7 @@ import { ReminderCopyButton } from "@/components/reminder-copy-button";
 import { TreatmentForm } from "@/components/treatment-form";
 import { TreatmentPhotoGallery } from "@/components/treatment-photo-gallery";
 import { requireSalonSession } from "@/lib/auth";
+import { getBranchProfileCopy, normalizeBranchType } from "@/lib/branch-profile";
 import { customerDictionary, getCurrentLocale } from "@/lib/i18n";
 import { prisma } from "@/lib/prisma";
 import { buildAppointmentReminderMessage, formatCurrencyFromCents, formatDate, formatDateOnly } from "@/lib/utils";
@@ -49,6 +50,8 @@ export default async function KlantDetailPage({
   const templateId = filters.templateId ? Number(filters.templateId) : null;
   const afspraakId = filters.afspraakId ? Number(filters.afspraakId) : null;
   const user = await requireSalonSession();
+  const branchType = normalizeBranchType(user.salon.instellingen?.branchType);
+  const branchProfile = getBranchProfileCopy(locale, branchType);
 
   if (!Number.isInteger(klantId)) {
     notFound();
@@ -523,9 +526,9 @@ export default async function KlantDetailPage({
           <div className="info-kaart" style={{ marginBottom: 18 }}>
             <div className="acties" style={{ justifyContent: "space-between", alignItems: "flex-start" }}>
               <div>
-                <h3>{copy.profileTitle}</h3>
+                <h3>{branchProfile.profileTitle}</h3>
                 <p className="meta" style={{ marginTop: 8 }}>
-                  {copy.profileText}
+                  {branchProfile.profileText}
                 </p>
               </div>
               <Link href={`/klanten/${klant.id}/bewerken#profiel`} className="knop-secundair">
@@ -542,22 +545,22 @@ export default async function KlantDetailPage({
               </p>
             </article>
             <article className="info-kaart">
-              <h3>{copy.hairType}</h3>
+              <h3>{branchProfile.fieldOneLabel}</h3>
               <p className="meta">{klant.haartype || copy.notFilledInYet}</p>
             </article>
             <article className="info-kaart">
-              <h3>{copy.hairColor}</h3>
+              <h3>{branchProfile.fieldTwoLabel}</h3>
               <p className="meta">{klant.haarkleur || copy.notFilledInYet}</p>
             </article>
             <article className="info-kaart">
-              <h3>{copy.allergies}</h3>
+              <h3>{branchProfile.allergiesLabel}</h3>
               <p className="meta">{klant.allergieen || copy.notFilledInYet}</p>
             </article>
           </div>
 
           {klant.stylistNotities ? (
             <div className="info-kaart" style={{ marginBottom: 18 }}>
-              <h3>{copy.stylistNotes}</h3>
+              <h3>{branchProfile.notesLabel}</h3>
               <p className="meta">{klant.stylistNotities}</p>
             </div>
           ) : null}

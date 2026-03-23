@@ -24,6 +24,12 @@ enum SalonStatus {
   GEPAUZEERD
 }
 
+enum SalonBranchType {
+  HAIR
+  MASSAGE
+  BEAUTY
+}
+
 enum CustomerPackageStatus {
   ACTIEF
   VOLLEDIG_GEBRUIKT
@@ -174,6 +180,7 @@ model SalonSettings {
   id             Int      @id @default(autoincrement())
   salonId        Int      @unique
   weergavenaam   String
+  branchType     SalonBranchType @default(HAIR)
   logoUrl        String?
   primaireKleur  String   @default("#b42323")
   contactEmail   String?

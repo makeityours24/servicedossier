@@ -1,10 +1,15 @@
 import { CustomerForm } from "@/components/customer-form";
 import { createCustomerAction } from "@/app/(dashboard)/klanten/actions";
+import { requireSalonSession } from "@/lib/auth";
+import { getBranchProfileCopy, normalizeBranchType } from "@/lib/branch-profile";
 import { customerDictionary, getCurrentLocale } from "@/lib/i18n";
 
 export default async function NieuweKlantPage() {
   const locale = await getCurrentLocale();
+  const user = await requireSalonSession();
   const copy = customerDictionary[locale].customerFormNew;
+  const branchType = normalizeBranchType(user.salon.instellingen?.branchType);
+  const branchProfile = getBranchProfileCopy(locale, branchType);
 
   return (
     <div className="rooster">
@@ -25,7 +30,17 @@ export default async function NieuweKlantPage() {
           action={createCustomerAction}
           submitLabel={copy.submit}
           busyLabel={copy.busy}
-          dictionary={customerDictionary[locale].customerFormFields}
+          dictionary={{
+            ...customerDictionary[locale].customerFormFields,
+            hairType: branchProfile.fieldOneLabel,
+            hairTypePlaceholder: branchProfile.fieldOnePlaceholder,
+            hairColor: branchProfile.fieldTwoLabel,
+            hairColorPlaceholder: branchProfile.fieldTwoPlaceholder,
+            allergies: branchProfile.allergiesLabel,
+            allergiesPlaceholder: branchProfile.allergiesPlaceholder,
+            stylistNotes: branchProfile.notesLabel,
+            stylistNotesPlaceholder: branchProfile.notesPlaceholder
+          }}
         />
       </section>
     </div>

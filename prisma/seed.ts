@@ -33,6 +33,7 @@ async function main() {
       instellingen: {
         create: {
           weergavenaam: "My Style",
+          branchType: "HAIR",
           primaireKleur: "#b42323",
           contactEmail: "info@kapsalonmystyle.nl",
           contactTelefoon: "0316240237",

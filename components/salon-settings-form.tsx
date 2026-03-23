@@ -12,6 +12,11 @@ type SalonSettingsFormProps = {
   submitLabel?: string;
   dictionary?: {
     salonName: string;
+    branchType: string;
+    branchHelp: string;
+    branchHair: string;
+    branchMassage: string;
+    branchBeauty: string;
     primaryColor: string;
     email: string;
     phone: string;
@@ -24,6 +29,7 @@ type SalonSettingsFormProps = {
   };
   settings: {
     weergavenaam: string;
+    branchType: "HAIR" | "MASSAGE" | "BEAUTY";
     contactEmail: string;
     contactTelefoon: string;
     adres: string;
@@ -35,6 +41,11 @@ type SalonSettingsFormProps = {
 
 const defaultDictionary = {
   salonName: "Salonnaam",
+  branchType: "Branche",
+  branchHelp: "Deze keuze bepaalt de terminologie en profielaccenten in klantdossiers en formulieren.",
+  branchHair: "Kapsalon",
+  branchMassage: "Massagesalon",
+  branchBeauty: "Schoonheidssalon",
   primaryColor: "Primaire kleur",
   email: "E-mailadres",
   phone: "Telefoonnummer",
@@ -63,6 +74,18 @@ export function SalonSettingsForm({
         <div className="veld">
           <label htmlFor="weergavenaam">{dictionary.salonName}</label>
           <input id="weergavenaam" name="weergavenaam" defaultValue={settings.weergavenaam} required />
+        </div>
+
+        <div className="veld">
+          <label htmlFor="branchType">{dictionary.branchType}</label>
+          <select id="branchType" name="branchType" defaultValue={settings.branchType}>
+            <option value="HAIR">{dictionary.branchHair}</option>
+            <option value="MASSAGE">{dictionary.branchMassage}</option>
+            <option value="BEAUTY">{dictionary.branchBeauty}</option>
+          </select>
+          <p className="meta" style={{ margin: 0 }}>
+            {dictionary.branchHelp}
+          </p>
         </div>
 
         <div className="veld">

@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { CustomerForm } from "@/components/customer-form";
 import { updateCustomerAction } from "@/app/(dashboard)/klanten/actions";
 import { requireSalonSession } from "@/lib/auth";
+import { getBranchProfileCopy, normalizeBranchType } from "@/lib/branch-profile";
 import { customerDictionary, getCurrentLocale } from "@/lib/i18n";
 import { prisma } from "@/lib/prisma";
 
@@ -12,6 +13,7 @@ type BewerkKlantPageProps = {
 export default async function BewerkKlantPage({ params }: BewerkKlantPageProps) {
   const locale = await getCurrentLocale();
   const user = await requireSalonSession();
+  const branchType = normalizeBranchType(user.salon.instellingen?.branchType);
   const { id } = await params;
   const klantId = Number(id);
 
@@ -31,6 +33,7 @@ export default async function BewerkKlantPage({ params }: BewerkKlantPageProps) 
   }
 
   const copy = customerDictionary[locale].customerFormEdit;
+  const branchProfile = getBranchProfileCopy(locale, branchType);
 
   return (
     <div className="rooster">
@@ -39,7 +42,7 @@ export default async function BewerkKlantPage({ params }: BewerkKlantPageProps) 
         <h2 className="pagina-titel" style={{ fontSize: "2.2rem" }}>
           {copy.title}
         </h2>
-        <p className="subtitel">{copy.subtitle}</p>
+        <p className="subtitel">{branchProfile.formEditSubtitle}</p>
       </section>
 
       <section className="kaart" id="profiel">
@@ -47,7 +50,17 @@ export default async function BewerkKlantPage({ params }: BewerkKlantPageProps) 
           action={updateCustomerAction}
           submitLabel={copy.submit}
           busyLabel={copy.busy}
-          dictionary={customerDictionary[locale].customerFormFields}
+          dictionary={{
+            ...customerDictionary[locale].customerFormFields,
+            hairType: branchProfile.fieldOneLabel,
+            hairTypePlaceholder: branchProfile.fieldOnePlaceholder,
+            hairColor: branchProfile.fieldTwoLabel,
+            hairColorPlaceholder: branchProfile.fieldTwoPlaceholder,
+            allergies: branchProfile.allergiesLabel,
+            allergiesPlaceholder: branchProfile.allergiesPlaceholder,
+            stylistNotes: branchProfile.notesLabel,
+            stylistNotesPlaceholder: branchProfile.notesPlaceholder
+          }}
           customer={klant}
         />
       </section>

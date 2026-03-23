@@ -1,16 +1,52 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import type { Prisma } from "@prisma/client";
 import { SESSION_COOKIE, createSessionValue, verifySessionValue } from "@/lib/auth-shared";
 export { hashPassword, needsPasswordRehash, verifyPassword } from "@/lib/password";
 import { prisma } from "@/lib/prisma";
 
-type SessionUser = NonNullable<Awaited<ReturnType<typeof getSessionUser>>>;
+const sessionUserSelect = {
+  id: true,
+  salonId: true,
+  isPlatformAdmin: true,
+  naam: true,
+  email: true,
+  sessionVersion: true,
+  moetWachtwoordWijzigen: true,
+  rol: true,
+  status: true,
+  salon: {
+    select: {
+      id: true,
+      naam: true,
+      email: true,
+      telefoonnummer: true,
+      adres: true,
+      slug: true,
+      status: true,
+      instellingen: {
+        select: {
+          weergavenaam: true,
+          branchType: true,
+          logoUrl: true,
+          primaireKleur: true,
+          contactEmail: true,
+          contactTelefoon: true,
+          adres: true,
+          treatmentPresets: true
+        }
+      }
+    }
+  }
+} satisfies Prisma.UserSelect;
+
+type SessionUser = Prisma.UserGetPayload<{ select: typeof sessionUserSelect }>;
 type SalonSessionUser = SessionUser & {
   salonId: number;
   salon: NonNullable<SessionUser["salon"]>;
 };
 
-export async function getSessionUser() {
+export async function getSessionUser(): Promise<SessionUser | null> {
   const cookieStore = await cookies();
   const session = cookieStore.get(SESSION_COOKIE)?.value;
 
@@ -25,39 +61,7 @@ export async function getSessionUser() {
 
   const user = await prisma.user.findUnique({
     where: { id: sessionData.userId },
-    select: {
-      id: true,
-      salonId: true,
-      isPlatformAdmin: true,
-      naam: true,
-      email: true,
-      sessionVersion: true,
-      moetWachtwoordWijzigen: true,
-      rol: true,
-      status: true,
-      salon: {
-        select: {
-          id: true,
-          naam: true,
-          email: true,
-          telefoonnummer: true,
-          adres: true,
-          slug: true,
-          status: true,
-          instellingen: {
-            select: {
-              weergavenaam: true,
-              logoUrl: true,
-              primaireKleur: true,
-              contactEmail: true,
-              contactTelefoon: true,
-              adres: true,
-              treatmentPresets: true
-            }
-          }
-        }
-      }
-    }
+    select: sessionUserSelect
   });
 
   if (!user || user.sessionVersion !== sessionData.sessionVersion) {

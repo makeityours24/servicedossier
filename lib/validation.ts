@@ -156,6 +156,7 @@ export const appointmentUpdateSchema = appointmentBaseSchema.extend({
 
 export const salonSettingsSchema = z.object({
   weergavenaam: z.string().min(2, "Salonnaam is verplicht."),
+  branchType: z.enum(["HAIR", "MASSAGE", "BEAUTY"]).default("HAIR"),
   contactEmail: z
     .string()
     .trim()
