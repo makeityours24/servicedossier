@@ -103,7 +103,7 @@ export default async function PlatformPage({ searchParams }: PlatformPageProps) 
             Salonoverzicht
           </h2>
           <p className="subtitel">
-            Beheer meerdere salons vanuit één centrale omgeving en gebruik My Style als eerste actieve tenant.
+            Beheer meerdere salons vanuit één centrale omgeving en gebruik SalonDossier als herkenbare demo-tenant.
           </p>
         </div>
       </section>
@@ -116,7 +116,7 @@ export default async function PlatformPage({ searchParams }: PlatformPageProps) 
               id="zoek"
               name="zoek"
               defaultValue={zoek}
-              placeholder="Bijvoorbeeld My Style, my-style of e-mail"
+              placeholder="Bijvoorbeeld SalonDossier, jouw-salon of e-mail"
             />
           </div>
 

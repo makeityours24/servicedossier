@@ -35,7 +35,7 @@ Deze gids beschrijft de aanbevolen live setup voor `SalonDossier` als multi-tena
 
 ### Salonomgevingen
 
-- `my-style.salondossier.com`
+- `jouw-salon.salondossier.com`
 - `andere-salon.salondossier.com`
 
 De middleware leest het subdomein uit en koppelt dat aan de juiste `salon.slug`.
@@ -119,7 +119,7 @@ Test daarna:
 
 ### Salon login
 
-- `https://my-style.salondossier.com/login`
+- `https://jouw-salon.salondossier.com/login`
 
 Controleer:
 
@@ -144,7 +144,7 @@ Salonmedewerkers loggen in via:
 
 Voorbeeld:
 
-- `https://my-style.salondossier.com/login`
+- `https://jouw-salon.salondossier.com/login`
 
 Dat is gebruiksvriendelijker dan steeds een saloncode invullen.
 
@@ -152,7 +152,7 @@ Dat is gebruiksvriendelijker dan steeds een saloncode invullen.
 
 Als wildcard subdomeinen nog niet live zijn, kun je tijdelijk de query-login gebruiken:
 
-- `https://app.salondossier.com/login?salon=my-style`
+- `https://app.salondossier.com/login?salon=jouw-salon`
 
 Daarmee kun je blijven testen totdat DNS volledig staat.
 

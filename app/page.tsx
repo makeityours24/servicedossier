@@ -7,6 +7,11 @@ import { getCurrentLocale, homeDictionary } from "@/lib/i18n";
 
 const demoMailHref = "mailto:platform@miy24.nl?subject=Demo%20aanvraag%20SalonDossier";
 const startMailHref = "mailto:platform@miy24.nl?subject=Startaanvraag%20SalonDossier";
+const previewImages = [
+  "/previews/client-record.svg",
+  "/previews/daily-schedule.svg",
+  "/previews/packages.svg"
+] as const;
 
 export default async function HomePage() {
   const user = await getSessionUser();
@@ -131,26 +136,16 @@ export default async function HomePage() {
         </div>
 
         <div className="landing-preview-grid">
-          {dict.previews.map((preview) => (
+          {dict.previews.map((preview, index) => (
             <article key={preview.title} className="kaart landing-preview-card">
-              <div className="landing-preview-window">
-                <div className="landing-preview-toolbar">
-                  <span />
-                  <span />
-                  <span />
-                </div>
-                <div className="landing-preview-body">
-                  <p className="landing-preview-eyebrow">{preview.eyebrow}</p>
-                  <strong>{preview.title}</strong>
-                  <div className="landing-preview-lines">
-                    {preview.lines.map((line) => (
-                      <div key={line} className="landing-preview-line">
-                        <span className="landing-module-dot" />
-                        <p>{line}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+              <div className="landing-preview-image-wrap">
+                <Image
+                  src={previewImages[index] ?? previewImages[0]}
+                  alt={preview.title}
+                  width={960}
+                  height={720}
+                  className="landing-preview-image"
+                />
               </div>
               <p>{preview.text}</p>
             </article>

@@ -282,7 +282,7 @@ textarea {
   line-height: 1.75;
 }
 
-.landing-preview-window {
+.landing-preview-image-wrap {
   border-radius: 22px;
   overflow: hidden;
   border: 1px solid rgba(176, 141, 141, 0.16);
@@ -290,63 +290,10 @@ textarea {
   box-shadow: var(--schaduw-zacht);
 }
 
-.landing-preview-toolbar {
-  display: flex;
-  gap: 8px;
-  padding: 14px 16px;
-  border-bottom: 1px solid rgba(176, 141, 141, 0.16);
-  background: rgba(255, 247, 247, 0.88);
-}
-
-.landing-preview-toolbar span {
-  width: 10px;
-  height: 10px;
-  border-radius: 999px;
-  background: rgba(180, 35, 35, 0.2);
-}
-
-.landing-preview-body {
-  display: grid;
-  gap: 12px;
-  padding: 18px;
-}
-
-.landing-preview-eyebrow {
-  margin: 0;
-  color: var(--accent-donker);
-  font-size: 0.82rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-
-.landing-preview-body strong {
-  font-size: 1.08rem;
-}
-
-.landing-preview-lines {
-  display: grid;
-  gap: 10px;
-}
-
-.landing-preview-line {
-  display: grid;
-  grid-template-columns: 14px 1fr;
-  gap: 10px;
-  align-items: start;
-  padding: 12px 0;
-  border-top: 1px solid rgba(176, 141, 141, 0.12);
-}
-
-.landing-preview-line:first-child {
-  border-top: 0;
-  padding-top: 0;
-}
-
-.landing-preview-line p {
-  margin: 0;
-  color: var(--tekst);
-  line-height: 1.55;
+.landing-preview-image {
+  display: block;
+  width: 100%;
+  height: auto;
 }
 
 .landing-process-card strong,

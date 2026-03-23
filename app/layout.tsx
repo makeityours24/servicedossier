@@ -10,7 +10,7 @@ const montserrat = Montserrat({
 });
 
 export const metadata: Metadata = {
-  title: "My Style",
+  title: "SalonDossier",
   description: "Digitaal klanten- en behandelingenlogboek voor kapsalons."
 };
 

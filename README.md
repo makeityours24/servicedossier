@@ -1,6 +1,6 @@
-# My Style
+# SalonDossier
 
-Professionele Next.js-webapplicatie voor `My Style` om klanten en kleurbehandelingen te registreren, lokaal te testen en online als website te publiceren.
+Professionele Next.js-webapplicatie voor `SalonDossier` om klanten en behandelingen te registreren, lokaal te testen en online als website te publiceren.
 
 ## Functies
 
@@ -66,8 +66,8 @@ cp .env.example .env
 Voorbeeld:
 
 ```env
-DATABASE_URL="postgresql://USER:PASSWORD@HOST:5432/my_style?schema=public"
-DIRECT_URL="postgresql://USER:PASSWORD@HOST:5432/my_style?schema=public"
+DATABASE_URL="postgresql://USER:PASSWORD@HOST:5432/salondossier?schema=public"
+DIRECT_URL="postgresql://USER:PASSWORD@HOST:5432/salondossier?schema=public"
 SESSION_SECRET="een-lang-uniek-geheim"
 NEXT_PUBLIC_APP_URL="http://127.0.0.1:3000"
 NEXT_PUBLIC_TENANT_MODE="query"
@@ -117,7 +117,7 @@ NEXT_PUBLIC_BASE_DOMAIN=""
 Voorbeeld:
 
 - Centrale login: `http://127.0.0.1:3000/login`
-- Salonlogin: `http://127.0.0.1:3000/login?salon=my-style`
+- Salonlogin: `http://127.0.0.1:3000/login?salon=jouw-salon`
 
 ### 2. Live login via subdomeinen
 
@@ -131,7 +131,7 @@ NEXT_PUBLIC_BASE_DOMAIN="jouwdomein.nl"
 
 Dan worden loginlinks automatisch opgebouwd als:
 
-- `https://my-style.jouwdomein.nl/login`
+- `https://jouw-salon.jouwdomein.nl/login`
 - `https://andere-salon.jouwdomein.nl/login`
 
 De middleware herkent een salonsubdomein automatisch en toont direct de juiste saloncontext op de loginpagina.
@@ -179,7 +179,7 @@ Voor de volledige live setup met centrale app, salonsubdomeinen en STRATO DNS:
 De applicatie gebruikt PostgreSQL:
 
 ```env
-DATABASE_URL="postgresql://USER:PASSWORD@HOST:5432/my_style?schema=public"
+DATABASE_URL="postgresql://USER:PASSWORD@HOST:5432/salondossier?schema=public"
 ```
 
 ## Opmerkingen

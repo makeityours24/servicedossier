@@ -23,19 +23,60 @@ async function main() {
 
   const salon = await prisma.salon.upsert({
     where: { slug: "my-style" },
-    update: {},
+    update: {
+      naam: "SalonDossier Demo",
+      email: "info@salondossier-demo.nl",
+      telefoonnummer: "0316240237",
+      adres: "Marktstraat 35, 6901 AK Zevenaar",
+      instellingen: {
+        upsert: {
+          update: {
+            weergavenaam: "SalonDossier Demo",
+            branchType: "HAIR",
+            primaireKleur: "#b42323",
+            contactEmail: "info@salondossier-demo.nl",
+            contactTelefoon: "0316240237",
+            adres: "Marktstraat 35, 6901 AK Zevenaar",
+            treatmentPresets: [
+              "Uitgroei kleuren",
+              "Volledige kleuring",
+              "Toner",
+              "Balayage",
+              "Highlights",
+              "Kleurcorrectie"
+            ]
+          },
+          create: {
+            weergavenaam: "SalonDossier Demo",
+            branchType: "HAIR",
+            primaireKleur: "#b42323",
+            contactEmail: "info@salondossier-demo.nl",
+            contactTelefoon: "0316240237",
+            adres: "Marktstraat 35, 6901 AK Zevenaar",
+            treatmentPresets: [
+              "Uitgroei kleuren",
+              "Volledige kleuring",
+              "Toner",
+              "Balayage",
+              "Highlights",
+              "Kleurcorrectie"
+            ]
+          }
+        }
+      }
+    },
     create: {
-      naam: "My Style",
+      naam: "SalonDossier Demo",
       slug: "my-style",
-      email: "info@kapsalonmystyle.nl",
+      email: "info@salondossier-demo.nl",
       telefoonnummer: "0316240237",
       adres: "Marktstraat 35, 6901 AK Zevenaar",
       instellingen: {
         create: {
-          weergavenaam: "My Style",
+          weergavenaam: "SalonDossier Demo",
           branchType: "HAIR",
           primaireKleur: "#b42323",
-          contactEmail: "info@kapsalonmystyle.nl",
+          contactEmail: "info@salondossier-demo.nl",
           contactTelefoon: "0316240237",
           adres: "Marktstraat 35, 6901 AK Zevenaar",
           treatmentPresets: [
