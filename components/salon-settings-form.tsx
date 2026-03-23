@@ -25,6 +25,9 @@ type SalonSettingsFormProps = {
     address: string;
     logoUrl: string;
     logoUrlPlaceholder: string;
+    logoUpload: string;
+    logoUploadHelp: string;
+    logoPreviewHelp: string;
     quickTreatments: string;
     quickTreatmentsPlaceholder: string;
     saving: string;
@@ -37,6 +40,7 @@ type SalonSettingsFormProps = {
     adres: string;
     primaireKleur: string;
     logoUrl: string;
+    logoBlobPath?: string;
     treatmentPresets: string;
   };
 };
@@ -54,6 +58,9 @@ const defaultDictionary = {
   address: "Adres",
   logoUrl: "Logo URL",
   logoUrlPlaceholder: "Bijvoorbeeld /logo-salon.svg of https://...",
+  logoUpload: "Logo uploaden",
+  logoUploadHelp: "Gebruik bij voorkeur een vierkant logo in JPG, PNG, WEBP of SVG tot 2 MB.",
+  logoPreviewHelp: "Dit logo wordt gebruikt in de login en in de zijbalk. Een eigen logo is dus juist handig voor herkenning.",
   quickTreatments: "Snelle behandelingen",
   quickTreatmentsPlaceholder:
     "Eén behandeling per regel\nUitgroei kleuren\nVolledige kleuring\nToner",
@@ -126,6 +133,19 @@ export function SalonSettingsForm({
             defaultValue={settings.logoUrl}
             placeholder={dictionary.logoUrlPlaceholder}
           />
+        </div>
+
+        <div className="veld-groot">
+          <label htmlFor="logoBestand">{dictionary.logoUpload}</label>
+          <input
+            id="logoBestand"
+            name="logoBestand"
+            type="file"
+            accept="image/jpeg,image/png,image/webp,image/svg+xml"
+          />
+          <p className="meta" style={{ margin: 0 }}>
+            {dictionary.logoUploadHelp}
+          </p>
           <div className="instellingen-logo-preview">
             <Image
               src={previewLogo}
@@ -135,7 +155,7 @@ export function SalonSettingsForm({
               className="logo-afbeelding logo-afbeelding-klein"
             />
             <p className="meta" style={{ margin: 0 }}>
-              Dit logo wordt gebruikt in de login en in de zijbalk. Een eigen logo is dus juist handig voor herkenning.
+              {dictionary.logoPreviewHelp}
             </p>
           </div>
         </div>

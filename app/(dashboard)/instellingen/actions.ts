@@ -1,5 +1,6 @@
 "use server";
 
+import { del, put } from "@vercel/blob";
 import { revalidatePath } from "next/cache";
 import type { Prisma } from "@prisma/client";
 import type { FormState } from "@/components/customer-form";
@@ -23,8 +24,26 @@ const salonSettingsSelect = {
   adres: true,
   primaireKleur: true,
   logoUrl: true,
+  logoBlobPath: true,
   treatmentPresets: true
 } satisfies Prisma.SalonSettingsSelect;
+
+const MAX_LOGO_FILE_SIZE = 2 * 1024 * 1024;
+const ALLOWED_LOGO_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/svg+xml"]);
+
+function sanitizeFileName(value: string) {
+  return value
+    .normalize("NFKD")
+    .replace(/[^\w.-]+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "")
+    .toLowerCase();
+}
+
+function buildSalonLogoBlobPath(params: { salonId: number; originalName: string }) {
+  const sanitized = sanitizeFileName(params.originalName || "salon-logo");
+  return `salons/${params.salonId}/branding/${Date.now()}-${sanitized}`;
+}
 
 export async function updateSalonSettingsAction(
   _: FormState,
@@ -60,6 +79,7 @@ export async function updateSalonSettingsAction(
 
   try {
     const selectedBranchType = normalizeBranchType(parsed.data.branchType);
+    const uploadedLogo = formData.get("logoBestand");
     const treatmentPresets = parsed.data.treatmentPresets
       .split("\n")
       .map((value) => value.trim())
@@ -73,6 +93,51 @@ export async function updateSalonSettingsAction(
       select: salonSettingsSelect
     });
 
+    let nextLogoUrl = parsed.data.logoUrl || null;
+    let nextLogoBlobPath = existingSettings?.logoBlobPath ?? null;
+
+    if (uploadedLogo instanceof File && uploadedLogo.size > 0) {
+      if (!ALLOWED_LOGO_TYPES.has(uploadedLogo.type)) {
+        return { error: "Gebruik voor het logo alleen JPG, PNG, WEBP of SVG." };
+      }
+
+      if (uploadedLogo.size > MAX_LOGO_FILE_SIZE) {
+        return { error: "Het logo is te groot. Gebruik een bestand tot maximaal 2 MB." };
+      }
+
+      if (!process.env.BLOB_READ_WRITE_TOKEN) {
+        return {
+          error:
+            "Logo-opslag is nog niet geconfigureerd. Voeg eerst Vercel Blob toe en zet BLOB_READ_WRITE_TOKEN in je omgeving."
+        };
+      }
+
+      const blob = await put(
+        buildSalonLogoBlobPath({
+          salonId: user.salonId,
+          originalName: uploadedLogo.name
+        }),
+        uploadedLogo,
+        {
+          access: "public",
+          addRandomSuffix: true,
+          contentType: uploadedLogo.type
+        }
+      );
+
+      nextLogoUrl = blob.url;
+      nextLogoBlobPath = blob.pathname;
+
+      if (existingSettings?.logoBlobPath) {
+        await del(existingSettings.logoBlobPath);
+      }
+    } else if (!parsed.data.logoUrl && existingSettings?.logoBlobPath) {
+      if (process.env.BLOB_READ_WRITE_TOKEN) {
+        await del(existingSettings.logoBlobPath);
+      }
+      nextLogoBlobPath = null;
+    }
+
     await prisma.salonSettings.upsert({
       where: { salonId: user.salonId },
       update: {
@@ -82,7 +147,8 @@ export async function updateSalonSettingsAction(
         contactTelefoon: parsed.data.contactTelefoon || null,
         adres: parsed.data.adres || null,
         primaireKleur: parsed.data.primaireKleur,
-        logoUrl: parsed.data.logoUrl || null,
+        logoUrl: nextLogoUrl,
+        logoBlobPath: nextLogoBlobPath,
         treatmentPresets: effectiveTreatmentPresets
       },
       create: {
@@ -93,7 +159,8 @@ export async function updateSalonSettingsAction(
         contactTelefoon: parsed.data.contactTelefoon || null,
         adres: parsed.data.adres || null,
         primaireKleur: parsed.data.primaireKleur,
-        logoUrl: parsed.data.logoUrl || null,
+        logoUrl: nextLogoUrl,
+        logoBlobPath: nextLogoBlobPath,
         treatmentPresets: effectiveTreatmentPresets
       }
     });
@@ -107,7 +174,8 @@ export async function updateSalonSettingsAction(
         : null,
       (existingSettings?.adres ?? null) !== (parsed.data.adres || null) ? "adres" : null,
       existingSettings?.primaireKleur !== parsed.data.primaireKleur ? "primaireKleur" : null,
-      (existingSettings?.logoUrl ?? null) !== (parsed.data.logoUrl || null) ? "logoUrl" : null,
+      (existingSettings?.logoUrl ?? null) !== nextLogoUrl ? "logoUrl" : null,
+      (existingSettings?.logoBlobPath ?? null) !== nextLogoBlobPath ? "logoBlobPath" : null,
       JSON.stringify(existingSettings?.treatmentPresets ?? []) !== JSON.stringify(effectiveTreatmentPresets)
         ? "treatmentPresets"
         : null
@@ -132,6 +200,7 @@ export async function updateSalonSettingsAction(
     revalidatePath("/dashboard");
     revalidatePath("/instellingen");
     revalidatePath("/klanten");
+    revalidatePath("/login");
     return { success: "Saloninstellingen zijn bijgewerkt." };
   } catch {
     await registerSensitiveActionAttempt({

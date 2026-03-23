@@ -182,6 +182,7 @@ model SalonSettings {
   weergavenaam   String
   branchType     SalonBranchType @default(HAIR)
   logoUrl        String?
+  logoBlobPath   String?
   primaireKleur  String   @default("#b42323")
   contactEmail   String?
   contactTelefoon String?

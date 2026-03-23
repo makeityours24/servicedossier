@@ -29,6 +29,7 @@ const sessionUserSelect = {
           weergavenaam: true,
           branchType: true,
           logoUrl: true,
+          logoBlobPath: true,
           primaireKleur: true,
           contactEmail: true,
           contactTelefoon: true,

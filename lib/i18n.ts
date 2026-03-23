@@ -2375,6 +2375,10 @@ export const managementDictionary = {
         address: "Adres",
         logoUrl: "Logo URL",
         logoUrlPlaceholder: "Bijvoorbeeld /logo-salon.svg of https://...",
+        logoUpload: "Logo uploaden",
+        logoUploadHelp: "Gebruik bij voorkeur een vierkant logo in JPG, PNG, WEBP of SVG tot 2 MB.",
+        logoPreviewHelp:
+          "Dit logo wordt gebruikt in de login en in de zijbalk. Een eigen logo is dus juist handig voor herkenning.",
         quickTreatments: "Snelle behandelingen",
         quickTreatmentsPlaceholder:
           "Eén behandeling per regel\nUitgroei kleuren\nVolledige kleuring\nToner",
@@ -2511,6 +2515,10 @@ export const managementDictionary = {
         address: "Address",
         logoUrl: "Logo URL",
         logoUrlPlaceholder: "For example /logo-salon.svg or https://...",
+        logoUpload: "Upload logo",
+        logoUploadHelp: "Preferably use a square logo in JPG, PNG, WEBP or SVG up to 2 MB.",
+        logoPreviewHelp:
+          "This logo is used on the login screen and in the sidebar, so a custom logo helps with recognition.",
         quickTreatments: "Quick treatments",
         quickTreatmentsPlaceholder:
           "One treatment per line\nRoot colour\nFull colour\nToner",
@@ -2648,6 +2656,10 @@ export const managementDictionary = {
         address: "Adresse",
         logoUrl: "Logo-URL",
         logoUrlPlaceholder: "Zum Beispiel /logo-salon.svg oder https://...",
+        logoUpload: "Logo hochladen",
+        logoUploadHelp: "Verwende möglichst ein quadratisches Logo in JPG, PNG, WEBP oder SVG bis 2 MB.",
+        logoPreviewHelp:
+          "Dieses Logo wird im Login und in der Seitenleiste verwendet. Ein eigenes Logo ist also sinnvoll für die Wiedererkennung.",
         quickTreatments: "Schnelle Behandlungen",
         quickTreatmentsPlaceholder:
           "Eine Behandlung pro Zeile\nAnsatz färben\nKomplettfärbung\nToner",

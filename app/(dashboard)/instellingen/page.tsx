@@ -34,6 +34,7 @@ export default async function InstellingenPage() {
             adres: settings?.adres ?? user.salon.adres ?? "",
             primaireKleur: settings?.primaireKleur ?? "#b42323",
             logoUrl: settings?.logoUrl ?? "",
+            logoBlobPath: settings?.logoBlobPath ?? "",
             treatmentPresets: (settings?.treatmentPresets ?? getDefaultTreatmentPresets(branchType)).join("\n")
           }}
         />
