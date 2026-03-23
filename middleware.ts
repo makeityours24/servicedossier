@@ -12,6 +12,7 @@ export function middleware(request: NextRequest) {
   if (
     pathname.startsWith("/_next") ||
     pathname.startsWith("/api/auth") ||
+    pathname.startsWith("/api/language") ||
     pathname.includes(".")
   ) {
     const response = NextResponse.next();
