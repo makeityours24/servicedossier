@@ -20,10 +20,10 @@ export async function getCurrentLocale(): Promise<Locale> {
 
 export const homeDictionary = {
   nl: {
-    heroKicker: "Digitaal klantdossier voor kapsalons",
+    heroKicker: "Digitaal klantdossier voor salons en behandelstudio's",
     heroTitle: "Alles van je klant op een plek die je team echt gebruikt.",
     heroSubtitle:
-      "SalonDossier helpt salons om behandelingen, kleurrecepten, afspraken, pakketten, digitale stempelkaarten en behandelfoto's centraal vast te leggen en snel terug te vinden.",
+      "SalonDossier helpt kapsalons, massagesalons en schoonheidsspecialisten om behandelingen, afspraken, pakketten, digitale kaarten en behandelfoto's centraal vast te leggen en snel terug te vinden.",
     login: "Inloggen",
     viewFeatures: "Bekijk functies",
     voordelen: [
@@ -81,6 +81,48 @@ export const homeDictionary = {
       "Agenda met lijst- en teamweergave",
       "Behandelfoto's als dossierbewijs",
       "Meerdere medewerkers met eigen login"
+    ],
+    previewLabel: "Voorbeeld",
+    previewTitle: "Zo voelt SalonDossier in de praktijk",
+    previewText:
+      "Geen stockbeelden, maar een snelle visuele indruk van de onderdelen die salons dagelijks gebruiken: klantdossier, agenda en pakketten.",
+    previews: [
+      {
+        title: "Klantdossier",
+        text: "Profielgegevens, behandelnotities en belangrijke aandachtspunten bij elkaar.",
+        eyebrow: "Klantprofiel",
+        lines: ["Eva Jansen", "Allergieën: parfumvrij", "Laatste notitie: toner koeler houden"]
+      },
+      {
+        title: "Dagagenda",
+        text: "Snel zien wie wanneer ingepland staat en welke behandeling loopt.",
+        eyebrow: "Vandaag",
+        lines: ["09:30 Mila · gezichtsbehandeling", "11:00 Noor · ontspanningsmassage", "14:00 Eva · uitgroei kleuren"]
+      },
+      {
+        title: "Pakketten",
+        text: "Open kaarten en resterende beurten direct zichtbaar aan de balie.",
+        eyebrow: "Actieve kaarten",
+        lines: ["5x massage · 2 over", "10x brows · 6 over", "6x toner · 1 over"]
+      }
+    ],
+    branchesLabel: "Branches",
+    branchesTitle: "Gemaakt voor behandelaars die met terugkerende klanten werken",
+    branchesText:
+      "SalonDossier is gestart vanuit kapsalons, maar de kern werkt ook goed voor massage en beauty. Per salon kies je een brancheprofiel zodat terminologie, profielvelden en standaardaccenten beter aansluiten.",
+    branches: [
+      {
+        title: "Kapsalons",
+        text: "Met kleurrecepten, haartype, haarkleur, behandelfoto's en teamplanning."
+      },
+      {
+        title: "Massagesalons",
+        text: "Met klachtengebieden, drukvoorkeur, behandelnotities, pakketten en terugkerende sessies."
+      },
+      {
+        title: "Schoonheidsspecialisten",
+        text: "Met huidtype, huidconditie, behandelnotities, productadvies en voortgangsfoto's."
+      }
     ],
     pricingLabel: "Prijzen",
     pricingTitle: "Eenvoudige prijzen voor salons die overzicht willen",
@@ -181,10 +223,10 @@ export const homeDictionary = {
     ]
   },
   en: {
-    heroKicker: "Digital client records for hair salons",
+    heroKicker: "Digital client records for salons and treatment studios",
     heroTitle: "Everything about every client in one place your salon team will actually use.",
     heroSubtitle:
-      "SalonDossier helps salons keep client records, colour formulas, appointments, packages, digital stamp cards and treatment photos together in one clear workflow.",
+      "SalonDossier helps hair salons, massage salons and beauty specialists keep treatments, appointments, packages, digital cards and treatment photos together in one clear workflow.",
     login: "Log in",
     viewFeatures: "View features",
     voordelen: [
@@ -230,6 +272,48 @@ export const homeDictionary = {
       "Appointment book with list and team view",
       "Treatment photos as visual proof",
       "Multiple staff members with their own login"
+    ],
+    previewLabel: "Preview",
+    previewTitle: "How SalonDossier feels in daily use",
+    previewText:
+      "No stock imagery, but a quick visual impression of the parts salons use every day: client records, the appointment book and packages.",
+    previews: [
+      {
+        title: "Client record",
+        text: "Profile details, treatment notes and key attention points in one place.",
+        eyebrow: "Client profile",
+        lines: ["Eva Jansen", "Allergies: fragrance free", "Latest note: keep toner cooler"]
+      },
+      {
+        title: "Daily schedule",
+        text: "Quickly see who is booked when and which service is running.",
+        eyebrow: "Today",
+        lines: ["09:30 Mila · facial treatment", "11:00 Noor · relaxation massage", "14:00 Eva · root colour"]
+      },
+      {
+        title: "Packages",
+        text: "Open cards and remaining visits visible right away at the desk.",
+        eyebrow: "Active cards",
+        lines: ["5x massage · 2 left", "10x brows · 6 left", "6x toner · 1 left"]
+      }
+    ],
+    branchesLabel: "Business types",
+    branchesTitle: "Built for treatment businesses with returning clients",
+    branchesText:
+      "SalonDossier started in hair salons, but the core workflow also fits massage and beauty. Each salon can choose a business profile so terminology, profile fields and default accents match better.",
+    branches: [
+      {
+        title: "Hair salons",
+        text: "With colour formulas, hair details, treatment photos and team planning."
+      },
+      {
+        title: "Massage salons",
+        text: "With complaint areas, pressure preference, therapist notes, packages and recurring sessions."
+      },
+      {
+        title: "Beauty specialists",
+        text: "With skin type, skin condition, treatment notes, product advice and progress photos."
+      }
     ],
     pricingLabel: "Pricing",
     pricingTitle: "Simple pricing for salons that want clarity",
@@ -321,10 +405,10 @@ export const homeDictionary = {
     ]
   },
   de: {
-    heroKicker: "Digitale Kundenkartei für Friseursalons",
+    heroKicker: "Digitale Kundenkartei für Salons und Behandlungsstudios",
     heroTitle: "Alles über deine Kundschaft an einem Ort, den dein Team wirklich nutzt.",
     heroSubtitle:
-      "SalonDossier hilft Salons dabei, Kundenkartei, Farbrezepte, Termine, Pakete, digitale Stempelkarten und Behandlungsfotos zentral festzuhalten und schnell wiederzufinden.",
+      "SalonDossier hilft Friseursalons, Massagesalons und Kosmetiksalons dabei, Behandlungen, Termine, Pakete, digitale Karten und Behandlungsfotos zentral festzuhalten und schnell wiederzufinden.",
     login: "Anmelden",
     viewFeatures: "Funktionen ansehen",
     voordelen: [
@@ -370,6 +454,48 @@ export const homeDictionary = {
       "Terminbuch mit Listen- und Teamansicht",
       "Behandlungsfotos als Nachweis",
       "Mehrere Mitarbeitende mit eigenem Login"
+    ],
+    previewLabel: "Einblick",
+    previewTitle: "So fühlt sich SalonDossier im Alltag an",
+    previewText:
+      "Keine Stockbilder, sondern ein schneller visueller Eindruck der Teile, die Salons täglich nutzen: Kundenkartei, Terminbuch und Pakete.",
+    previews: [
+      {
+        title: "Kundenkartei",
+        text: "Profildaten, Behandlungsnotizen und wichtige Hinweise an einem Ort.",
+        eyebrow: "Kundenprofil",
+        lines: ["Eva Jansen", "Allergien: parfumfrei", "Letzte Notiz: Toner kühler halten"]
+      },
+      {
+        title: "Tagesplanung",
+        text: "Schnell sehen, wer wann eingeplant ist und welche Behandlung läuft.",
+        eyebrow: "Heute",
+        lines: ["09:30 Mila · Gesichtsbehandlung", "11:00 Noor · Entspannungsmassage", "14:00 Eva · Ansatz färben"]
+      },
+      {
+        title: "Pakete",
+        text: "Offene Karten und verbleibende Besuche direkt am Empfang sichtbar.",
+        eyebrow: "Aktive Karten",
+        lines: ["5x Massage · 2 offen", "10x Brows · 6 offen", "6x Toner · 1 offen"]
+      }
+    ],
+    branchesLabel: "Branchen",
+    branchesTitle: "Für Behandlungsbetriebe mit wiederkehrender Kundschaft gemacht",
+    branchesText:
+      "SalonDossier wurde aus Friseursalons heraus entwickelt, aber der Kern funktioniert auch gut für Massage und Beauty. Pro Salon kann ein Branchenprofil gewählt werden, damit Terminologie, Profilfelder und Standardakzente besser passen.",
+    branches: [
+      {
+        title: "Friseursalons",
+        text: "Mit Farbrezepten, Haarinfos, Behandlungsfotos und Teamplanung."
+      },
+      {
+        title: "Massagesalons",
+        text: "Mit Beschwerdebereichen, Druckvorlieben, Behandlungsnotizen, Paketen und wiederkehrenden Sitzungen."
+      },
+      {
+        title: "Kosmetiksalons",
+        text: "Mit Hauttyp, Hautzustand, Behandlungsnotizen, Produktempfehlungen und Verlaufsfotos."
+      }
     ],
     pricingLabel: "Preise",
     pricingTitle: "Einfache Preise für Salons, die Übersicht wollen",

@@ -123,6 +123,58 @@ export default async function HomePage() {
         </div>
       </section>
 
+      <section className="landing-sectie container">
+        <div className="landing-sectie-kop">
+          <span className="logo-label">{dict.previewLabel}</span>
+          <h2>{dict.previewTitle}</h2>
+          <p>{dict.previewText}</p>
+        </div>
+
+        <div className="landing-preview-grid">
+          {dict.previews.map((preview) => (
+            <article key={preview.title} className="kaart landing-preview-card">
+              <div className="landing-preview-window">
+                <div className="landing-preview-toolbar">
+                  <span />
+                  <span />
+                  <span />
+                </div>
+                <div className="landing-preview-body">
+                  <p className="landing-preview-eyebrow">{preview.eyebrow}</p>
+                  <strong>{preview.title}</strong>
+                  <div className="landing-preview-lines">
+                    {preview.lines.map((line) => (
+                      <div key={line} className="landing-preview-line">
+                        <span className="landing-module-dot" />
+                        <p>{line}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <p>{preview.text}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="landing-sectie container">
+        <div className="landing-sectie-kop">
+          <span className="logo-label">{dict.branchesLabel}</span>
+          <h2>{dict.branchesTitle}</h2>
+          <p>{dict.branchesText}</p>
+        </div>
+
+        <div className="landing-kaarten">
+          {dict.branches.map((branch) => (
+            <article key={branch.title} className="kaart landing-kaart">
+              <h3>{branch.title}</h3>
+              <p>{branch.text}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
       <section className="landing-sectie container" id="prijzen">
         <div className="landing-sectie-kop">
           <span className="logo-label">{dict.pricingLabel}</span>
