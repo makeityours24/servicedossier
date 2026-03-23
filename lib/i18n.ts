@@ -224,9 +224,9 @@ export const homeDictionary = {
   },
   en: {
     heroKicker: "Digital client records for salons and treatment studios",
-    heroTitle: "Everything about every client in one place your salon team will actually use.",
+    heroTitle: "Everything about every client in one place your team will actually keep using.",
     heroSubtitle:
-      "SalonDossier helps hair salons, massage salons and beauty specialists keep treatments, appointments, packages, digital cards and treatment photos together in one clear workflow.",
+      "SalonDossier helps hair salons, massage studios and beauty professionals keep treatments, appointments, packages, digital loyalty cards and treatment photos together in one clear workflow.",
     login: "Log in",
     viewFeatures: "View features",
     voordelen: [
@@ -238,7 +238,7 @@ export const homeDictionary = {
     demoLabel: "What salons notice right away",
     demoTitle: "From scattered notes to a complete client overview",
     demoText:
-      "In a demo you can immediately show that you are not only storing client data, but also connecting formulas, packages, appointments and photos in a logical way.",
+      "A quick demo makes it clear right away: SalonDossier does more than store client details. It connects formulas, packages, appointments and photos in one practical flow.",
     demoItems: [
       { title: "Find formulas instantly", text: "Reuse previous treatments without typing everything again." },
       { title: "Digitise stamp cards", text: "Packages and stamp cards stay linked to the client record." },
@@ -256,7 +256,7 @@ export const homeDictionary = {
       },
       {
         title: "Built for salons",
-        text: "Work with multiple staff members, manage appointments per stylist, sell packages or stamp cards and turn an appointment directly into a service record."
+        text: "Work with multiple team members, plan appointments per stylist or therapist, sell packages or loyalty cards and turn an appointment straight into a service record."
       },
       {
         title: "Calmer working days",
@@ -276,7 +276,7 @@ export const homeDictionary = {
     previewLabel: "Preview",
     previewTitle: "How SalonDossier feels in daily use",
     previewText:
-      "No stock imagery, but a quick visual impression of the parts salons use every day: client records, the appointment book and packages.",
+      "Not stock photos, but a quick visual impression of the parts teams use every day: client records, the appointment book and packages.",
     previews: [
       {
         title: "Client record",
@@ -300,7 +300,7 @@ export const homeDictionary = {
     branchesLabel: "Business types",
     branchesTitle: "Built for treatment businesses with returning clients",
     branchesText:
-      "SalonDossier started in hair salons, but the core workflow also fits massage and beauty. Each salon can choose a business profile so terminology, profile fields and default accents match better.",
+      "SalonDossier started in hair salons, but the same core workflow also fits massage and beauty businesses. Each salon can choose its own business profile so the wording, profile focus and defaults feel more natural.",
     branches: [
       {
         title: "Hair salons",
@@ -308,21 +308,21 @@ export const homeDictionary = {
       },
       {
         title: "Massage salons",
-        text: "With complaint areas, pressure preference, therapist notes, packages and recurring sessions."
+        text: "With focus areas, pressure preferences, treatment notes, packages and repeat sessions."
       },
       {
-        title: "Beauty specialists",
+        title: "Beauty professionals",
         text: "With skin type, skin condition, treatment notes, product advice and progress photos."
       }
     ],
     pricingLabel: "Pricing",
     pricingTitle: "Simple pricing for salons that want clarity",
     pricingText:
-      "SalonDossier is built for salons that want to manage client records, services, colour formulas, appointments, packages, digital stamp cards and treatment photos without a heavy all-in-one system.",
+      "SalonDossier is built for salons that want client records, services, colour formulas, appointments, packages, digital loyalty cards and treatment photos in one place, without the weight of a large all-in-one system.",
     processLabel: "How onboarding works",
     processTitle: "No cold checkout, but a short intake first",
     processText:
-      "SalonDossier currently starts with a short intake and setup. That way we first check whether it fits your salon, agree on the setup fee and prepare your account properly before you go live.",
+      "SalonDossier starts with a short intake and setup session. That way we can first check whether it fits your salon, agree on the setup fee and prepare your account properly before you go live.",
     processSteps: [
       {
         title: "1. Request or demo",
@@ -342,11 +342,11 @@ export const homeDictionary = {
       }
     ],
     processNote:
-      "The one-time setup fee covers setup, walkthrough and a calm launch. That is why getting started currently runs through a request and short contact first, not direct online checkout.",
+      "The one-time setup fee covers setup, walkthrough and a calm launch. That is why getting started currently begins with a request and short contact first, not direct online checkout.",
     demoRequestLabel: "Request a demo",
-    demoRequestTitle: "See in 15 minutes how SalonDossier would work in your salon.",
+    demoRequestTitle: "See in 15 minutes how SalonDossier could fit your salon.",
     demoRequestText:
-      "We briefly walk through your workflow and show how client records, appointments, packages, stamp cards and treatment photos fit your salon.",
+      "We briefly walk through your workflow and show how client records, appointments, packages, loyalty cards and treatment photos fit your way of working.",
     demoSteps: [
       { title: "1. Short intake", text: "We discuss how your salon works today and where time or clarity is currently lost." },
       { title: "2. Focused demo", text: "You only see the parts that matter for your salon and team." },
@@ -360,7 +360,7 @@ export const homeDictionary = {
     guideLabel: "Setup guide",
     guideTitle: "Want to know how onboarding works?",
     guideText:
-      "We created a clear handout for initial setup, transferring stamp cards and the first week of working with SalonDossier.",
+      "We created a practical handout for your initial setup, carrying over existing cards and getting through the first week with confidence.",
     pricingPlans: [
       {
         name: "SalonDossier Start",
@@ -371,9 +371,9 @@ export const homeDictionary = {
           "client records",
           "services and colour formulas",
           "appointment book",
-          "packages and digital stamp cards",
+          "packages and digital loyalty cards",
           "treatment photos",
-          "standard updates and support"
+          "regular updates and support"
         ]
       },
       {
@@ -383,11 +383,11 @@ export const homeDictionary = {
         audience: "For salons with multiple staff members.",
         features: [
           "everything in Start",
-          "team usage",
+          "full team access",
           "team appointment book",
           "priority support",
-          "faster access to new features",
-          "more guidance"
+          "early access to new improvements",
+          "extra guidance"
         ]
       },
       {
@@ -398,7 +398,7 @@ export const homeDictionary = {
         features: [
           "basic setup",
           "help with settings",
-          "guided walkthrough of key features",
+          "guided walkthrough of the key features",
           "support during launch"
         ]
       }
@@ -406,9 +406,9 @@ export const homeDictionary = {
   },
   de: {
     heroKicker: "Digitale Kundenkartei für Salons und Behandlungsstudios",
-    heroTitle: "Alles über deine Kundschaft an einem Ort, den dein Team wirklich nutzt.",
+    heroTitle: "Alles über deine Kundschaft an einem Ort, mit dem dein Team wirklich arbeitet.",
     heroSubtitle:
-      "SalonDossier hilft Friseursalons, Massagesalons und Kosmetiksalons dabei, Behandlungen, Termine, Pakete, digitale Karten und Behandlungsfotos zentral festzuhalten und schnell wiederzufinden.",
+      "SalonDossier hilft Friseursalons, Massagestudios und Kosmetikinstituten dabei, Behandlungen, Termine, Pakete, digitale Treuekarten und Behandlungsfotos zentral festzuhalten und schnell wiederzufinden.",
     login: "Anmelden",
     viewFeatures: "Funktionen ansehen",
     voordelen: [
@@ -420,7 +420,7 @@ export const homeDictionary = {
     demoLabel: "Was Salons sofort merken",
     demoTitle: "Von losen Notizen zu einer vollständigen Kundenkartei",
     demoText:
-      "In einer Demo zeigst du sofort, dass nicht nur Kundendaten gespeichert werden, sondern auch Rezepte, Pakete, Termine und Fotos logisch miteinander verbunden sind.",
+      "In einer kurzen Demo wird sofort klar: SalonDossier speichert nicht nur Kundendaten, sondern verbindet Rezepte, Pakete, Termine und Fotos in einem stimmigen Ablauf.",
     demoItems: [
       { title: "Rezepte schnell finden", text: "Frühere Behandlungen wiederverwenden, ohne alles neu einzugeben." },
       { title: "Stempelkarten digitalisieren", text: "Pakete und Stempelkarten bleiben mit der Kundenkartei verbunden." },
@@ -438,7 +438,7 @@ export const homeDictionary = {
       },
       {
         title: "Für Salons gemacht",
-        text: "Arbeite mit mehreren Mitarbeitenden, plane Termine pro Mitarbeitendem, verkaufe Pakete oder Stempelkarten und wandle einen Termin direkt in eine Behandlung um."
+        text: "Arbeite mit mehreren Mitarbeitenden, plane Termine pro Stylistin, Therapeut oder Behandlerin, verkaufe Pakete oder Treuekarten und überführe einen Termin direkt in eine Behandlung."
       },
       {
         title: "Mehr Ruhe im Arbeitstag",
@@ -458,7 +458,7 @@ export const homeDictionary = {
     previewLabel: "Einblick",
     previewTitle: "So fühlt sich SalonDossier im Alltag an",
     previewText:
-      "Keine Stockbilder, sondern ein schneller visueller Eindruck der Teile, die Salons täglich nutzen: Kundenkartei, Terminbuch und Pakete.",
+      "Keine Stockfotos, sondern ein kurzer visueller Eindruck der Bereiche, mit denen Teams täglich arbeiten: Kundenkartei, Terminbuch und Pakete.",
     previews: [
       {
         title: "Kundenkartei",
@@ -482,7 +482,7 @@ export const homeDictionary = {
     branchesLabel: "Branchen",
     branchesTitle: "Für Behandlungsbetriebe mit wiederkehrender Kundschaft gemacht",
     branchesText:
-      "SalonDossier wurde aus Friseursalons heraus entwickelt, aber der Kern funktioniert auch gut für Massage und Beauty. Pro Salon kann ein Branchenprofil gewählt werden, damit Terminologie, Profilfelder und Standardakzente besser passen.",
+      "SalonDossier wurde für Friseursalons entwickelt, aber der Kern passt genauso gut zu Massage und Beauty. Pro Salon lässt sich ein Branchenprofil wählen, damit Sprache, Profilfokus und Standards besser zum Betrieb passen.",
     branches: [
       {
         title: "Friseursalons",
@@ -490,21 +490,21 @@ export const homeDictionary = {
       },
       {
         title: "Massagesalons",
-        text: "Mit Beschwerdebereichen, Druckvorlieben, Behandlungsnotizen, Paketen und wiederkehrenden Sitzungen."
+        text: "Mit Fokusbereichen, Druckvorlieben, Behandlungsnotizen, Paketen und wiederkehrenden Terminen."
       },
       {
-        title: "Kosmetiksalons",
-        text: "Mit Hauttyp, Hautzustand, Behandlungsnotizen, Produktempfehlungen und Verlaufsfotos."
+        title: "Kosmetikinstitute",
+        text: "Mit Hauttyp, Hautbild, Behandlungsnotizen, Produktempfehlungen und Verlaufsfotos."
       }
     ],
     pricingLabel: "Preise",
     pricingTitle: "Einfache Preise für Salons, die Übersicht wollen",
     pricingText:
-      "SalonDossier ist für Salons gedacht, die Kundenkartei, Behandlungen, Farbrezepte, Termine, Pakete, digitale Stempelkarten und Behandlungsfotos zentral verwalten möchten, ohne ein schweres All-in-One-System.",
+      "SalonDossier ist für Salons gedacht, die Kundenkartei, Behandlungen, Farbrezepte, Termine, Pakete, digitale Treuekarten und Behandlungsfotos zentral verwalten möchten, ohne ein schweres All-in-One-System.",
     processLabel: "So startest du",
     processTitle: "Kein kalter Checkout, sondern erst kurz gemeinsam abstimmen",
     processText:
-      "SalonDossier startet bewusst mit einem kurzen Gespräch und einer Einrichtung. So prüfen wir zuerst, ob es zu deinem Salon passt, sprechen die Einrichtungskosten ab und richten alles sauber ein, bevor ihr live geht.",
+      "SalonDossier startet bewusst mit einem kurzen Gespräch und einer begleiteten Einrichtung. So prüfen wir zuerst, ob es zu deinem Salon passt, sprechen die Einrichtungskosten ab und richten alles sauber ein, bevor ihr live geht.",
     processSteps: [
       {
         title: "1. Anfrage oder Demo",
@@ -524,11 +524,11 @@ export const homeDictionary = {
       }
     ],
     processNote:
-      "Die einmaligen Einrichtungskosten sind für Einrichtung, Erklärung und einen ruhigen Start gedacht. Deshalb läuft der Start aktuell über Anfrage und Kontakt statt über einen direkten Online-Checkout.",
+      "Die einmaligen Einrichtungskosten decken Einrichtung, Einführung und einen ruhigen Start ab. Deshalb beginnt der Start aktuell über Anfrage und kurzen Kontakt statt über einen direkten Online-Checkout.",
     demoRequestLabel: "Demo anfragen",
-    demoRequestTitle: "Sieh in 15 Minuten, wie SalonDossier in deinem Salon funktionieren würde.",
+    demoRequestTitle: "Sieh in 15 Minuten, wie SalonDossier zu deinem Salon passen kann.",
     demoRequestText:
-      "Wir gehen kurz deinen Ablauf durch und zeigen direkt, wie Kundenkartei, Termine, Pakete, Stempelkarten und Behandlungsfotos in deinen Salon passen.",
+      "Wir gehen kurz euren Ablauf durch und zeigen direkt, wie Kundenkartei, Termine, Pakete, Treuekarten und Behandlungsfotos dazu passen.",
     demoSteps: [
       { title: "1. Kurzes Gespräch", text: "Wir besprechen, wie ihr heute arbeitet und wo aktuell Zeit oder Übersicht verloren geht." },
       { title: "2. Gezielte Demo", text: "Du siehst nur die Teile, die für deinen Salon und dein Team relevant sind." },
@@ -542,7 +542,7 @@ export const homeDictionary = {
     guideLabel: "Startleitfaden",
     guideTitle: "Du willst wissen, wie die Einrichtung abläuft?",
     guideText:
-      "Wir haben eine klare Handreichung für die erste Einrichtung, das Übernehmen von Stempelkarten und die erste Woche mit SalonDossier erstellt.",
+      "Wir haben einen klaren Leitfaden für die erste Einrichtung, das Übernehmen bestehender Karten und die ersten Tage mit SalonDossier erstellt.",
     pricingPlans: [
       {
         name: "SalonDossier Start",
@@ -553,9 +553,9 @@ export const homeDictionary = {
           "Kundenkartei",
           "Behandlungen und Farbrezepte",
           "Terminbuch",
-          "Pakete und digitale Stempelkarten",
+          "Pakete und digitale Treuekarten",
           "Behandlungsfotos",
-          "Standard-Updates und Support"
+          "regelmäßige Updates und Support"
         ]
       },
       {
@@ -565,10 +565,10 @@ export const homeDictionary = {
         audience: "Für Salons mit mehreren Mitarbeitenden.",
         features: [
           "alles aus Start",
-          "Teamnutzung",
+          "voller Teamzugang",
           "Team-Terminbuch",
           "priorisierter Support",
-          "schnellerer Zugang zu neuen Funktionen",
+          "früherer Zugang zu neuen Verbesserungen",
           "mehr Begleitung"
         ]
       },
@@ -664,7 +664,7 @@ export const onboardingGuideDictionary = {
     kicker: "Setup guide",
     title: "How to set up SalonDossier in a calm and practical way",
     subtitle:
-      "This handout is meant for your first setup, for transferring existing client information and as a reference later if questions come up again.",
+      "This handout is meant for your initial setup, for carrying over existing client information and as a reference later on if questions come up again.",
     backHome: "Back to website",
     printGuide: "Print this guide",
     requestDemo: "Request a demo",
@@ -683,7 +683,7 @@ export const onboardingGuideDictionary = {
     setupSteps: [
       {
         title: "1. Salon and team",
-        text: "Start with the salon settings and then add the staff members who need immediate access."
+        text: "Start with the salon settings and then add the team members who need access right away."
       },
       {
         title: "2. Packages and stamp cards",
@@ -709,17 +709,17 @@ export const onboardingGuideDictionary = {
     migrateLabel: "Bring your current workflow with you",
     migrateTitle: "What you do not need to enter manually",
     migrateItems: [
-      "You do not need to type old stamp dates; only carry over the current remaining balance.",
+      "You do not need to type in old stamp dates; just carry over the current remaining balance.",
       "You do not need to fully import every client before you start; begin with the clients you need now.",
       "If a card was deducted incorrectly, you can correct it with a controlled package correction and a reason."
     ],
     weekLabel: "First week",
     weekTitle: "What to pay attention to in the first live week",
     weekItems: [
-      "Is every appointment completed through the service flow so stamp cards are deducted correctly?",
+      "Is every appointment completed through the service flow so loyalty cards are deducted correctly?",
       "Does the team clearly understand where to find client notes and photos?",
       "Are active packages and remaining visits visible enough for the front desk?",
-      "Does the reminder text or WhatsApp flow feel practical for your salon?"
+      "Does the reminder text or WhatsApp flow feel practical for your team?"
     ],
     supportLabel: "Need help later",
     supportTitle: "You can still use this after months or after a year",
@@ -729,13 +729,13 @@ export const onboardingGuideDictionary = {
       "Use this guide again as a checklist when you later revisit packages, team setup or client migration."
     ],
     closing:
-      "SalonDossier is intentionally set up as a guided start. That way the first setup is right and you do not need to puzzle through it again later."
+      "SalonDossier is intentionally set up as a guided start. That way the first setup is done properly and you do not have to puzzle through it again later."
   },
   de: {
     kicker: "Startleitfaden",
     title: "So richtest du SalonDossier ruhig und sinnvoll ein",
     subtitle:
-      "Diese Handreichung ist für die erste Einrichtung gedacht, für das Übernehmen bestehender Kundendaten und als Nachschlagehilfe, wenn später wieder Fragen auftauchen.",
+      "Dieser Leitfaden ist für die erste Einrichtung gedacht, für das Übernehmen bestehender Kundendaten und als Nachschlagehilfe, wenn später wieder Fragen auftauchen.",
     backHome: "Zurück zur Website",
     printGuide: "Leitfaden drucken",
     requestDemo: "Demo anfragen",
@@ -754,7 +754,7 @@ export const onboardingGuideDictionary = {
     setupSteps: [
       {
         title: "1. Salon und Team",
-        text: "Lege zuerst die Salon-Einstellungen an und füge danach die Mitarbeitenden hinzu, die direkt Zugriff brauchen."
+        text: "Lege zuerst die Salon-Einstellungen fest und füge danach die Mitarbeitenden hinzu, die direkt Zugriff brauchen."
       },
       {
         title: "2. Pakete und Stempelkarten",
@@ -782,12 +782,12 @@ export const onboardingGuideDictionary = {
     migrateItems: [
       "Alte Stempeldaten müssen nicht nachgetragen werden; übernimm nur den aktuellen Reststand.",
       "Du musst nicht erst alle Kundinnen und Kunden vollständig anlegen; starte mit denen, die du jetzt brauchst.",
-      "Wenn eine Karte falsch abgebucht wurde, kannst du das über eine kontrollierte Paketkorrektur mit Begründung anpassen."
+      "Wenn eine Karte falsch abgebucht wurde, kannst du das über eine kontrollierte Paketkorrektur mit Begründung korrigieren."
     ],
     weekLabel: "Erste Woche",
     weekTitle: "Darauf achten wir in der ersten Live-Woche",
     weekItems: [
-      "Wird jeder Termin über die Behandlung abgeschlossen, damit die Karte korrekt abgebucht wird?",
+      "Wird jeder Termin über die Behandlung abgeschlossen, damit die Treuekarte korrekt abgebucht wird?",
       "Weiß das Team klar, wo Kundennotizen und Fotos zu finden sind?",
       "Sind aktive Pakete und verbleibende Besuche für den Empfang deutlich sichtbar?",
       "Fühlt sich der Erinnerungstext oder der WhatsApp-Ablauf für euch praktisch an?"
@@ -800,7 +800,7 @@ export const onboardingGuideDictionary = {
       "Nutze diesen Leitfaden später erneut als Checkliste, wenn ihr Pakete, Teamstruktur oder Kundenübernahme nochmals überarbeitet."
     ],
     closing:
-      "SalonDossier ist bewusst als begleiteter Start aufgebaut. So stimmt die erste Einrichtung und ihr müsst später nicht wieder von vorn puzzeln."
+      "SalonDossier ist bewusst als begleiteter Start aufgebaut. So sitzt die erste Einrichtung von Anfang an und ihr müsst später nicht wieder von vorn anfangen."
   }
 } as const;
 
