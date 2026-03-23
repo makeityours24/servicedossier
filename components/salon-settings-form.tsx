@@ -1,6 +1,8 @@
 "use client";
 
-import { useActionState } from "react";
+import Image from "next/image";
+import { useActionState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { FormMessage } from "@/components/form-message";
 import { SubmitButton } from "@/components/submit-button";
 import type { FormState } from "@/components/customer-form";
@@ -64,7 +66,15 @@ export function SalonSettingsForm({
   dictionary = defaultDictionary,
   settings
 }: SalonSettingsFormProps) {
+  const router = useRouter();
   const [state, formAction] = useActionState(action, initialState);
+  const previewLogo = settings.logoUrl?.trim() || "/logo-salon.svg";
+
+  useEffect(() => {
+    if (state.success) {
+      router.refresh();
+    }
+  }, [router, state.success]);
 
   return (
     <form action={formAction} className="formulier">
@@ -116,6 +126,18 @@ export function SalonSettingsForm({
             defaultValue={settings.logoUrl}
             placeholder={dictionary.logoUrlPlaceholder}
           />
+          <div className="instellingen-logo-preview">
+            <Image
+              src={previewLogo}
+              alt="Logo preview"
+              width={64}
+              height={64}
+              className="logo-afbeelding logo-afbeelding-klein"
+            />
+            <p className="meta" style={{ margin: 0 }}>
+              Dit logo wordt gebruikt in de login en in de zijbalk. Een eigen logo is dus juist handig voor herkenning.
+            </p>
+          </div>
         </div>
 
         <div className="veld-groot">
