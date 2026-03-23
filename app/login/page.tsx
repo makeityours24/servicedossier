@@ -67,6 +67,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
         salonNaam={salon?.instellingen?.weergavenaam ?? salon?.naam ?? "SalonDossier"}
         logoUrl={salon?.instellingen?.logoUrl}
         tenantGedetecteerd={tenantGedetecteerd}
+        variant="salon"
         presetError={presetError}
         presetSuccess={presetSuccess}
         dictionary={dict}

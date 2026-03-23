@@ -602,6 +602,34 @@ textarea {
   padding: 40px;
 }
 
+.auth-context-kaart {
+  margin-top: 18px;
+  margin-bottom: 18px;
+  padding: 18px 20px;
+  border-radius: 20px;
+  background: linear-gradient(180deg, rgba(255, 248, 246, 0.96) 0%, rgba(255, 255, 255, 0.94) 100%);
+  border: 1px solid rgba(176, 141, 141, 0.18);
+}
+
+.auth-context-kaart h2 {
+  margin: 0;
+  font-size: 1rem;
+  color: var(--accent-donker);
+}
+
+.auth-context-kaart p {
+  margin: 8px 0 0;
+  color: var(--subtekst);
+  line-height: 1.7;
+}
+
+.auth-form-hint {
+  margin: -2px 0 4px;
+  color: var(--subtekst);
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
 .logo-label {
   display: inline-flex;
   align-items: center;
@@ -912,6 +940,12 @@ textarea {
   font-size: 1rem;
   color: var(--tekst);
   box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.7);
+}
+
+.auth-input {
+  border-color: rgba(121, 107, 107, 0.18) !important;
+  background: #fff !important;
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.82);
 }
 
 .veld textarea,

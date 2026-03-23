@@ -806,25 +806,16 @@ export const onboardingGuideDictionary = {
 
 export const loginDictionary = {
   nl: {
-    title: "Inloggen voor medewerkers",
-    subtitle:
-      "Registreer klanten, bewaar kleurrecepten en houd de volledige behandelgeschiedenis centraal bij.",
-    salonCodeLabel: "Saloncode of subdomein (optioneel)",
-    salonCodePlaceholder: "Bijvoorbeeld my-style",
+    title: "Inloggen",
+    subtitle: "Beheer je klanten, behandelingen en resultaten op een plek.",
+    tenantActiveTitle: "Je logt in voor {salonNaam}",
+    tenantActiveText: "De juiste salonomgeving is al geselecteerd. Gebruik hieronder alleen je e-mailadres en wachtwoord.",
     emailLabel: "E-mailadres",
     emailPlaceholder: "naam@salon.nl",
     passwordLabel: "Wachtwoord",
     loginLabel: "Inloggen",
     loginBusy: "Controleren...",
-    salonLoginTitle: "Salon login",
-    salonLoginText: "Gebruik het medewerkeraccount van de salon. Voorbeeld:",
-    platformLoginTitle: "Platform login",
-    platformLoginText:
-      "Log centraal in zonder saloncode voor platformbeheer en onboarding van nieuwe salons.",
-    tenantActiveTitle: "Saloncontext actief",
-    tenantActiveText: "Je logt direct in voor {salonNaam}. De juiste saloncontext is al geselecteerd.",
-    noSalonHint:
-      "Zonder saloncode log je centraal in. Met een saloncode of subdomein log je direct in voor die salon.",
+    formHint: "Gebruik het e-mailadres en wachtwoord van je salonaccount.",
     forgotPasswordLabel: "Wachtwoord vergeten?",
     forgotPasswordHref: "/wachtwoord-vergeten",
     pausedError: "Deze salon is tijdelijk gepauzeerd. Neem contact op met de beheerder.",
@@ -833,25 +824,16 @@ export const loginDictionary = {
     madeBy: "Gemaakt door"
   },
   en: {
-    title: "Staff login",
-    subtitle:
-      "Register clients, save colour formulas and keep the full treatment history in one place.",
-    salonCodeLabel: "Salon code or subdomain (optional)",
-    salonCodePlaceholder: "For example my-style",
+    title: "Log in",
+    subtitle: "Manage your clients, treatments and results in one place.",
+    tenantActiveTitle: "You are logging in for {salonNaam}",
+    tenantActiveText: "The correct salon workspace is already selected. Just enter your email address and password below.",
     emailLabel: "Email address",
     emailPlaceholder: "name@salon.com",
     passwordLabel: "Password",
     loginLabel: "Log in",
     loginBusy: "Checking...",
-    salonLoginTitle: "Salon login",
-    salonLoginText: "Use the salon staff account. Example:",
-    platformLoginTitle: "Platform login",
-    platformLoginText:
-      "Log in centrally without a salon code for platform management and onboarding new salons.",
-    tenantActiveTitle: "Salon context active",
-    tenantActiveText: "You are logging in directly for {salonNaam}. The correct salon context is already selected.",
-    noSalonHint:
-      "Without a salon code you log in centrally. With a salon code or subdomain you log in directly for that salon.",
+    formHint: "Use the email address and password of your salon account.",
     forgotPasswordLabel: "Forgot your password?",
     forgotPasswordHref: "/wachtwoord-vergeten",
     pausedError: "This salon is temporarily paused. Please contact the administrator.",
@@ -860,31 +842,61 @@ export const loginDictionary = {
     madeBy: "Made by"
   },
   de: {
-    title: "Mitarbeiter-Login",
-    subtitle:
-      "Erfasse Kundschaft, speichere Farbrezepte und behalte die gesamte Behandlungshistorie zentral im Blick.",
-    salonCodeLabel: "Saloncode oder Subdomain (optional)",
-    salonCodePlaceholder: "Zum Beispiel my-style",
+    title: "Anmelden",
+    subtitle: "Behalte Kundschaft, Behandlungen und Ergebnisse an einem Ort im Überblick.",
+    tenantActiveTitle: "Du meldest dich für {salonNaam} an",
+    tenantActiveText: "Die richtige Salonumgebung ist bereits ausgewählt. Gib unten nur noch deine E-Mail-Adresse und dein Passwort ein.",
     emailLabel: "E-Mail-Adresse",
     emailPlaceholder: "name@salon.de",
     passwordLabel: "Passwort",
     loginLabel: "Anmelden",
     loginBusy: "Prüfen...",
-    salonLoginTitle: "Salon-Login",
-    salonLoginText: "Nutze das Mitarbeiterkonto des Salons. Beispiel:",
-    platformLoginTitle: "Plattform-Login",
-    platformLoginText:
-      "Melde dich zentral ohne Saloncode an, um die Plattform zu verwalten und neue Salons einzurichten.",
-    tenantActiveTitle: "Salonkontext aktiv",
-    tenantActiveText: "Du meldest dich direkt für {salonNaam} an. Der richtige Salonkontext ist bereits gewählt.",
-    noSalonHint:
-      "Ohne Saloncode meldest du dich zentral an. Mit einem Saloncode oder einer Subdomain meldest du dich direkt für diesen Salon an.",
+    formHint: "Nutze die E-Mail-Adresse und das Passwort deines Salonkontos.",
     forgotPasswordLabel: "Passwort vergessen?",
     forgotPasswordHref: "/wachtwoord-vergeten",
     pausedError: "Dieser Salon ist vorübergehend pausiert. Bitte kontaktiere die Verwaltung.",
     notFoundError: "Dieser Saloncode wurde nicht gefunden.",
     resetCompleted: "Dein Passwort wurde zurückgesetzt. Melde dich mit deinem neuen Passwort an.",
     madeBy: "Erstellt von"
+  }
+} as const;
+
+export const platformLoginDictionary = {
+  nl: {
+    title: "Platform login",
+    subtitle: "Alleen voor intern platformbeheer en onboarding van nieuwe salons.",
+    emailLabel: "E-mailadres",
+    emailPlaceholder: "naam@miy24.nl",
+    passwordLabel: "Wachtwoord",
+    loginLabel: "Inloggen",
+    loginBusy: "Controleren...",
+    formHint: "Gebruik alleen je centrale platformaccount.",
+    forgotPasswordLabel: "Wachtwoord vergeten?",
+    forgotPasswordHref: "/wachtwoord-vergeten"
+  },
+  en: {
+    title: "Platform login",
+    subtitle: "For internal platform management and onboarding of new salons only.",
+    emailLabel: "Email address",
+    emailPlaceholder: "name@miy24.nl",
+    passwordLabel: "Password",
+    loginLabel: "Log in",
+    loginBusy: "Checking...",
+    formHint: "Use your central platform account only.",
+    forgotPasswordLabel: "Forgot your password?",
+    forgotPasswordHref: "/wachtwoord-vergeten"
+  },
+  de: {
+    title: "Plattform-Login",
+    subtitle: "Nur für interne Plattformverwaltung und das Onboarding neuer Salons.",
+    emailLabel: "E-Mail-Adresse",
+    emailPlaceholder: "name@miy24.nl",
+    passwordLabel: "Passwort",
+    loginLabel: "Anmelden",
+    loginBusy: "Prüfen...",
+    formHint: "Nutze dafür ausschließlich dein zentrales Plattformkonto.",
+    forgotPasswordLabel: "Passwort vergessen?",
+    forgotPasswordHref: "/wachtwoord-vergeten"
   }
 } as const;
 

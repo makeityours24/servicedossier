@@ -3,7 +3,7 @@ import type { NextRequest } from "next/server";
 import { getAppHostname, getBaseDomain, getWebsiteUrl } from "@/lib/app-url";
 import { extractTenantSlugFromHostname } from "@/lib/tenant";
 
-const publiekeAuthenticatiePaden = ["/login", "/wachtwoord-vergeten", "/wachtwoord-reset"];
+const publiekeAuthenticatiePaden = ["/login", "/platform-login", "/wachtwoord-vergeten", "/wachtwoord-reset"];
 const publiekeWebsitePaden = ["/", "/startgids", "/testformulier"];
 
 export function middleware(request: NextRequest) {

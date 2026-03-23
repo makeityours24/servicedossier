@@ -152,7 +152,7 @@ export async function loginAction(_: LoginState, formData: FormData): Promise<Lo
         salonSlug: salonInput
       }
     });
-    return { error: "Platformbeheer logt in via de centrale login zonder saloncode." };
+    return { error: "Platformbeheer logt in via de centrale platformlogin, niet via een salonomgeving." };
   }
 
   if (salon && user.salonId !== salon.id) {
