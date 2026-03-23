@@ -5,6 +5,9 @@ import { LanguageSwitcher } from "@/components/language-switcher";
 import { clearSession, getSessionUser } from "@/lib/auth";
 import { getCurrentLocale, homeDictionary } from "@/lib/i18n";
 
+const demoMailHref = "mailto:platform@miy24.nl?subject=Demo%20aanvraag%20SalonDossier";
+const startMailHref = "mailto:platform@miy24.nl?subject=Startaanvraag%20SalonDossier";
+
 export default async function HomePage() {
   const user = await getSessionUser();
   if (user) {
@@ -48,10 +51,13 @@ export default async function HomePage() {
           <p className="landing-subtitel">{dict.heroSubtitle}</p>
 
           <div className="landing-acties">
-            <Link href="/login" className="knop">
-              {dict.login}
+            <a href={demoMailHref} className="knop">
+              {dict.requestDemo}
+            </a>
+            <Link href="/startgids" className="knop-secundair">
+              {dict.viewGuide}
             </Link>
-            <a href="#wat-je-krijgt" className="knop-secundair">
+            <a href="#wat-je-krijgt" className="knop-zacht">
               {dict.viewFeatures}
             </a>
           </div>
@@ -150,6 +156,54 @@ export default async function HomePage() {
       </section>
 
       <section className="landing-sectie container">
+        <div className="landing-sectie-kop">
+          <span className="logo-label">{dict.processLabel}</span>
+          <h2>{dict.processTitle}</h2>
+          <p>{dict.processText}</p>
+        </div>
+
+        <div className="landing-process-grid">
+          {dict.processSteps.map((step) => (
+            <article key={step.title} className="kaart landing-process-card">
+              <strong>{step.title}</strong>
+              <p>{step.text}</p>
+            </article>
+          ))}
+        </div>
+
+        <div className="landing-process-note kaart">
+          <p>{dict.processNote}</p>
+          <div className="landing-demo-request-actions">
+            <a href={startMailHref} className="knop">
+              {dict.startRequest}
+            </a>
+            <Link href="/startgids" className="knop-secundair">
+              {dict.viewGuide}
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      <section className="landing-sectie container">
+        <div className="landing-demo-request kaart">
+          <div className="landing-demo-request-copy">
+            <span className="logo-label">{dict.guideLabel}</span>
+            <h2>{dict.guideTitle}</h2>
+            <p>{dict.guideText}</p>
+          </div>
+
+          <div className="landing-demo-request-actions">
+            <Link href="/startgids" className="knop">
+              {dict.viewGuide}
+            </Link>
+            <a href={startMailHref} className="knop-secundair">
+              {dict.startRequest}
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <section className="landing-sectie container">
         <div className="landing-demo-request kaart">
           <div className="landing-demo-request-copy">
             <span className="logo-label">{dict.demoRequestLabel}</span>
@@ -167,16 +221,19 @@ export default async function HomePage() {
           </div>
 
           <div className="landing-demo-request-actions">
-            <a
-              href="mailto:platform@miy24.nl?subject=Demo%20aanvraag%20SalonDossier"
-              className="knop"
-            >
+            <a href={demoMailHref} className="knop">
               {dict.requestDemo}
             </a>
-            <a href="mailto:platform@miy24.nl" className="knop-secundair">
+            <Link href="/startgids" className="knop-secundair">
+              {dict.viewGuide}
+            </Link>
+            <a href={startMailHref} className="knop-zacht">
+              {dict.startRequest}
+            </a>
+            <a href="mailto:platform@miy24.nl" className="knop-zacht">
               {dict.sendEmail}
             </a>
-            <a href="#prijzen" className="knop-zacht">
+            <a href="#prijzen" className="knop-secundair">
               {dict.viewPricing}
             </a>
           </div>

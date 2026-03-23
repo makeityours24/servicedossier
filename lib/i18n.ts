@@ -86,6 +86,30 @@ export const homeDictionary = {
     pricingTitle: "Eenvoudige prijzen voor salons die overzicht willen",
     pricingText:
       "SalonDossier is bedoeld voor salons die klantdossiers, behandelingen, kleurrecepten, afspraken, pakketten, digitale stempelkaarten en behandelfoto's centraal willen beheren, zonder een zwaar en duur alles-in-één systeem.",
+    processLabel: "Zo start je",
+    processTitle: "Geen koude checkout, maar eerst kort samen afstemmen",
+    processText:
+      "SalonDossier start nu bewust met een korte intake en inrichting. Zo kijken we eerst of het goed past, spreken we de opstartkosten af en richten we de salon netjes in voordat je live gaat.",
+    processSteps: [
+      {
+        title: "1. Aanvraag of demo",
+        text: "Je laat weten dat je interesse hebt of eerst een korte demo wilt zien."
+      },
+      {
+        title: "2. Kort contact",
+        text: "We bespreken je team, jullie werkwijze, stempelkaarten en wat je als eerste goed wilt hebben."
+      },
+      {
+        title: "3. Inrichting",
+        text: "We zetten je salon goed neer en helpen waar nodig met basisinstellingen, pakketten en teamgebruik."
+      },
+      {
+        title: "4. Livegang",
+        text: "Daarna ontvang je de inloggegevens en kun je rustig starten met begeleiding."
+      }
+    ],
+    processNote:
+      "De eenmalige opstartkosten zijn bedoeld voor inrichting, uitleg en een zachte livegang. Daarom loopt starten nu nog via aanvraag en contact, niet via directe online betaling.",
     demoRequestLabel: "Demo aanvragen",
     demoRequestTitle: "Laat in 15 minuten zien hoe SalonDossier in jouw salon zou werken.",
     demoRequestText:
@@ -107,6 +131,12 @@ export const homeDictionary = {
     requestDemo: "Vraag een demo aan",
     sendEmail: "Stuur een e-mail",
     viewPricing: "Bekijk prijzen",
+    viewGuide: "Bekijk startgids",
+    startRequest: "Startaanvraag sturen",
+    guideLabel: "Startgids",
+    guideTitle: "Wil je weten hoe de inrichting loopt?",
+    guideText:
+      "We hebben een duidelijke handout gemaakt voor de eerste inrichting, het overzetten van kaarten en de eerste week werken met SalonDossier.",
     pricingPlans: [
       {
         name: "SalonDossier Start",
@@ -205,6 +235,30 @@ export const homeDictionary = {
     pricingTitle: "Simple pricing for salons that want clarity",
     pricingText:
       "SalonDossier is built for salons that want to manage client records, services, colour formulas, appointments, packages, digital stamp cards and treatment photos without a heavy all-in-one system.",
+    processLabel: "How onboarding works",
+    processTitle: "No cold checkout, but a short intake first",
+    processText:
+      "SalonDossier currently starts with a short intake and setup. That way we first check whether it fits your salon, agree on the setup fee and prepare your account properly before you go live.",
+    processSteps: [
+      {
+        title: "1. Request or demo",
+        text: "You let us know you are interested or want to see a short demo first."
+      },
+      {
+        title: "2. Short call",
+        text: "We discuss your team, your workflow, your stamp cards and what needs to work first."
+      },
+      {
+        title: "3. Setup",
+        text: "We prepare your salon and help with the basic settings, packages and team usage."
+      },
+      {
+        title: "4. Launch",
+        text: "After that you receive the login details and can start with guidance."
+      }
+    ],
+    processNote:
+      "The one-time setup fee covers setup, walkthrough and a calm launch. That is why getting started currently runs through a request and short contact first, not direct online checkout.",
     demoRequestLabel: "Request a demo",
     demoRequestTitle: "See in 15 minutes how SalonDossier would work in your salon.",
     demoRequestText:
@@ -217,6 +271,12 @@ export const homeDictionary = {
     requestDemo: "Request a demo",
     sendEmail: "Send an email",
     viewPricing: "View pricing",
+    viewGuide: "View setup guide",
+    startRequest: "Send start request",
+    guideLabel: "Setup guide",
+    guideTitle: "Want to know how onboarding works?",
+    guideText:
+      "We created a clear handout for initial setup, transferring stamp cards and the first week of working with SalonDossier.",
     pricingPlans: [
       {
         name: "SalonDossier Start",
@@ -315,6 +375,30 @@ export const homeDictionary = {
     pricingTitle: "Einfache Preise für Salons, die Übersicht wollen",
     pricingText:
       "SalonDossier ist für Salons gedacht, die Kundenkartei, Behandlungen, Farbrezepte, Termine, Pakete, digitale Stempelkarten und Behandlungsfotos zentral verwalten möchten, ohne ein schweres All-in-One-System.",
+    processLabel: "So startest du",
+    processTitle: "Kein kalter Checkout, sondern erst kurz gemeinsam abstimmen",
+    processText:
+      "SalonDossier startet bewusst mit einem kurzen Gespräch und einer Einrichtung. So prüfen wir zuerst, ob es zu deinem Salon passt, sprechen die Einrichtungskosten ab und richten alles sauber ein, bevor ihr live geht.",
+    processSteps: [
+      {
+        title: "1. Anfrage oder Demo",
+        text: "Du meldest dich mit Interesse oder möchtest zuerst eine kurze Demo sehen."
+      },
+      {
+        title: "2. Kurzer Kontakt",
+        text: "Wir besprechen dein Team, euren Ablauf, eure Stempelkarten und was zuerst gut funktionieren muss."
+      },
+      {
+        title: "3. Einrichtung",
+        text: "Wir richten deinen Salon ein und helfen bei Grundeinstellungen, Paketen und Teamnutzung."
+      },
+      {
+        title: "4. Start",
+        text: "Danach erhältst du die Zugangsdaten und kannst mit Begleitung loslegen."
+      }
+    ],
+    processNote:
+      "Die einmaligen Einrichtungskosten sind für Einrichtung, Erklärung und einen ruhigen Start gedacht. Deshalb läuft der Start aktuell über Anfrage und Kontakt statt über einen direkten Online-Checkout.",
     demoRequestLabel: "Demo anfragen",
     demoRequestTitle: "Sieh in 15 Minuten, wie SalonDossier in deinem Salon funktionieren würde.",
     demoRequestText:
@@ -327,6 +411,12 @@ export const homeDictionary = {
     requestDemo: "Demo anfragen",
     sendEmail: "E-Mail senden",
     viewPricing: "Preise ansehen",
+    viewGuide: "Startleitfaden ansehen",
+    startRequest: "Startanfrage senden",
+    guideLabel: "Startleitfaden",
+    guideTitle: "Du willst wissen, wie die Einrichtung abläuft?",
+    guideText:
+      "Wir haben eine klare Handreichung für die erste Einrichtung, das Übernehmen von Stempelkarten und die erste Woche mit SalonDossier erstellt.",
     pricingPlans: [
       {
         name: "SalonDossier Start",
@@ -369,6 +459,222 @@ export const homeDictionary = {
         ]
       }
     ]
+  }
+} as const;
+
+export const onboardingGuideDictionary = {
+  nl: {
+    kicker: "Startgids",
+    title: "Zo richt je SalonDossier rustig en logisch in",
+    subtitle:
+      "Deze handout is bedoeld voor de eerste inrichting, het overzetten van bestaande klantinformatie en als naslag voor later als er opnieuw vragen zijn.",
+    backHome: "Terug naar website",
+    printGuide: "Print deze gids",
+    requestDemo: "Vraag een demo aan",
+    requestSetup: "Stuur een startaanvraag",
+    prepLabel: "Vooraf klaarzetten",
+    prepTitle: "Dit is handig om voor de inrichting bij de hand te hebben",
+    prepItems: [
+      "Naam van de salon, contactgegevens en eventueel je logo",
+      "Teamleden die een eigen login nodig hebben",
+      "Bestaande pakketten of stempelkaarten die je actief wilt overnemen",
+      "Een paar voorbeeldbehandelingen of kleurrecepten die je vaak gebruikt",
+      "Bestaande klantgegevens die je eerst wilt invoeren"
+    ],
+    setupLabel: "Inrichting in stappen",
+    setupTitle: "Aanbevolen volgorde voor een rustige start",
+    setupSteps: [
+      {
+        title: "1. Salon en team",
+        text: "Zet eerst de saloninstellingen goed en voeg daarna de medewerkers toe die direct moeten kunnen inloggen."
+      },
+      {
+        title: "2. Pakketten en kaarten",
+        text: "Maak je pakkettypes of stempelkaarten aan voordat je ze aan klanten koppelt."
+      },
+      {
+        title: "3. Eerste klanten",
+        text: "Voeg de klanten toe die je snel nodig hebt en vul basisinformatie zoals haartype, haarkleur en allergieën aan."
+      },
+      {
+        title: "4. Bestaande kaarten overnemen",
+        text: "Gebruik bij vaste klanten de optie om een bestaande kaart over te nemen met alleen het resterende aantal beurten."
+      },
+      {
+        title: "5. Eerste afspraken plannen",
+        text: "Plan nieuwe afspraken, koppel direct de juiste klant en kies de behandelaar die de afspraak uitvoert."
+      },
+      {
+        title: "6. Eerste behandeling vastleggen",
+        text: "Werk vanuit de afspraak naar de behandeling, zodat notities, pakketafboeking en historie netjes bij elkaar blijven."
+      }
+    ],
+    migrateLabel: "Bestaande werkwijze meenemen",
+    migrateTitle: "Wat je niet allemaal handmatig hoeft te doen",
+    migrateItems: [
+      "Je hoeft oude stempeldatums niet terug te typen; neem alleen de huidige resterende stand over.",
+      "Je hoeft niet eerst alle klanten volledig af te hebben voordat je begint; start met de klanten die je nu nodig hebt.",
+      "Als een kaart ooit verkeerd is afgeboekt, kun je dat corrigeren via een gecontroleerde pakketcorrectie met reden."
+    ],
+    weekLabel: "Eerste week",
+    weekTitle: "Hier letten we op tijdens de eerste live week",
+    weekItems: [
+      "Wordt elke afspraak via behandeling afgerond zodat de kaart goed wordt afgeboekt?",
+      "Zijn teamleden duidelijk over waar zij klantnotities en foto’s terugvinden?",
+      "Zijn actieve pakketten en resterende beurten goed zichtbaar voor de balie?",
+      "Werkt de herinneringstekst of WhatsApp-flow prettig voor jullie?"
+    ],
+    supportLabel: "Later hulp nodig",
+    supportTitle: "Ook na maanden of na een jaar kun je hierop terugvallen",
+    supportItems: [
+      "Mail je vraag of stuur een lijstje met wat onduidelijk is; dan kijken we gericht mee.",
+      "Plan een korte opfrissessie als er nieuwe medewerkers zijn of jullie anders zijn gaan werken.",
+      "Gebruik deze gids als basischecklist als je later opnieuw pakketten, teamleden of klantmigratie wilt aanpakken."
+    ],
+    closing:
+      "SalonDossier is nu bewust ingericht als begeleide start. Zo zorgen we dat de eerste inrichting klopt en dat je later niet opnieuw hoeft te puzzelen."
+  },
+  en: {
+    kicker: "Setup guide",
+    title: "How to set up SalonDossier in a calm and practical way",
+    subtitle:
+      "This handout is meant for your first setup, for transferring existing client information and as a reference later if questions come up again.",
+    backHome: "Back to website",
+    printGuide: "Print this guide",
+    requestDemo: "Request a demo",
+    requestSetup: "Send a start request",
+    prepLabel: "Prepare first",
+    prepTitle: "Helpful things to have ready before setup",
+    prepItems: [
+      "Salon name, contact details and optionally your logo",
+      "Staff members who need their own login",
+      "Existing packages or stamp cards you want to carry over",
+      "A few example services or colour formulas you often use",
+      "Existing client information you want to add first"
+    ],
+    setupLabel: "Setup steps",
+    setupTitle: "Recommended order for a smooth start",
+    setupSteps: [
+      {
+        title: "1. Salon and team",
+        text: "Start with the salon settings and then add the staff members who need immediate access."
+      },
+      {
+        title: "2. Packages and stamp cards",
+        text: "Create your package or stamp card types before assigning them to clients."
+      },
+      {
+        title: "3. First clients",
+        text: "Add the clients you need first and fill in basics like hair type, hair colour and allergies."
+      },
+      {
+        title: "4. Carry over existing cards",
+        text: "For regular clients, use the carry-over option and only enter the remaining number of visits."
+      },
+      {
+        title: "5. Plan first appointments",
+        text: "Create new appointments, link the correct client right away and select the staff member who will handle it."
+      },
+      {
+        title: "6. Record the first service",
+        text: "Work from the appointment into the service record so notes, package deductions and history stay together."
+      }
+    ],
+    migrateLabel: "Bring your current workflow with you",
+    migrateTitle: "What you do not need to enter manually",
+    migrateItems: [
+      "You do not need to type old stamp dates; only carry over the current remaining balance.",
+      "You do not need to fully import every client before you start; begin with the clients you need now.",
+      "If a card was deducted incorrectly, you can correct it with a controlled package correction and a reason."
+    ],
+    weekLabel: "First week",
+    weekTitle: "What to pay attention to in the first live week",
+    weekItems: [
+      "Is every appointment completed through the service flow so stamp cards are deducted correctly?",
+      "Does the team clearly understand where to find client notes and photos?",
+      "Are active packages and remaining visits visible enough for the front desk?",
+      "Does the reminder text or WhatsApp flow feel practical for your salon?"
+    ],
+    supportLabel: "Need help later",
+    supportTitle: "You can still use this after months or after a year",
+    supportItems: [
+      "Email your question or a short list of what feels unclear and we will review it with you.",
+      "Plan a short refresher session when new staff join or your workflow changes.",
+      "Use this guide again as a checklist when you later revisit packages, team setup or client migration."
+    ],
+    closing:
+      "SalonDossier is intentionally set up as a guided start. That way the first setup is right and you do not need to puzzle through it again later."
+  },
+  de: {
+    kicker: "Startleitfaden",
+    title: "So richtest du SalonDossier ruhig und sinnvoll ein",
+    subtitle:
+      "Diese Handreichung ist für die erste Einrichtung gedacht, für das Übernehmen bestehender Kundendaten und als Nachschlagehilfe, wenn später wieder Fragen auftauchen.",
+    backHome: "Zurück zur Website",
+    printGuide: "Leitfaden drucken",
+    requestDemo: "Demo anfragen",
+    requestSetup: "Startanfrage senden",
+    prepLabel: "Vorab bereitlegen",
+    prepTitle: "Das ist vor der Einrichtung hilfreich",
+    prepItems: [
+      "Salonname, Kontaktdaten und optional dein Logo",
+      "Mitarbeitende, die einen eigenen Login brauchen",
+      "Bestehende Pakete oder Stempelkarten, die übernommen werden sollen",
+      "Ein paar Beispielbehandlungen oder Farbrezepte, die ihr oft nutzt",
+      "Bestehende Kundendaten, die zuerst eingetragen werden sollen"
+    ],
+    setupLabel: "Einrichtung in Schritten",
+    setupTitle: "Empfohlene Reihenfolge für einen ruhigen Start",
+    setupSteps: [
+      {
+        title: "1. Salon und Team",
+        text: "Lege zuerst die Salon-Einstellungen an und füge danach die Mitarbeitenden hinzu, die direkt Zugriff brauchen."
+      },
+      {
+        title: "2. Pakete und Stempelkarten",
+        text: "Lege Paket- oder Stempelkartentypen an, bevor du sie Kundinnen und Kunden zuweist."
+      },
+      {
+        title: "3. Erste Kundschaft",
+        text: "Lege zuerst die Kundschaft an, die du direkt brauchst, und ergänze Grundlagen wie Haartyp, Haarfarbe und Allergien."
+      },
+      {
+        title: "4. Bestehende Karten übernehmen",
+        text: "Nutze bei Stammkundschaft die Übernahmefunktion und trage nur die aktuell verbleibenden Besuche ein."
+      },
+      {
+        title: "5. Erste Termine planen",
+        text: "Lege neue Termine an, verknüpfe direkt die richtige Kundin oder den richtigen Kunden und wähle die zuständige Person."
+      },
+      {
+        title: "6. Erste Behandlung festhalten",
+        text: "Arbeite vom Termin in die Behandlung, damit Notizen, Paketabbuchung und Historie sauber zusammenbleiben."
+      }
+    ],
+    migrateLabel: "Bestehende Arbeitsweise mitnehmen",
+    migrateTitle: "Was du nicht alles manuell eintragen musst",
+    migrateItems: [
+      "Alte Stempeldaten müssen nicht nachgetragen werden; übernimm nur den aktuellen Reststand.",
+      "Du musst nicht erst alle Kundinnen und Kunden vollständig anlegen; starte mit denen, die du jetzt brauchst.",
+      "Wenn eine Karte falsch abgebucht wurde, kannst du das über eine kontrollierte Paketkorrektur mit Begründung anpassen."
+    ],
+    weekLabel: "Erste Woche",
+    weekTitle: "Darauf achten wir in der ersten Live-Woche",
+    weekItems: [
+      "Wird jeder Termin über die Behandlung abgeschlossen, damit die Karte korrekt abgebucht wird?",
+      "Weiß das Team klar, wo Kundennotizen und Fotos zu finden sind?",
+      "Sind aktive Pakete und verbleibende Besuche für den Empfang deutlich sichtbar?",
+      "Fühlt sich der Erinnerungstext oder der WhatsApp-Ablauf für euch praktisch an?"
+    ],
+    supportLabel: "Später Hilfe nötig",
+    supportTitle: "Darauf kannst du auch nach Monaten oder nach einem Jahr zurückgreifen",
+    supportItems: [
+      "Schicke deine Frage oder eine kurze Liste mit offenen Punkten per E-Mail, dann schauen wir gezielt mit.",
+      "Plane eine kurze Auffrischung, wenn neue Mitarbeitende dazukommen oder sich euer Ablauf verändert hat.",
+      "Nutze diesen Leitfaden später erneut als Checkliste, wenn ihr Pakete, Teamstruktur oder Kundenübernahme nochmals überarbeitet."
+    ],
+    closing:
+      "SalonDossier ist bewusst als begleiteter Start aufgebaut. So stimmt die erste Einrichtung und ihr müsst später nicht wieder von vorn puzzeln."
   }
 } as const;
 
