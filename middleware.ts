@@ -1,8 +1,10 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { getAppHostname, getBaseDomain, getWebsiteUrl } from "@/lib/app-url";
 import { extractTenantSlugFromHostname } from "@/lib/tenant";
 
-const publiekePaden = ["/login", "/wachtwoord-vergeten", "/wachtwoord-reset"];
+const publiekeAuthenticatiePaden = ["/login", "/wachtwoord-vergeten", "/wachtwoord-reset"];
+const publiekeWebsitePaden = ["/", "/startgids", "/testformulier"];
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -17,8 +19,40 @@ export function middleware(request: NextRequest) {
     return response;
   }
 
-  const tenantSlug = extractTenantSlugFromHostname(request.headers.get("host") ?? "");
+  const requestHost = normalizeHostname(request.headers.get("host"));
+  const tenantSlug = extractTenantSlugFromHostname(requestHost);
+  const appHost = getAppHostname();
+  const baseDomain = getBaseDomain();
+  const websiteUrl = getWebsiteUrl();
+  const isLocalHost = isLocalDevelopmentHost(requestHost);
+  const isAppHost = Boolean(!isLocalHost && appHost && requestHost === appHost);
+  const isMarketingHost = Boolean(
+    isLocalHost ||
+      (baseDomain && (requestHost === baseDomain || requestHost === `www.${baseDomain}`))
+  );
   const requestHeaders = new Headers(request.headers);
+  const isPubliekeAuthRoute = matchesAnyPath(pathname, publiekeAuthenticatiePaden);
+  const isPubliekeWebsiteRoute = matchesAnyPath(pathname, publiekeWebsitePaden);
+
+  if (!isLocalHost && isMarketingHost && appHost && !isPubliekeWebsiteRoute) {
+    const response = NextResponse.redirect(new URL(`${pathname}${request.nextUrl.search}`, `https://${appHost}`));
+    setSecurityHeaders(response);
+    return response;
+  }
+
+  if (!isLocalHost && isAppHost && isPubliekeWebsiteRoute) {
+    const target =
+      pathname === "/" ? new URL("/login", request.url) : new URL(`${pathname}${request.nextUrl.search}`, websiteUrl);
+    const response = NextResponse.redirect(target);
+    setSecurityHeaders(response);
+    return response;
+  }
+
+  if (!isLocalHost && tenantSlug && isPubliekeWebsiteRoute) {
+    const response = NextResponse.redirect(new URL("/login", request.url));
+    setSecurityHeaders(response);
+    return response;
+  }
 
   if (tenantSlug) {
     requestHeaders.set("x-tenant-slug", tenantSlug);
@@ -27,7 +61,7 @@ export function middleware(request: NextRequest) {
   }
 
   const heeftSessie = request.cookies.has("salon_session");
-  const isPubliek = publiekePaden.some((pad) => pathname.startsWith(pad));
+  const isPubliek = isPubliekeAuthRoute || (isMarketingHost && isPubliekeWebsiteRoute);
 
   if (!heeftSessie && !isPubliek) {
     const response = NextResponse.redirect(new URL("/login", request.url));
@@ -74,6 +108,26 @@ function setSecurityHeaders(response: NextResponse) {
       "form-action 'self'",
       "upgrade-insecure-requests"
     ].join("; ")
+  );
+}
+
+function normalizeHostname(host: string | null | undefined) {
+  return (host ?? "").toLowerCase().split(":")[0];
+}
+
+function isLocalDevelopmentHost(hostname: string) {
+  return (
+    hostname === "localhost" ||
+    hostname === "127.0.0.1" ||
+    hostname.endsWith(".localhost")
+  );
+}
+
+function matchesAnyPath(pathname: string, candidates: string[]) {
+  return candidates.some((candidate) =>
+    candidate === "/"
+      ? pathname === "/"
+      : pathname === candidate || pathname.startsWith(`${candidate}/`)
   );
 }
 

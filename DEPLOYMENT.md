@@ -4,27 +4,39 @@ Deze gids beschrijft de aanbevolen live setup voor `SalonDossier` als multi-tena
 
 ## Aanbevolen productie-opzet
 
+- Publieke website: `salondossier.com`
 - Applicatiehosting: `Vercel`
 - Database: `Neon PostgreSQL`
 - Domeinbeheer: `STRATO`
+- Publieke site:
+  - `salondossier.com`
 - Salonlogins:
-  - centraal: `app.jouwdomein.nl/login`
-  - per salon via subdomein: `salonslug.jouwdomein.nl/login`
+  - centraal: `app.salondossier.com/login`
+  - per salon via subdomein: `salonslug.salondossier.com/login`
 
 ## Architectuur
 
 ### Centrale platformomgeving
 
-- `app.jouwdomein.nl`
+- `app.salondossier.com`
 - gebruikt voor:
   - platform login
   - platform overzicht
   - salon onboarding
 
+### Publieke website
+
+- `salondossier.com`
+- gebruikt voor:
+  - productuitleg
+  - prijzen
+  - demo-aanvragen
+  - startgids / handout
+
 ### Salonomgevingen
 
-- `my-style.jouwdomein.nl`
-- `andere-salon.jouwdomein.nl`
+- `my-style.salondossier.com`
+- `andere-salon.salondossier.com`
 
 De middleware leest het subdomein uit en koppelt dat aan de juiste `salon.slug`.
 
@@ -36,9 +48,10 @@ Vul in Vercel deze variabelen in:
 DATABASE_URL="postgresql://..."
 DIRECT_URL="postgresql://..."
 SESSION_SECRET="een-lang-uniek-geheim"
-NEXT_PUBLIC_APP_URL="https://app.jouwdomein.nl"
+NEXT_PUBLIC_APP_URL="https://app.salondossier.com"
 NEXT_PUBLIC_TENANT_MODE="subdomain"
-NEXT_PUBLIC_BASE_DOMAIN="jouwdomein.nl"
+NEXT_PUBLIC_BASE_DOMAIN="salondossier.com"
+PASSWORD_RESET_URL_BASE="https://app.salondossier.com"
 ```
 
 ## Stap 1: database klaarzetten
@@ -73,13 +86,15 @@ npm run db:seed
 
 Koppel in Vercel:
 
-- `app.jouwdomein.nl`
+- `salondossier.com`
+- `www.salondossier.com`
+- `app.salondossier.com`
 
 ### Wildcard voor salons
 
 Koppel daarnaast:
 
-- `*.jouwdomein.nl`
+- `*.salondossier.com`
 
 Zo kunnen alle salons op een eigen subdomein uitkomen zonder per salon handmatig een aparte app op te zetten.
 
@@ -87,8 +102,10 @@ Zo kunnen alle salons op een eigen subdomein uitkomen zonder per salon handmatig
 
 In STRATO heb je uiteindelijk minimaal nodig:
 
-- een record voor `app.jouwdomein.nl`
-- een wildcard record voor `*.jouwdomein.nl`
+- een record voor `salondossier.com`
+- een record voor `www.salondossier.com`
+- een record voor `app.salondossier.com`
+- een wildcard record voor `*.salondossier.com`
 
 Welke exacte recordwaarden je gebruikt, neem je over uit het Vercel domeinoverzicht zodra het domein in Vercel is toegevoegd.
 
@@ -98,11 +115,11 @@ Test daarna:
 
 ### Centrale login
 
-- `https://app.jouwdomein.nl/login`
+- `https://app.salondossier.com/login`
 
 ### Salon login
 
-- `https://my-style.jouwdomein.nl/login`
+- `https://my-style.salondossier.com/login`
 
 Controleer:
 
@@ -117,7 +134,7 @@ Controleer:
 
 Platformbeheer logt in via:
 
-- `https://app.jouwdomein.nl/login`
+- `https://app.salondossier.com/login`
 
 ### Salongebruikers
 
@@ -127,7 +144,7 @@ Salonmedewerkers loggen in via:
 
 Voorbeeld:
 
-- `https://my-style.jouwdomein.nl/login`
+- `https://my-style.salondossier.com/login`
 
 Dat is gebruiksvriendelijker dan steeds een saloncode invullen.
 
@@ -135,21 +152,19 @@ Dat is gebruiksvriendelijker dan steeds een saloncode invullen.
 
 Als wildcard subdomeinen nog niet live zijn, kun je tijdelijk de query-login gebruiken:
 
-- `https://app.jouwdomein.nl/login?salon=my-style`
+- `https://app.salondossier.com/login?salon=my-style`
 
 Daarmee kun je blijven testen totdat DNS volledig staat.
 
 ## Productiechecklist
 
 - `NEXT_PUBLIC_TENANT_MODE` staat op `subdomain`
-- `NEXT_PUBLIC_BASE_DOMAIN` klopt
+- `NEXT_PUBLIC_BASE_DOMAIN` klopt en wijst naar `salondossier.com`
+- apexdomein toont de publieke website
+- `app.salondossier.com` toont de app-login
 - platformlogin werkt
 - salonlogin werkt
 - onboardinglink toont de juiste live URL
 - gepauzeerde salons worden geblokkeerd
 - database backup is ingericht
 - sterke `SESSION_SECRET` gebruikt
-
-## Belangrijke productienoot
-
-Deze versie gebruikt nu nog SHA-256 voor wachtwoorden. Dat is bruikbaar voor demo en interne test, maar voor productie moet dit worden vervangen door `argon2` of `bcrypt`.
