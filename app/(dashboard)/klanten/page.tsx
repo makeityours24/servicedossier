@@ -54,9 +54,14 @@ export default async function KlantenPage({ searchParams }: KlantenPageProps) {
           </p>
         </div>
 
-        <Link href="/klanten/nieuwe" className="knop">
-          Klant toevoegen
-        </Link>
+        <div className="acties">
+          <a href="/api/customer-import-template" className="knop-secundair">
+            Download importtemplate
+          </a>
+          <Link href="/klanten/nieuwe" className="knop">
+            Klant toevoegen
+          </Link>
+        </div>
       </section>
 
       <CustomerSearch initialQuery={zoek} />
@@ -74,6 +79,13 @@ export default async function KlantenPage({ searchParams }: KlantenPageProps) {
           <p className="meta">
             Moet iemand wel kunnen inloggen? Voeg die persoon dan toe via <strong>Team</strong> als
             medewerkeraccount.
+          </p>
+        </article>
+        <article className="info-kaart">
+          <h3>Excel overzetten?</h3>
+          <p className="meta">
+            Download eerst de <strong>SalonDossier-template</strong>, plak daar je bestaande
+            klantlijst in en gebruik die als vaste basis voor een latere import.
           </p>
         </article>
       </section>
