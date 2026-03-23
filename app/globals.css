@@ -414,9 +414,19 @@ textarea {
 }
 
 .landing-pricing-feature {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
+  display: grid;
+  grid-template-columns: 14px minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+}
+
+.landing-pricing-feature .landing-module-dot {
+  margin-top: 0.35rem;
+}
+
+.landing-pricing-feature p {
+  margin: 0;
+  line-height: 1.65;
 }
 
 .landing-demo-request {
@@ -1529,6 +1539,15 @@ textarea {
   .landing-module-grid,
   .landing-pricing-grid {
     grid-template-columns: 1fr;
+  }
+
+  .landing-pricing-card {
+    gap: 18px;
+  }
+
+  .landing-pricing-feature {
+    grid-template-columns: 12px minmax(0, 1fr);
+    gap: 10px;
   }
 
   .landing-titel {
