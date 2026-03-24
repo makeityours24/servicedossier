@@ -6,16 +6,12 @@ import type { FormState } from "@/components/customer-form";
 import { requireSalonSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { createAuditLog, getRequestIp } from "@/lib/security";
+import { buildAppointmentSegmentEnd } from "@/lib/appointment-visits";
 import { formatDateParamLocal } from "@/lib/utils";
-import { appointmentSchema, appointmentUpdateSchema } from "@/lib/validation";
+import { appointmentSchema, appointmentUpdateSchema, appointmentVisitSchema } from "@/lib/validation";
 
 function toDateParam(value: Date) {
   return formatDateParamLocal(value);
-}
-
-function buildAppointmentEndDate(datumStart: string, duurMinuten: number) {
-  const start = new Date(datumStart);
-  return new Date(start.getTime() + duurMinuten * 60000);
 }
 
 export async function createAppointmentAction(
@@ -76,7 +72,7 @@ export async function createAppointmentAction(
     }
 
     const datumStart = new Date(parsed.data.datumStart);
-    const datumEinde = buildAppointmentEndDate(parsed.data.datumStart, parsed.data.duurMinuten);
+    const datumEinde = buildAppointmentSegmentEnd(parsed.data.datumStart, parsed.data.duurMinuten);
 
     const afspraak = await prisma.appointment.create({
       data: {
@@ -207,7 +203,7 @@ export async function updateAppointmentAction(
     }
 
     const datumStart = new Date(parsed.data.datumStart);
-    const datumEinde = buildAppointmentEndDate(parsed.data.datumStart, parsed.data.duurMinuten);
+    const datumEinde = buildAppointmentSegmentEnd(parsed.data.datumStart, parsed.data.duurMinuten);
 
     const updated = await prisma.appointment.update({
       where: { id: parsed.data.appointmentId },
@@ -251,6 +247,143 @@ export async function updateAppointmentAction(
     return { success: "Afspraak is bijgewerkt." };
   } catch {
     return { error: "Bijwerken van de afspraak is mislukt." };
+  }
+}
+
+export async function createAppointmentVisitAction(
+  _: FormState,
+  formData: FormData
+): Promise<FormState> {
+  const user = await requireSalonSession();
+  const ipAddress = await getRequestIp();
+
+  const segmentsJson = formData.get("segmentsJson");
+  let parsedSegments: unknown = [];
+
+  if (typeof segmentsJson === "string" && segmentsJson.trim()) {
+    try {
+      parsedSegments = JSON.parse(segmentsJson);
+    } catch {
+      return { error: "Controleer de onderdelen van dit bezoek." };
+    }
+  }
+
+  const parsed = appointmentVisitSchema.safeParse({
+    customerId: formData.get("customerId"),
+    datum: formData.get("datum"),
+    notities: formData.get("notities") || undefined,
+    status: formData.get("status"),
+    segments: parsedSegments
+  });
+
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Controleer de gegevens van dit bezoek." };
+  }
+
+  try {
+    const customer = await prisma.customer.findFirst({
+      where: {
+        id: parsed.data.customerId,
+        salonId: user.salonId
+      },
+      select: {
+        id: true,
+        naam: true
+      }
+    });
+
+    if (!customer) {
+      return { error: "Deze klant hoort niet bij deze salon." };
+    }
+
+    const userIds = Array.from(
+      new Set(parsed.data.segments.map((segment) => segment.userId).filter((value): value is number => Boolean(value)))
+    );
+
+    if (userIds.length > 0) {
+      const medewerkerCount = await prisma.user.count({
+        where: {
+          id: { in: userIds },
+          salonId: user.salonId,
+          isPlatformAdmin: false
+        }
+      });
+
+      if (medewerkerCount !== userIds.length) {
+        return { error: "Een of meer behandelaars horen niet bij deze salon." };
+      }
+    }
+
+    const visit = await prisma.appointmentVisit.create({
+      data: {
+        salonId: user.salonId,
+        customerId: customer.id,
+        datum: new Date(parsed.data.datum),
+        notities: parsed.data.notities || null,
+        status: parsed.data.status,
+        segments: {
+          create: parsed.data.segments.map((segment) => ({
+            salonId: user.salonId,
+            customerId: customer.id,
+            userId: segment.userId,
+            datumStart: new Date(segment.datumStart),
+            datumEinde: buildAppointmentSegmentEnd(segment.datumStart, segment.duurMinuten),
+            duurMinuten: segment.duurMinuten,
+            behandeling: segment.behandeling,
+            behandelingKleur: segment.behandelingKleur,
+            notities: segment.notities || null,
+            status: segment.status
+          }))
+        }
+      },
+      include: {
+        segments: {
+          select: {
+            id: true,
+            userId: true,
+            datumStart: true,
+            datumEinde: true,
+            duurMinuten: true,
+            behandeling: true,
+            behandelingKleur: true,
+            status: true
+          }
+        }
+      }
+    });
+
+    await createAuditLog({
+      salonId: user.salonId,
+      actorUserId: user.id,
+      action: "APPOINTMENT_VISIT_CREATED",
+      entityType: "AppointmentVisit",
+      entityId: visit.id,
+      message: `Samengesteld bezoek aangemaakt voor ${customer.naam}.`,
+      ipAddress,
+      metadata: {
+        customerId: customer.id,
+        customerName: customer.naam,
+        datum: visit.datum.toISOString(),
+        segmentCount: visit.segments.length,
+        segments: visit.segments.map((segment) => ({
+          id: segment.id,
+          userId: segment.userId,
+          datumStart: segment.datumStart.toISOString(),
+          datumEinde: segment.datumEinde.toISOString(),
+          duurMinuten: segment.duurMinuten,
+          behandeling: segment.behandeling,
+          behandelingKleur: segment.behandelingKleur,
+          status: segment.status
+        }))
+      }
+    });
+
+    const dateParam = toDateParam(visit.datum);
+    revalidatePath(`/agenda?datum=${dateParam}`);
+    revalidatePath("/dashboard");
+    return { success: "Samengesteld bezoek is toegevoegd." };
+  } catch {
+    return { error: "Opslaan van het samengestelde bezoek is mislukt." };
   }
 }
 

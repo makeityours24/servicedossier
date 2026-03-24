@@ -1058,6 +1058,18 @@ textarea {
   background: linear-gradient(135deg, rgba(255, 247, 247, 0.98) 0%, rgba(255, 255, 255, 0.96) 100%);
 }
 
+.visit-segments {
+  display: grid;
+  gap: 16px;
+}
+
+.visit-segment-card {
+  display: grid;
+  gap: 4px;
+  padding: 22px;
+  margin: 0;
+}
+
 .kleur-invoer-rij {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
