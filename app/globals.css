@@ -605,15 +605,16 @@ textarea {
 .logo-blok {
   display: flex;
   align-items: flex-start;
-  gap: 14px;
+  gap: 12px;
   margin-bottom: 18px;
 }
 
 .logo-blok > div {
   display: grid;
-  gap: 4px;
+  gap: 2px;
   align-content: start;
   padding-top: 2px;
+  min-width: 0;
 }
 
 .logo-afbeelding {
@@ -630,6 +631,7 @@ textarea {
 .logo-afbeelding-klein {
   width: 56px;
   height: 56px;
+  flex-shrink: 0;
 }
 
 .pagina-titel {
@@ -1556,6 +1558,15 @@ textarea {
   .zijbalk {
     position: static;
     height: auto;
+  }
+
+  .logo-afbeelding-klein {
+    width: 52px;
+    height: 52px;
+  }
+
+  .merk h1 {
+    font-size: 1.75rem;
   }
 
   .statistieken {
