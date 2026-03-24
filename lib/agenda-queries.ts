@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { groupAppointmentSegmentsByVisit } from "@/lib/appointment-visits";
 import { formatDateParamLocal } from "@/lib/utils";
 
 export function getDayRange(datum?: string) {
@@ -90,6 +91,84 @@ export async function getAgendaData(params: {
 
   return {
     appointments,
+    customers,
+    medewerkers
+  };
+}
+
+export async function getAgendaVisitData(params: {
+  salonId: number;
+  dayStart: Date;
+  dayEnd: Date;
+  medewerkerFilter?: string;
+}) {
+  const medewerkerId = params.medewerkerFilter ? Number(params.medewerkerFilter) || undefined : undefined;
+
+  const [segments, customers, medewerkers] = await Promise.all([
+    prisma.appointmentSegment.findMany({
+      where: {
+        salonId: params.salonId,
+        datumStart: {
+          gte: params.dayStart,
+          lte: params.dayEnd
+        },
+        userId: medewerkerId
+      },
+      orderBy: [{ datumStart: "asc" }, { id: "asc" }],
+      include: {
+        visit: {
+          select: {
+            id: true,
+            datum: true,
+            notities: true,
+            status: true
+          }
+        },
+        customer: {
+          select: {
+            id: true,
+            naam: true,
+            telefoonnummer: true
+          }
+        },
+        user: {
+          select: {
+            id: true,
+            naam: true
+          }
+        },
+        convertedTreatment: {
+          select: {
+            id: true
+          }
+        }
+      }
+    }),
+    prisma.customer.findMany({
+      where: { salonId: params.salonId },
+      orderBy: { naam: "asc" },
+      select: {
+        id: true,
+        naam: true
+      }
+    }),
+    prisma.user.findMany({
+      where: {
+        salonId: params.salonId,
+        isPlatformAdmin: false,
+        status: "ACTIEF"
+      },
+      orderBy: { naam: "asc" },
+      select: {
+        id: true,
+        naam: true
+      }
+    })
+  ]);
+
+  return {
+    segments,
+    visits: groupAppointmentSegmentsByVisit(segments),
     customers,
     medewerkers
   };

@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { groupAppointmentSegmentsByVisit } from "@/lib/appointment-visits";
 
 function getTodayRange() {
   const now = new Date();
@@ -146,5 +147,104 @@ export async function getDashboardData(salonId: number) {
     afsprakenVandaag,
     laatsteBehandelingen,
     openPakketten
+  };
+}
+
+export async function getDashboardVisitData(salonId: number) {
+  const { start: vandaagStart, end: vandaagEinde } = getTodayRange();
+
+  const [
+    aantalBezoekenVandaag,
+    openBezoekenVandaag,
+    aantalSegmentenVandaag,
+    openSegmentenVandaag,
+    segmentenVandaag
+  ] = await Promise.all([
+    prisma.appointmentVisit.count({
+      where: {
+        salonId,
+        datum: {
+          gte: vandaagStart,
+          lte: vandaagEinde
+        }
+      }
+    }),
+    prisma.appointmentVisit.count({
+      where: {
+        salonId,
+        status: "GEPLAND",
+        datum: {
+          gte: vandaagStart,
+          lte: vandaagEinde
+        }
+      }
+    }),
+    prisma.appointmentSegment.count({
+      where: {
+        salonId,
+        datumStart: {
+          gte: vandaagStart,
+          lte: vandaagEinde
+        }
+      }
+    }),
+    prisma.appointmentSegment.count({
+      where: {
+        salonId,
+        status: "GEPLAND",
+        datumStart: {
+          gte: vandaagStart,
+          lte: vandaagEinde
+        }
+      }
+    }),
+    prisma.appointmentSegment.findMany({
+      where: {
+        salonId,
+        datumStart: {
+          gte: vandaagStart,
+          lte: vandaagEinde
+        }
+      },
+      orderBy: [{ datumStart: "asc" }, { id: "asc" }],
+      take: 8,
+      include: {
+        visit: {
+          select: {
+            id: true,
+            datum: true,
+            notities: true,
+            status: true
+          }
+        },
+        customer: {
+          select: {
+            id: true,
+            naam: true,
+            telefoonnummer: true
+          }
+        },
+        user: {
+          select: {
+            id: true,
+            naam: true
+          }
+        },
+        convertedTreatment: {
+          select: {
+            id: true
+          }
+        }
+      }
+    })
+  ]);
+
+  return {
+    aantalBezoekenVandaag,
+    openBezoekenVandaag,
+    aantalSegmentenVandaag,
+    openSegmentenVandaag,
+    segmentenVandaag,
+    bezoekenVandaag: groupAppointmentSegmentsByVisit(segmentenVandaag)
   };
 }
