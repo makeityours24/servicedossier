@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { buildCustomerImportPreview, getCustomerImportTemplate } from "../lib/customer-import";
+import { buildCustomerImportPreview, getCustomerImportTemplate, parseCustomerImportFile } from "../lib/customer-import";
 
 test("customer import template uses branch-specific column labels", () => {
   const massageTemplate = getCustomerImportTemplate("nl", "MASSAGE");
@@ -62,4 +62,18 @@ test("customer import preview rejects duplicate phone numbers inside the same fi
   assert.equal(preview.validRows, 1);
   assert.equal(preview.invalidRows, 1);
   assert.match(preview.errors[0]?.message ?? "", /dubbel/);
+});
+
+test("customer import parser returns valid records for later bulk import", async () => {
+  const template = getCustomerImportTemplate("nl", "HAIR");
+  const file = new File([template.csv], "klanten.csv", { type: "text/csv" });
+
+  const parsed = await parseCustomerImportFile({
+    file,
+    locale: "nl",
+    branchType: "HAIR"
+  });
+
+  assert.equal(parsed.validRecords.length, 1);
+  assert.equal(parsed.validRecords[0]?.telefoonnummer, "0612345678");
 });

@@ -1,14 +1,21 @@
 "use client";
 
 import { useActionState } from "react";
-import { previewCustomerImportAction, type CustomerImportPreviewState } from "@/app/(dashboard)/klanten/customer-actions";
+import {
+  importCustomersFromTemplateAction,
+  previewCustomerImportAction,
+  type CustomerImportPreviewState,
+  type CustomerImportState
+} from "@/app/(dashboard)/klanten/customer-actions";
 import { FormMessage } from "@/components/form-message";
 import { SubmitButton } from "@/components/submit-button";
 
 const initialState: CustomerImportPreviewState = {};
+const initialImportState: CustomerImportState = {};
 
 export function CustomerImportPreviewForm() {
   const [state, formAction] = useActionState(previewCustomerImportAction, initialState);
+  const [importState, importAction] = useActionState(importCustomersFromTemplateAction, initialImportState);
 
   return (
     <div className="kaart">
@@ -89,6 +96,33 @@ export function CustomerImportPreviewForm() {
               </ul>
             </div>
           ) : null}
+
+          <div className="kaart import-confirm-card">
+            <h4>Bestand echt importeren</h4>
+            <p className="meta">
+              Als de controle goed is, kies dan hieronder hetzelfde CSV-bestand opnieuw. We maken
+              daarna alleen klanten aan die nog niet bestaan op basis van telefoonnummer.
+            </p>
+
+            <form action={importAction} className="formulier">
+              <FormMessage error={importState.error} success={importState.success} />
+
+              <div className="veld-groot">
+                <label htmlFor="customerImportFileConfirm">CSV-bestand opnieuw kiezen</label>
+                <input
+                  id="customerImportFileConfirm"
+                  name="customerImportFile"
+                  type="file"
+                  accept=".csv,text/csv"
+                  required
+                />
+              </div>
+
+              <div className="knoppenrij">
+                <SubmitButton label="Klanten importeren" bezigLabel="Importeren..." />
+              </div>
+            </form>
+          </div>
         </div>
       ) : null}
     </div>

@@ -1044,6 +1044,11 @@ textarea {
   gap: 8px;
 }
 
+.import-confirm-card {
+  border: 1px solid rgba(180, 35, 35, 0.14);
+  background: linear-gradient(135deg, rgba(255, 247, 247, 0.98) 0%, rgba(255, 255, 255, 0.96) 100%);
+}
+
 .shell {
   display: grid;
   grid-template-columns: 280px minmax(0, 1fr);

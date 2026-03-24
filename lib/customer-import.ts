@@ -144,6 +144,17 @@ export type CustomerImportPreview = {
   errors: CustomerImportPreviewError[];
 };
 
+export type CustomerImportRecord = {
+  naam: string;
+  telefoonnummer: string;
+  adres: string;
+  geboortedatum: string;
+  allergieen?: string;
+  haartype?: string;
+  haarkleur?: string;
+  stylistNotities?: string;
+};
+
 const MAX_IMPORT_FILE_SIZE_BYTES = 1024 * 1024;
 
 export async function buildCustomerImportPreview(params: {
@@ -151,6 +162,17 @@ export async function buildCustomerImportPreview(params: {
   locale: Locale;
   branchType: BranchType;
 }): Promise<CustomerImportPreview> {
+  return (await parseCustomerImportFile(params)).preview;
+}
+
+export async function parseCustomerImportFile(params: {
+  file: File;
+  locale: Locale;
+  branchType: BranchType;
+}): Promise<{
+  preview: CustomerImportPreview;
+  validRecords: CustomerImportRecord[];
+}> {
   validateImportFile(params.file);
 
   const template = getCustomerImportTemplate(params.locale, params.branchType);
@@ -173,6 +195,7 @@ export async function buildCustomerImportPreview(params: {
   const previewRows: CustomerImportPreviewRow[] = [];
   const errors: CustomerImportPreviewError[] = [];
   const seenPhoneNumbers = new Set<string>();
+  const validRecords: CustomerImportRecord[] = [];
   let validRows = 0;
 
   for (let index = 1; index < rows.length; index += 1) {
@@ -214,6 +237,16 @@ export async function buildCustomerImportPreview(params: {
 
     seenPhoneNumbers.add(normalizedPhone);
     validRows += 1;
+    validRecords.push({
+      naam: parsed.data.naam,
+      telefoonnummer: parsed.data.telefoonnummer,
+      adres: parsed.data.adres,
+      geboortedatum: parsed.data.geboortedatum ?? "",
+      allergieen: parsed.data.allergieen,
+      haartype: parsed.data.haartype,
+      haarkleur: parsed.data.haarkleur,
+      stylistNotities: parsed.data.stylistNotities
+    });
 
     if (previewRows.length < 8) {
       previewRows.push({
@@ -226,11 +259,14 @@ export async function buildCustomerImportPreview(params: {
   }
 
   return {
-    totalRows: validRows + errors.length,
-    validRows,
-    invalidRows: errors.length,
-    previewRows,
-    errors: errors.slice(0, 12)
+    preview: {
+      totalRows: validRows + errors.length,
+      validRows,
+      invalidRows: errors.length,
+      previewRows,
+      errors: errors.slice(0, 12)
+    },
+    validRecords
   };
 }
 

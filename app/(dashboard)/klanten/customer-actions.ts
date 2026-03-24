@@ -5,16 +5,29 @@ import { redirect } from "next/navigation";
 import type { FormState } from "@/components/customer-form";
 import { requireSalonSession } from "@/lib/auth";
 import { normalizeBranchType } from "@/lib/branch-profile";
-import { buildCustomerImportPreview, type CustomerImportPreview } from "@/lib/customer-import";
+import { parseCustomerImportFile, type CustomerImportPreview } from "@/lib/customer-import";
 import { getCurrentLocale } from "@/lib/i18n";
 import { prisma } from "@/lib/prisma";
-import { createAuditLog, getRequestIp } from "@/lib/security";
+import {
+  assertSensitiveActionAllowed,
+  clearSensitiveActionThrottle,
+  createAuditLog,
+  getRequestIp,
+  registerSensitiveActionAttempt
+} from "@/lib/security";
 import { customerSchema } from "@/lib/validation";
 
 export type CustomerImportPreviewState = {
   error?: string;
   success?: string;
   preview?: CustomerImportPreview;
+};
+
+export type CustomerImportState = {
+  error?: string;
+  success?: string;
+  importedCount?: number;
+  skippedCount?: number;
 };
 
 export async function createCustomerAction(
@@ -119,7 +132,7 @@ export async function previewCustomerImportAction(
   }
 
   try {
-    const preview = await buildCustomerImportPreview({
+    const { preview } = await parseCustomerImportFile({
       file,
       locale,
       branchType: normalizeBranchType(user.salon.instellingen?.branchType)
@@ -135,6 +148,121 @@ export async function previewCustomerImportAction(
   } catch (error) {
     return {
       error: error instanceof Error ? error.message : "Het bestand kon niet worden gecontroleerd."
+    };
+  }
+}
+
+export async function importCustomersFromTemplateAction(
+  _: CustomerImportState,
+  formData: FormData
+): Promise<CustomerImportState> {
+  const user = await requireSalonSession();
+  const locale = await getCurrentLocale();
+  const ipAddress = await getRequestIp();
+  const throttle = await assertSensitiveActionAllowed({
+    action: "CUSTOMER_IMPORT",
+    actorUserId: user.id,
+    salonId: user.salonId,
+    ipAddress
+  });
+
+  if (!throttle.allowed) {
+    return { error: throttle.error };
+  }
+
+  await registerSensitiveActionAttempt({
+    key: throttle.key,
+    action: "CUSTOMER_IMPORT",
+    actorUserId: user.id,
+    salonId: user.salonId,
+    ipAddress
+  });
+
+  const file = formData.get("customerImportFile");
+
+  if (!(file instanceof File)) {
+    return { error: "Kies eerst een CSV-bestand om te importeren." };
+  }
+
+  try {
+    const { preview, validRecords: importableRecords } = await parseCustomerImportFile({
+      file,
+      locale,
+      branchType: normalizeBranchType(user.salon.instellingen?.branchType)
+    });
+
+    if (preview.invalidRows > 0) {
+      return { error: "Los eerst de rijen met fouten op voordat je importeert." };
+    }
+
+    if (importableRecords.length === 0) {
+      return { error: "Er staan geen geldige klantregels in dit bestand." };
+    }
+
+    const phoneNumbers = importableRecords.map((record) => record.telefoonnummer);
+    const existingCustomers = await prisma.customer.findMany({
+      where: {
+        salonId: user.salonId,
+        telefoonnummer: { in: phoneNumbers }
+      },
+      select: {
+        telefoonnummer: true
+      }
+    });
+
+    const existingPhoneNumbers = new Set(existingCustomers.map((customer) => customer.telefoonnummer));
+    const toCreate = importableRecords.filter((record) => !existingPhoneNumbers.has(record.telefoonnummer));
+    const skippedCount = importableRecords.length - toCreate.length;
+
+    if (toCreate.length === 0) {
+      return {
+        error: "Alle geldige klantregels bestaan al in deze salon op basis van telefoonnummer."
+      };
+    }
+
+    await prisma.customer.createMany({
+      data: toCreate.map((record) => ({
+        salonId: user.salonId,
+        naam: record.naam,
+        telefoonnummer: record.telefoonnummer,
+        adres: record.adres,
+        geboortedatum: record.geboortedatum ? new Date(record.geboortedatum) : null,
+        allergieen: record.allergieen || null,
+        haartype: record.haartype || null,
+        haarkleur: record.haarkleur || null,
+        stylistNotities: record.stylistNotities || null
+      })),
+      skipDuplicates: true
+    });
+
+    await createAuditLog({
+      salonId: user.salonId,
+      actorUserId: user.id,
+      action: "CUSTOMER_IMPORT",
+      entityType: "CUSTOMER",
+      message: "Klanten geimporteerd via template.",
+      ipAddress,
+      metadata: {
+        importedCount: toCreate.length,
+        skippedCount
+      }
+    });
+
+    await clearSensitiveActionThrottle(throttle.key);
+    revalidatePath("/klanten");
+    revalidatePath("/dashboard");
+
+    return {
+      success:
+        skippedCount > 0
+          ? `${toCreate.length} klanten geimporteerd. ${skippedCount} regels zijn overgeslagen omdat het telefoonnummer al bestond.`
+          : `${toCreate.length} klanten zijn succesvol geimporteerd.`,
+      importedCount: toCreate.length,
+      skippedCount
+    };
+  } catch (error) {
+    return {
+      error: error instanceof Error ? error.message : "Het importeren is mislukt."
     };
   }
 }
