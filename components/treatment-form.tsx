@@ -41,6 +41,7 @@ type TreatmentFormProps = {
   treatment?: {
     id?: number;
     appointmentId?: number | null;
+    appointmentSegmentId?: number | null;
     behandelaarUserId?: number | null;
     datum: string;
     behandeling: string;
@@ -109,7 +110,7 @@ export function TreatmentForm({
   const [customerPackageId, setCustomerPackageId] = useState(
     treatment?.customerPackageId ? String(treatment.customerPackageId) : ""
   );
-  const draftKey = `salondossier:treatment-form:${customerId}:${treatment?.id ?? treatment?.appointmentId ?? "new"}`;
+  const draftKey = `salondossier:treatment-form:${customerId}:${treatment?.id ?? treatment?.appointmentSegmentId ?? treatment?.appointmentId ?? "new"}`;
   const [hasDraft, setHasDraft] = useState(false);
 
   useEffect(() => {
@@ -218,6 +219,9 @@ export function TreatmentForm({
       {treatment?.id ? <input type="hidden" name="treatmentId" value={treatment.id} /> : null}
       {treatment?.appointmentId ? (
         <input type="hidden" name="appointmentId" value={treatment.appointmentId} />
+      ) : null}
+      {treatment?.appointmentSegmentId ? (
+        <input type="hidden" name="appointmentSegmentId" value={treatment.appointmentSegmentId} />
       ) : null}
       <FormMessage error={state.error} success={state.success} />
       {state.success && state.suggestionHref && state.suggestionLabel ? (

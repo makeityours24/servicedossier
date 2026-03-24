@@ -10,7 +10,8 @@ import {
   applyPackageUsage,
   getPackageStatusForRemainingSessions,
   rollbackPackageUsage,
-  validateAppointmentConversion
+  validateAppointmentConversion,
+  validateAppointmentSegmentConversion
 } from "@/lib/treatment-workflows";
 import { treatmentSchema } from "@/lib/validation";
 
@@ -131,6 +132,7 @@ export async function createTreatmentAction(
   const parsed = treatmentSchema.safeParse({
     customerId: formData.get("customerId"),
     appointmentId: formData.get("appointmentId"),
+    appointmentSegmentId: formData.get("appointmentSegmentId"),
     datum: formData.get("datum"),
     behandelaarUserId: formData.get("behandelaarUserId"),
     behandeling: formData.get("behandeling"),
@@ -147,6 +149,13 @@ export async function createTreatmentAction(
   try {
     const datum = new Date(parsed.data.datum);
     let appointmentMetadata:
+      | {
+          id: number;
+          datumStart: Date;
+          behandeling: string;
+        }
+      | null = null;
+    let appointmentSegmentMetadata:
       | {
           id: number;
           datumStart: Date;
@@ -193,6 +202,45 @@ export async function createTreatmentAction(
       };
     }
 
+    if (parsed.data.appointmentSegmentId) {
+      const appointmentSegment = await prisma.appointmentSegment.findFirst({
+        where: {
+          id: parsed.data.appointmentSegmentId,
+          salonId: user.salonId,
+          customerId: parsed.data.customerId
+        },
+        select: {
+          id: true,
+          datumStart: true,
+          behandeling: true,
+          convertedTreatment: {
+            select: {
+              id: true
+            }
+          }
+        }
+      });
+
+      const appointmentSegmentError = validateAppointmentSegmentConversion({
+        appointmentSegmentExists: Boolean(appointmentSegment),
+        alreadyConverted: Boolean(appointmentSegment?.convertedTreatment)
+      });
+
+      if (appointmentSegmentError) {
+        return { error: appointmentSegmentError };
+      }
+
+      if (!appointmentSegment) {
+        return { error: "Dit bezoekonderdeel hoort niet bij deze klant of salon." };
+      }
+
+      appointmentSegmentMetadata = {
+        id: appointmentSegment.id,
+        datumStart: appointmentSegment.datumStart,
+        behandeling: appointmentSegment.behandeling
+      };
+    }
+
     const behandelaarGebruiker = parsed.data.behandelaarUserId
       ? await prisma.user.findFirst({
           where: {
@@ -218,6 +266,7 @@ export async function createTreatmentAction(
         customerId: parsed.data.customerId,
         userId: behandelaarGebruiker?.id ?? user.id,
         sourceAppointmentId: appointmentMetadata?.id ?? null,
+        sourceAppointmentSegmentId: appointmentSegmentMetadata?.id ?? null,
         datum,
         behandeling: parsed.data.behandeling,
         recept: parsed.data.recept,
@@ -238,6 +287,15 @@ export async function createTreatmentAction(
     if (appointmentMetadata) {
       await prisma.appointment.update({
         where: { id: appointmentMetadata.id },
+        data: {
+          status: "VOLTOOID"
+        }
+      });
+    }
+
+    if (appointmentSegmentMetadata) {
+      await prisma.appointmentSegment.update({
+        where: { id: appointmentSegmentMetadata.id },
         data: {
           status: "VOLTOOID"
         }
@@ -275,6 +333,7 @@ export async function updateTreatmentAction(
 
   const parsed = treatmentSchema.safeParse({
     customerId: formData.get("customerId"),
+    appointmentSegmentId: formData.get("appointmentSegmentId"),
     datum: formData.get("datum"),
     behandelaarUserId: formData.get("behandelaarUserId"),
     behandeling: formData.get("behandeling"),

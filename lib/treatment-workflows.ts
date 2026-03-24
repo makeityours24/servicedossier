@@ -60,3 +60,18 @@ export function validateAppointmentConversion(params: {
 
   return null;
 }
+
+export function validateAppointmentSegmentConversion(params: {
+  appointmentSegmentExists: boolean;
+  alreadyConverted: boolean;
+}) {
+  if (!params.appointmentSegmentExists) {
+    return "Dit bezoekonderdeel hoort niet bij deze klant of salon.";
+  }
+
+  if (params.alreadyConverted) {
+    return "Van dit bezoekonderdeel is al een behandeling gemaakt.";
+  }
+
+  return null;
+}

@@ -59,6 +59,9 @@ export const treatmentSchema = z.object({
   appointmentId: z
     .union([z.coerce.number().int().positive(), z.literal(""), z.null(), z.undefined()])
     .transform((value) => (typeof value === "number" ? value : null)),
+  appointmentSegmentId: z
+    .union([z.coerce.number().int().positive(), z.literal(""), z.null(), z.undefined()])
+    .transform((value) => (typeof value === "number" ? value : null)),
   datum: z
     .string()
     .min(1, "Datum is verplicht.")

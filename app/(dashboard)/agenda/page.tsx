@@ -223,7 +223,11 @@ export default async function AgendaPage({ searchParams }: AgendaPageProps) {
                       </Link>
                     ) : (
                       <Link
-                        href={`/klanten/${appointment.customer.id}?afspraakId=${appointment.id}#nieuwe-behandeling`}
+                        href={
+                          appointment.kind === "appointment"
+                            ? `/klanten/${appointment.customer.id}?afspraakId=${appointment.id}#nieuwe-behandeling`
+                            : `/klanten/${appointment.customer.id}?afspraakSegmentId=${appointment.id}#nieuwe-behandeling`
+                        }
                         className="knop"
                       >
                         {dict.registerTreatmentAndDeduct}

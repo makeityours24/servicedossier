@@ -29,6 +29,7 @@ type KlantDetailPageProps = {
     herhaalId?: string;
     templateId?: string;
     afspraakId?: string;
+    afspraakSegmentId?: string;
   }>;
 };
 
@@ -49,6 +50,7 @@ export default async function KlantDetailPage({
   const herhaalId = filters.herhaalId ? Number(filters.herhaalId) : null;
   const templateId = filters.templateId ? Number(filters.templateId) : null;
   const afspraakId = filters.afspraakId ? Number(filters.afspraakId) : null;
+  const afspraakSegmentId = filters.afspraakSegmentId ? Number(filters.afspraakSegmentId) : null;
   const user = await requireSalonSession();
   const branchType = normalizeBranchType(user.salon.instellingen?.branchType);
   const branchProfile = getBranchProfileCopy(locale, branchType);
@@ -172,6 +174,34 @@ export default async function KlantDetailPage({
       ? await prisma.appointment.findFirst({
           where: {
             id: afspraakId,
+            customerId: klant.id,
+            salonId: user.salonId
+          },
+          select: {
+            id: true,
+            datumStart: true,
+            behandeling: true,
+            notities: true,
+            userId: true,
+            user: {
+              select: {
+                naam: true
+              }
+            },
+            convertedTreatment: {
+              select: {
+                id: true
+              }
+            }
+          }
+        })
+      : null;
+
+  const geselecteerdAfspraakSegment =
+    !herhaalBehandeling && !geselecteerdSjabloon && !geselecteerdeAfspraak && afspraakSegmentId && Number.isInteger(afspraakSegmentId)
+      ? await prisma.appointmentSegment.findFirst({
+          where: {
+            id: afspraakSegmentId,
             customerId: klant.id,
             salonId: user.salonId
           },
@@ -339,6 +369,21 @@ export default async function KlantDetailPage({
             datum: new Date(
               geselecteerdeAfspraak.datumStart.getTime() -
                 geselecteerdeAfspraak.datumStart.getTimezoneOffset() * 60000
+            )
+              .toISOString()
+              .slice(0, 16)
+          }
+      : geselecteerdAfspraakSegment && !geselecteerdAfspraakSegment.convertedTreatment
+        ? {
+            appointmentSegmentId: geselecteerdAfspraakSegment.id,
+            behandelaarUserId: geselecteerdAfspraakSegment.userId ?? null,
+            behandeling: geselecteerdAfspraakSegment.behandeling,
+            recept: "",
+            behandelaar: geselecteerdAfspraakSegment.user?.naam ?? user.naam,
+            notities: geselecteerdAfspraakSegment.notities ?? "",
+            datum: new Date(
+              geselecteerdAfspraakSegment.datumStart.getTime() -
+                geselecteerdAfspraakSegment.datumStart.getTimezoneOffset() * 60000
             )
               .toISOString()
               .slice(0, 16)

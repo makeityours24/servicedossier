@@ -4,7 +4,8 @@ import {
   applyPackageUsage,
   getPackageStatusForRemainingSessions,
   rollbackPackageUsage,
-  validateAppointmentConversion
+  validateAppointmentConversion,
+  validateAppointmentSegmentConversion
 } from "../lib/treatment-workflows";
 
 test("package usage lowers remaining sessions and marks package complete at zero", () => {
@@ -67,5 +68,25 @@ test("appointment conversion validation allows valid appointments", () => {
       alreadyConverted: false
     }),
     null
+  );
+});
+
+test("appointment segment conversion validation rejects missing segments", () => {
+  assert.equal(
+    validateAppointmentSegmentConversion({
+      appointmentSegmentExists: false,
+      alreadyConverted: false
+    }),
+    "Dit bezoekonderdeel hoort niet bij deze klant of salon."
+  );
+});
+
+test("appointment segment conversion validation rejects already converted segments", () => {
+  assert.equal(
+    validateAppointmentSegmentConversion({
+      appointmentSegmentExists: true,
+      alreadyConverted: true
+    }),
+    "Van dit bezoekonderdeel is al een behandeling gemaakt."
   );
 });
