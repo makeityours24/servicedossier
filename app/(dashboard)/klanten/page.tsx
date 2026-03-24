@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { deleteCustomerAction } from "@/app/(dashboard)/klanten/actions";
+import { CustomerImportPreviewForm } from "@/components/customer-import-preview-form";
 import { CustomerSearch } from "@/components/customer-search";
 import { DeleteCustomerButton } from "@/components/delete-customer-button";
 import { requireSalonSession } from "@/lib/auth";
@@ -75,6 +76,7 @@ export default async function KlantenPage({ searchParams }: KlantenPageProps) {
       </section>
 
       <CustomerSearch initialQuery={zoek} />
+      <CustomerImportPreviewForm />
 
       <section className="info-grid">
         <article className="info-kaart">

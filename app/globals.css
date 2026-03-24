@@ -1006,6 +1006,44 @@ textarea {
   color: var(--accent-donker);
 }
 
+.import-preview {
+  margin-top: 22px;
+  display: grid;
+  gap: 18px;
+}
+
+.import-preview h4 {
+  margin: 0 0 10px;
+}
+
+.import-preview-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.import-preview-summary strong {
+  display: block;
+  margin-top: 8px;
+  font-size: 2rem;
+  line-height: 1;
+  color: var(--accent-donker);
+}
+
+.import-preview-errors {
+  padding: 16px 18px;
+  border-radius: 18px;
+  border: 1px solid rgba(180, 65, 65, 0.16);
+  background: rgba(180, 65, 65, 0.08);
+}
+
+.import-preview-errors ul {
+  margin: 10px 0 0;
+  padding-left: 20px;
+  display: grid;
+  gap: 8px;
+}
+
 .shell {
   display: grid;
   grid-template-columns: 280px minmax(0, 1fr);
@@ -1547,6 +1585,7 @@ textarea {
   }
 
   .formulier-grid,
+  .import-preview-summary,
   .filters,
   .bovenbalk {
     grid-template-columns: 1fr;

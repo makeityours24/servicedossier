@@ -4,9 +4,18 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import type { FormState } from "@/components/customer-form";
 import { requireSalonSession } from "@/lib/auth";
+import { normalizeBranchType } from "@/lib/branch-profile";
+import { buildCustomerImportPreview, type CustomerImportPreview } from "@/lib/customer-import";
+import { getCurrentLocale } from "@/lib/i18n";
 import { prisma } from "@/lib/prisma";
 import { createAuditLog, getRequestIp } from "@/lib/security";
 import { customerSchema } from "@/lib/validation";
+
+export type CustomerImportPreviewState = {
+  error?: string;
+  success?: string;
+  preview?: CustomerImportPreview;
+};
 
 export async function createCustomerAction(
   _: FormState,
@@ -94,6 +103,39 @@ export async function createQuickCustomerAction(
     };
   } catch {
     return { error: "Opslaan is mislukt. Controleer of het telefoonnummer al bestaat." };
+  }
+}
+
+export async function previewCustomerImportAction(
+  _: CustomerImportPreviewState,
+  formData: FormData
+): Promise<CustomerImportPreviewState> {
+  const user = await requireSalonSession();
+  const locale = await getCurrentLocale();
+  const file = formData.get("customerImportFile");
+
+  if (!(file instanceof File)) {
+    return { error: "Kies eerst een CSV-bestand." };
+  }
+
+  try {
+    const preview = await buildCustomerImportPreview({
+      file,
+      locale,
+      branchType: normalizeBranchType(user.salon.instellingen?.branchType)
+    });
+
+    return {
+      success:
+        preview.invalidRows === 0
+          ? "Bestand gecontroleerd. Deze rijen zijn klaar voor de importstap."
+          : "Bestand gecontroleerd. Pas eerst de rijen met fouten aan.",
+      preview
+    };
+  } catch (error) {
+    return {
+      error: error instanceof Error ? error.message : "Het bestand kon niet worden gecontroleerd."
+    };
   }
 }
 
