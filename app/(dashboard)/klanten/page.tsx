@@ -64,6 +64,16 @@ export default async function KlantenPage({ searchParams }: KlantenPageProps) {
         </div>
       </section>
 
+      <section className="kaart" style={{ marginTop: "-0.4rem" }}>
+        <h3 style={{ marginTop: 0 }}>Klantenlijst importeren</h3>
+        <p className="meta">
+          Download eerst de <strong>SalonDossier-template</strong> en vul daarin je bestaande
+          klantenlijst in. Laat de kolomnamen staan zoals ze zijn en gebruik per klant één rij.
+          Zodra de importfunctie live staat, kun je dit bestand direct gebruiken om klanten sneller
+          over te zetten.
+        </p>
+      </section>
+
       <CustomerSearch initialQuery={zoek} />
 
       <section className="info-grid">
