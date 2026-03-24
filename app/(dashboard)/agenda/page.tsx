@@ -41,7 +41,7 @@ export default async function AgendaPage({ searchParams }: AgendaPageProps) {
     dayEnd,
     medewerkerFilter: filters.medewerker
   });
-  const { segments } = await getAgendaVisitData({
+  const { segments, schemaAvailable: visitSchemaAvailable } = await getAgendaVisitData({
     salonId: user.salonId,
     dayStart,
     dayEnd,
@@ -296,7 +296,11 @@ export default async function AgendaPage({ searchParams }: AgendaPageProps) {
             <p className="subtitel" style={{ marginTop: 8 }}>
               {dict.newVisitText}
             </p>
-            {customers.length === 0 ? (
+            {!visitSchemaAvailable ? (
+              <div className="melding-info" style={{ marginTop: 18 }}>
+                {dict.newVisitUnavailable}
+              </div>
+            ) : customers.length === 0 ? (
               <div className="leeg" style={{ marginTop: 18 }}>
                 {dict.addCustomerFirst}
               </div>

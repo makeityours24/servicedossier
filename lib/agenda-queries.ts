@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { groupAppointmentSegmentsByVisit } from "@/lib/appointment-visits";
 import { formatDateParamLocal } from "@/lib/utils";
+import { isMissingVisitSchemaError } from "@/lib/visit-schema-support";
 
 export function getDayRange(datum?: string) {
   const baseDate = datum ? new Date(`${datum}T00:00:00`) : new Date();
@@ -104,8 +105,31 @@ export async function getAgendaVisitData(params: {
 }) {
   const medewerkerId = params.medewerkerFilter ? Number(params.medewerkerFilter) || undefined : undefined;
 
-  const [segments, customers, medewerkers] = await Promise.all([
-    prisma.appointmentSegment.findMany({
+  const [customers, medewerkers] = await Promise.all([
+    prisma.customer.findMany({
+      where: { salonId: params.salonId },
+      orderBy: { naam: "asc" },
+      select: {
+        id: true,
+        naam: true
+      }
+    }),
+    prisma.user.findMany({
+      where: {
+        salonId: params.salonId,
+        isPlatformAdmin: false,
+        status: "ACTIEF"
+      },
+      orderBy: { naam: "asc" },
+      select: {
+        id: true,
+        naam: true
+      }
+    })
+  ]);
+
+  try {
+    const segments = await prisma.appointmentSegment.findMany({
       where: {
         salonId: params.salonId,
         datumStart: {
@@ -143,33 +167,28 @@ export async function getAgendaVisitData(params: {
           }
         }
       }
-    }),
-    prisma.customer.findMany({
-      where: { salonId: params.salonId },
-      orderBy: { naam: "asc" },
-      select: {
-        id: true,
-        naam: true
-      }
-    }),
-    prisma.user.findMany({
-      where: {
-        salonId: params.salonId,
-        isPlatformAdmin: false,
-        status: "ACTIEF"
-      },
-      orderBy: { naam: "asc" },
-      select: {
-        id: true,
-        naam: true
-      }
-    })
-  ]);
+    });
 
-  return {
-    segments,
-    visits: groupAppointmentSegmentsByVisit(segments),
-    customers,
-    medewerkers
-  };
+    return {
+      segments,
+      visits: groupAppointmentSegmentsByVisit(segments),
+      customers,
+      medewerkers,
+      schemaAvailable: true
+    };
+  } catch (error) {
+    if (!isMissingVisitSchemaError(error)) {
+      throw error;
+    }
+
+    console.error("Agenda visit data skipped because the production database is missing the visit schema.", error);
+
+    return {
+      segments: [],
+      visits: [],
+      customers,
+      medewerkers,
+      schemaAvailable: false
+    };
+  }
 }

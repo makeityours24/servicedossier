@@ -6,6 +6,7 @@ import { DeleteCustomerButton } from "@/components/delete-customer-button";
 import { requireSalonSession } from "@/lib/auth";
 import { agendaDictionary, getCurrentLocale } from "@/lib/i18n";
 import { prisma } from "@/lib/prisma";
+import { isMissingVisitSchemaError } from "@/lib/visit-schema-support";
 import { formatDateParamLocal } from "@/lib/utils";
 
 type BewerkVisitPageProps = {
@@ -27,54 +28,66 @@ export default async function BewerkVisitPage({ params }: BewerkVisitPageProps) 
     notFound();
   }
 
-  const [visit, customers, medewerkers] = await Promise.all([
-    prisma.appointmentVisit.findFirst({
-      where: {
-        id: visitId,
-        salonId: user.salonId
-      },
-      include: {
-        customer: {
-          select: {
-            naam: true
-          }
+  let visit = null;
+  let customers = [];
+  let medewerkers = [];
+
+  try {
+    [visit, customers, medewerkers] = await Promise.all([
+      prisma.appointmentVisit.findFirst({
+        where: {
+          id: visitId,
+          salonId: user.salonId
         },
-        segments: {
-          orderBy: [{ datumStart: "asc" }, { id: "asc" }],
-          select: {
-            id: true,
-            userId: true,
-            datumStart: true,
-            duurMinuten: true,
-            behandeling: true,
-            behandelingKleur: true,
-            notities: true,
-            status: true
+        include: {
+          customer: {
+            select: {
+              naam: true
+            }
+          },
+          segments: {
+            orderBy: [{ datumStart: "asc" }, { id: "asc" }],
+            select: {
+              id: true,
+              userId: true,
+              datumStart: true,
+              duurMinuten: true,
+              behandeling: true,
+              behandelingKleur: true,
+              notities: true,
+              status: true
+            }
           }
         }
-      }
-    }),
-    prisma.customer.findMany({
-      where: { salonId: user.salonId },
-      orderBy: { naam: "asc" },
-      select: {
-        id: true,
-        naam: true
-      }
-    }),
-    prisma.user.findMany({
-      where: {
-        salonId: user.salonId,
-        isPlatformAdmin: false,
-        status: "ACTIEF"
-      },
-      orderBy: { naam: "asc" },
-      select: {
-        id: true,
-        naam: true
-      }
-    })
-  ]);
+      }),
+      prisma.customer.findMany({
+        where: { salonId: user.salonId },
+        orderBy: { naam: "asc" },
+        select: {
+          id: true,
+          naam: true
+        }
+      }),
+      prisma.user.findMany({
+        where: {
+          salonId: user.salonId,
+          isPlatformAdmin: false,
+          status: "ACTIEF"
+        },
+        orderBy: { naam: "asc" },
+        select: {
+          id: true,
+          naam: true
+        }
+      })
+    ]);
+  } catch (error) {
+    if (!isMissingVisitSchemaError(error)) {
+      throw error;
+    }
+
+    notFound();
+  }
 
   if (!visit) {
     notFound();

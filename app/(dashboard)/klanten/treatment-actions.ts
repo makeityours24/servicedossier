@@ -265,13 +265,13 @@ export async function createTreatmentAction(
         salonId: user.salonId,
         customerId: parsed.data.customerId,
         userId: behandelaarGebruiker?.id ?? user.id,
-        sourceAppointmentId: appointmentMetadata?.id ?? null,
-        sourceAppointmentSegmentId: appointmentSegmentMetadata?.id ?? null,
         datum,
         behandeling: parsed.data.behandeling,
         recept: parsed.data.recept,
         behandelaar: behandelaarGebruiker?.naam ?? parsed.data.behandelaar,
-        notities: parsed.data.notities
+        notities: parsed.data.notities,
+        ...(appointmentMetadata ? { sourceAppointmentId: appointmentMetadata.id } : {}),
+        ...(appointmentSegmentMetadata ? { sourceAppointmentSegmentId: appointmentSegmentMetadata.id } : {})
       }
     });
 

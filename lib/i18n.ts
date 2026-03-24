@@ -1216,6 +1216,8 @@ export const agendaDictionary = {
       "Plan snel een nieuwe afspraak voor een bestaande klant. Dit is bewust een lichte dagagenda zonder zware planner.",
     newVisitText:
       "Gebruik dit wanneer één klant in hetzelfde bezoek meerdere behandelingen of behandelaars heeft.",
+    newVisitUnavailable:
+      "Samengestelde bezoeken verschijnen hier zodra de database-update voor dit onderdeel live staat.",
     addCustomerFirst: "Voeg eerst een klant toe voordat je een afspraak kunt plannen.",
     groupedVisitBadge: "Samengesteld bezoek",
     groupedVisitInfo: "Dit onderdeel hoort bij een samengesteld bezoek.",
@@ -1337,6 +1339,8 @@ export const agendaDictionary = {
       "Quickly add a new appointment for an existing client. This is intentionally a lightweight appointment book, not a heavy planner.",
     newVisitText:
       "Use this when one client visit includes multiple services or different stylists in the same booking.",
+    newVisitUnavailable:
+      "Combined visits will appear here once the database update for this feature is live.",
     addCustomerFirst: "Add a client first before you can book an appointment.",
     groupedVisitBadge: "Combined visit",
     groupedVisitInfo: "This segment belongs to a combined visit.",
@@ -1458,6 +1462,8 @@ export const agendaDictionary = {
       "Plane schnell einen neuen Termin für eine bestehende Kundin oder einen bestehenden Kunden. Das ist bewusst ein leichtes Terminbuch ohne schweren Planer.",
     newVisitText:
       "Nutze dies, wenn ein Kundenbesuch mehrere Behandlungen oder unterschiedliche Mitarbeitende im selben Besuch umfasst.",
+    newVisitUnavailable:
+      "Kombinierte Besuche erscheinen hier, sobald das Datenbank-Update für diese Funktion live ist.",
     addCustomerFirst: "Lege zuerst eine Kundin oder einen Kunden an, bevor du einen Termin planen kannst.",
     groupedVisitBadge: "Kombinierter Besuch",
     groupedVisitInfo: "Dieser Teil gehört zu einem kombinierten Besuch.",

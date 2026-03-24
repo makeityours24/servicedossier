@@ -7,6 +7,7 @@ import { requireSalonSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { createAuditLog, getRequestIp } from "@/lib/security";
 import { buildAppointmentSegmentEnd } from "@/lib/appointment-visits";
+import { isMissingVisitSchemaError } from "@/lib/visit-schema-support";
 import { formatDateParamLocal } from "@/lib/utils";
 import { appointmentSchema, appointmentUpdateSchema, appointmentVisitSchema } from "@/lib/validation";
 
@@ -382,7 +383,10 @@ export async function createAppointmentVisitAction(
     revalidatePath(`/agenda?datum=${dateParam}`);
     revalidatePath("/dashboard");
     return { success: "Samengesteld bezoek is toegevoegd." };
-  } catch {
+  } catch (error) {
+    if (isMissingVisitSchemaError(error)) {
+      return { error: "Samengestelde bezoeken zijn nog niet beschikbaar zolang de database-update niet live staat." };
+    }
     return { error: "Opslaan van het samengestelde bezoek is mislukt." };
   }
 }
@@ -550,7 +554,10 @@ export async function updateAppointmentVisitAction(
     revalidatePath(`/agenda/bezoeken/${updatedVisit.id}/bewerken`);
     revalidatePath("/dashboard");
     return { success: "Samengesteld bezoek is bijgewerkt." };
-  } catch {
+  } catch (error) {
+    if (isMissingVisitSchemaError(error)) {
+      return { error: "Samengestelde bezoeken zijn nog niet beschikbaar zolang de database-update niet live staat." };
+    }
     return { error: "Bijwerken van het samengestelde bezoek is mislukt." };
   }
 }
@@ -617,22 +624,32 @@ export async function deleteAppointmentVisitAction(formData: FormData): Promise<
     throw new Error("Ongeldig bezoek geselecteerd.");
   }
 
-  const visit = await prisma.appointmentVisit.findFirst({
-    where: {
-      id: visitId,
-      salonId: user.salonId
-    },
-    select: {
-      id: true,
-      datum: true,
-      customer: {
-        select: {
-          id: true,
-          naam: true
+  let visit;
+
+  try {
+    visit = await prisma.appointmentVisit.findFirst({
+      where: {
+        id: visitId,
+        salonId: user.salonId
+      },
+      select: {
+        id: true,
+        datum: true,
+        customer: {
+          select: {
+            id: true,
+            naam: true
+          }
         }
       }
+    });
+  } catch (error) {
+    if (isMissingVisitSchemaError(error)) {
+      throw new Error("Samengestelde bezoeken zijn nog niet beschikbaar zolang de database-update niet live staat.");
     }
-  });
+
+    throw error;
+  }
 
   if (!visit) {
     throw new Error("Samengesteld bezoek niet gevonden.");

@@ -18,6 +18,7 @@ import { groupAppointmentSegmentsByVisit } from "@/lib/appointment-visits";
 import { getBranchProfileCopy, normalizeBranchType } from "@/lib/branch-profile";
 import { customerDictionary, getCurrentLocale } from "@/lib/i18n";
 import { prisma } from "@/lib/prisma";
+import { isMissingVisitSchemaError } from "@/lib/visit-schema-support";
 import { buildAppointmentReminderMessage, formatCurrencyFromCents, formatDate, formatDateOnly } from "@/lib/utils";
 import { treatmentPresets as defaultTreatmentPresets } from "@/lib/treatment-presets";
 
@@ -60,61 +61,112 @@ export default async function KlantDetailPage({
     notFound();
   }
 
-  const klant = await prisma.customer.findFirst({
-    where: {
-      id: klantId,
-      salonId: user.salonId
-    },
-    include: {
-      behandelingen: {
-        where: {
-          salonId: user.salonId,
-          datum: {
-            gte: filters.van ? new Date(`${filters.van}T00:00:00`) : undefined,
-            lte: filters.tot ? new Date(`${filters.tot}T23:59:59`) : undefined
+  let klant = null;
+
+  try {
+    klant = await prisma.customer.findFirst({
+      where: {
+        id: klantId,
+        salonId: user.salonId
+      },
+      include: {
+        behandelingen: {
+          where: {
+            salonId: user.salonId,
+            datum: {
+              gte: filters.van ? new Date(`${filters.van}T00:00:00`) : undefined,
+              lte: filters.tot ? new Date(`${filters.tot}T23:59:59`) : undefined
+            },
+            behandelaar: filters.medewerker
+              ? {
+                  contains: filters.medewerker,
+                  mode: "insensitive"
+                }
+              : undefined
           },
-          behandelaar: filters.medewerker
-            ? {
-                contains: filters.medewerker,
-                mode: "insensitive"
-              }
-            : undefined
-        },
-        orderBy: { datum: "asc" },
-        include: {
-          sourceAppointmentSegment: {
-            select: {
-              id: true,
-              visitId: true,
-              behandeling: true,
-              datumStart: true,
-              user: {
-                select: {
-                  naam: true
+          orderBy: { datum: "asc" },
+          include: {
+            sourceAppointmentSegment: {
+              select: {
+                id: true,
+                visitId: true,
+                behandeling: true,
+                datumStart: true,
+                user: {
+                  select: {
+                    naam: true
+                  }
                 }
               }
-            }
-          },
-          photos: {
-            orderBy: { createdAt: "desc" },
-            select: {
-              id: true,
-              url: true,
-              bestandNaam: true,
-              soort: true,
-              notitie: true,
-              createdAt: true,
-              uploadedByUser: {
-                select: {
-                  naam: true
+            },
+            photos: {
+              orderBy: { createdAt: "desc" },
+              select: {
+                id: true,
+                url: true,
+                bestandNaam: true,
+                soort: true,
+                notitie: true,
+                createdAt: true,
+                uploadedByUser: {
+                  select: {
+                    naam: true
+                  }
                 }
               }
             }
           }
         }
       }
+    });
+  } catch (error) {
+    if (!isMissingVisitSchemaError(error)) {
+      throw error;
     }
-  });
+
+    klant = await prisma.customer.findFirst({
+      where: {
+        id: klantId,
+        salonId: user.salonId
+      },
+      include: {
+        behandelingen: {
+          where: {
+            salonId: user.salonId,
+            datum: {
+              gte: filters.van ? new Date(`${filters.van}T00:00:00`) : undefined,
+              lte: filters.tot ? new Date(`${filters.tot}T23:59:59`) : undefined
+            },
+            behandelaar: filters.medewerker
+              ? {
+                  contains: filters.medewerker,
+                  mode: "insensitive"
+                }
+              : undefined
+          },
+          orderBy: { datum: "asc" },
+          include: {
+            photos: {
+              orderBy: { createdAt: "desc" },
+              select: {
+                id: true,
+                url: true,
+                bestandNaam: true,
+                soort: true,
+                notitie: true,
+                createdAt: true,
+                uploadedByUser: {
+                  select: {
+                    naam: true
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    });
+  }
 
   if (!klant) {
     notFound();
@@ -211,33 +263,40 @@ export default async function KlantDetailPage({
         })
       : null;
 
-  const geselecteerdAfspraakSegment =
-    !herhaalBehandeling && !geselecteerdSjabloon && !geselecteerdeAfspraak && afspraakSegmentId && Number.isInteger(afspraakSegmentId)
-      ? await prisma.appointmentSegment.findFirst({
-          where: {
-            id: afspraakSegmentId,
-            customerId: klant.id,
-            salonId: user.salonId
+  let geselecteerdAfspraakSegment = null;
+
+  if (!herhaalBehandeling && !geselecteerdSjabloon && !geselecteerdeAfspraak && afspraakSegmentId && Number.isInteger(afspraakSegmentId)) {
+    try {
+      geselecteerdAfspraakSegment = await prisma.appointmentSegment.findFirst({
+        where: {
+          id: afspraakSegmentId,
+          customerId: klant.id,
+          salonId: user.salonId
+        },
+        select: {
+          id: true,
+          datumStart: true,
+          behandeling: true,
+          notities: true,
+          userId: true,
+          user: {
+            select: {
+              naam: true
+            }
           },
-          select: {
-            id: true,
-            datumStart: true,
-            behandeling: true,
-            notities: true,
-            userId: true,
-            user: {
-              select: {
-                naam: true
-              }
-            },
-            convertedTreatment: {
-              select: {
-                id: true
-              }
+          convertedTreatment: {
+            select: {
+              id: true
             }
           }
-        })
-      : null;
+        }
+      });
+    } catch (error) {
+      if (!isMissingVisitSchemaError(error)) {
+        throw error;
+      }
+    }
+  }
 
   const sjablonen = await prisma.recipeTemplate.findMany({
     where: { salonId: user.salonId },
@@ -341,43 +400,51 @@ export default async function KlantDetailPage({
     }
   });
 
-  const aankomendeVisitSegments = await prisma.appointmentSegment.findMany({
-    where: {
-      salonId: user.salonId,
-      customerId: klant.id,
-      datumStart: {
-        gte: new Date()
+  let aankomendeBezoeken: ReturnType<typeof groupAppointmentSegmentsByVisit> = [];
+
+  try {
+    const aankomendeVisitSegments = await prisma.appointmentSegment.findMany({
+      where: {
+        salonId: user.salonId,
+        customerId: klant.id,
+        datumStart: {
+          gte: new Date()
+        },
+        status: {
+          in: ["GEPLAND", "NIET_GEKOMEN"]
+        }
       },
-      status: {
-        in: ["GEPLAND", "NIET_GEKOMEN"]
+      orderBy: [{ datumStart: "asc" }, { id: "asc" }],
+      include: {
+        visit: {
+          select: {
+            id: true,
+            datum: true,
+            notities: true,
+            status: true
+          }
+        },
+        customer: {
+          select: {
+            id: true,
+            naam: true,
+            telefoonnummer: true
+          }
+        },
+        user: {
+          select: {
+            id: true,
+            naam: true
+          }
+        }
       }
-    },
-    orderBy: [{ datumStart: "asc" }, { id: "asc" }],
-    include: {
-      visit: {
-        select: {
-          id: true,
-          datum: true,
-          notities: true,
-          status: true
-        }
-      },
-      customer: {
-        select: {
-          id: true,
-          naam: true,
-          telefoonnummer: true
-        }
-      },
-      user: {
-        select: {
-          id: true,
-          naam: true
-        }
-      }
+    });
+    aankomendeBezoeken = groupAppointmentSegmentsByVisit(aankomendeVisitSegments);
+  } catch (error) {
+    if (!isMissingVisitSchemaError(error)) {
+      throw error;
     }
-  });
-  const aankomendeBezoeken = groupAppointmentSegmentsByVisit(aankomendeVisitSegments);
+  }
 
   const actieveKlantPakketten = customerPackages.filter((customerPackage) => customerPackage.status === "ACTIEF");
   const overigeKlantPakketten = customerPackages.filter((customerPackage) => customerPackage.status !== "ACTIEF");
@@ -812,14 +879,25 @@ export default async function KlantDetailPage({
                       <strong>{copy.notes}:</strong> {behandeling.notities}
                     </p>
                   ) : null}
-                  {behandeling.sourceAppointmentSegment ? (
-                    <p className="meta">
-                      <strong>{copy.fromCombinedVisit}:</strong>{" "}
-                      {behandeling.sourceAppointmentSegment.behandeling}
-                      {" · "}
-                      {behandeling.sourceAppointmentSegment.user?.naam ?? copy.notAssigned}
-                    </p>
-                  ) : null}
+                  {(() => {
+                    const sourceAppointmentSegment =
+                      "sourceAppointmentSegment" in behandeling
+                        ? (behandeling.sourceAppointmentSegment as
+                            | {
+                                behandeling: string;
+                                user: { naam: string } | null;
+                              }
+                            | null)
+                        : null;
+
+                    return sourceAppointmentSegment ? (
+                      <p className="meta">
+                        <strong>{copy.fromCombinedVisit}:</strong> {sourceAppointmentSegment.behandeling}
+                        {" · "}
+                        {sourceAppointmentSegment.user?.naam ?? copy.notAssigned}
+                      </p>
+                    ) : null;
+                  })()}
                   {behandeling.photos.length > 0 ? (
                     <div style={{ marginTop: 16 }}>
                       <h4 style={{ marginBottom: 10 }}>{copy.treatmentPhotos}</h4>
