@@ -57,6 +57,23 @@ type AppointmentVisitFormProps = {
     id: number;
     naam: string;
   }>;
+  visit?: {
+    id: number;
+    customerId: number;
+    datum: string;
+    notities?: string | null;
+    status: "GEPLAND" | "VOLTOOID" | "GEANNULEERD" | "NIET_GEKOMEN";
+    segments: Array<{
+      id: number;
+      userId?: number | null;
+      datumStart: string;
+      duurMinuten: number;
+      behandeling: string;
+      behandelingKleur: string;
+      notities?: string | null;
+      status: "GEPLAND" | "VOLTOOID" | "GEANNULEERD" | "NIET_GEKOMEN";
+    }>;
+  };
 };
 
 function createSegment(id: number, overrides?: Partial<VisitSegmentFormState>): VisitSegmentFormState {
@@ -87,17 +104,35 @@ export function AppointmentVisitForm({
   busyLabel,
   dictionary,
   customers,
-  medewerkers
+  medewerkers,
+  visit
 }: AppointmentVisitFormProps) {
   const [state, formAction] = useActionState(action, initialState);
-  const [selectedCustomerId, setSelectedCustomerId] = useState("");
-  const [visitStatus, setVisitStatus] = useState<VisitSegmentFormState["status"]>("GEPLAND");
-  const [visitNotes, setVisitNotes] = useState("");
-  const [nextSegmentId, setNextSegmentId] = useState(2);
-  const [segments, setSegments] = useState<VisitSegmentFormState[]>([createSegment(1)]);
+  const [selectedCustomerId, setSelectedCustomerId] = useState(String(visit?.customerId ?? ""));
+  const [visitStatus, setVisitStatus] = useState<VisitSegmentFormState["status"]>(visit?.status ?? "GEPLAND");
+  const [visitNotes, setVisitNotes] = useState(visit?.notities ?? "");
+  const [nextSegmentId, setNextSegmentId] = useState(
+    visit?.segments?.length ? Math.max(...visit.segments.map((segment) => segment.id)) + 1 : 2
+  );
+  const [segments, setSegments] = useState<VisitSegmentFormState[]>(
+    visit?.segments?.length
+      ? visit.segments.map((segment) =>
+          createSegment(segment.id, {
+            id: segment.id,
+            userId: segment.userId ? String(segment.userId) : "",
+            datumStart: segment.datumStart,
+            duurMinuten: String(segment.duurMinuten),
+            behandeling: segment.behandeling,
+            behandelingKleur: segment.behandelingKleur,
+            notities: segment.notities ?? "",
+            status: segment.status
+          })
+        )
+      : [createSegment(1)]
+  );
 
   useEffect(() => {
-    if (!state.success) {
+    if (!state.success || visit) {
       return;
     }
 
@@ -106,7 +141,7 @@ export function AppointmentVisitForm({
     setVisitNotes("");
     setNextSegmentId(2);
     setSegments([createSegment(1)]);
-  }, [state.success]);
+  }, [state.success, visit]);
 
   const visitDateValue = useMemo(() => toVisitDateValue(segments), [segments]);
   const segmentsJson = useMemo(
@@ -156,6 +191,7 @@ export function AppointmentVisitForm({
 
   return (
     <form action={formAction} className="formulier">
+      {visit ? <input type="hidden" name="visitId" value={visit.id} /> : null}
       <FormMessage error={state.error} success={state.success} />
       <p className="melding-info">{dictionary.visitHelp}</p>
       <input type="hidden" name="datum" value={visitDateValue} />

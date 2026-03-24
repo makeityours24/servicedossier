@@ -387,6 +387,174 @@ export async function createAppointmentVisitAction(
   }
 }
 
+export async function updateAppointmentVisitAction(
+  _: FormState,
+  formData: FormData
+): Promise<FormState> {
+  const user = await requireSalonSession();
+  const ipAddress = await getRequestIp();
+  const visitId = Number(formData.get("visitId"));
+
+  if (!Number.isInteger(visitId)) {
+    return { error: "Ongeldig bezoek geselecteerd." };
+  }
+
+  const segmentsJson = formData.get("segmentsJson");
+  let parsedSegments: unknown = [];
+
+  if (typeof segmentsJson === "string" && segmentsJson.trim()) {
+    try {
+      parsedSegments = JSON.parse(segmentsJson);
+    } catch {
+      return { error: "Controleer de onderdelen van dit bezoek." };
+    }
+  }
+
+  const parsed = appointmentVisitSchema.safeParse({
+    customerId: formData.get("customerId"),
+    datum: formData.get("datum"),
+    notities: formData.get("notities") || undefined,
+    status: formData.get("status"),
+    segments: parsedSegments
+  });
+
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Controleer de gegevens van dit bezoek." };
+  }
+
+  try {
+    const [existingVisit, customer] = await Promise.all([
+      prisma.appointmentVisit.findFirst({
+        where: {
+          id: visitId,
+          salonId: user.salonId
+        },
+        select: {
+          id: true,
+          datum: true
+        }
+      }),
+      prisma.customer.findFirst({
+        where: {
+          id: parsed.data.customerId,
+          salonId: user.salonId
+        },
+        select: {
+          id: true,
+          naam: true
+        }
+      })
+    ]);
+
+    if (!existingVisit) {
+      return { error: "Dit bezoek hoort niet bij deze salon." };
+    }
+
+    if (!customer) {
+      return { error: "Deze klant hoort niet bij deze salon." };
+    }
+
+    const userIds = Array.from(
+      new Set(parsed.data.segments.map((segment) => segment.userId).filter((value): value is number => Boolean(value)))
+    );
+
+    if (userIds.length > 0) {
+      const medewerkerCount = await prisma.user.count({
+        where: {
+          id: { in: userIds },
+          salonId: user.salonId,
+          isPlatformAdmin: false
+        }
+      });
+
+      if (medewerkerCount !== userIds.length) {
+        return { error: "Een of meer behandelaars horen niet bij deze salon." };
+      }
+    }
+
+    const updatedVisit = await prisma.$transaction(async (tx) => {
+      await tx.appointmentSegment.deleteMany({
+        where: {
+          visitId,
+          salonId: user.salonId
+        }
+      });
+
+      return tx.appointmentVisit.update({
+        where: { id: visitId },
+        data: {
+          customerId: customer.id,
+          datum: new Date(parsed.data.datum),
+          notities: parsed.data.notities || null,
+          status: parsed.data.status,
+          segments: {
+            create: parsed.data.segments.map((segment) => ({
+              salonId: user.salonId,
+              customerId: customer.id,
+              userId: segment.userId,
+              datumStart: new Date(segment.datumStart),
+              datumEinde: buildAppointmentSegmentEnd(segment.datumStart, segment.duurMinuten),
+              duurMinuten: segment.duurMinuten,
+              behandeling: segment.behandeling,
+              behandelingKleur: segment.behandelingKleur,
+              notities: segment.notities || null,
+              status: segment.status
+            }))
+          }
+        },
+        include: {
+          segments: {
+            select: {
+              id: true,
+              userId: true,
+              datumStart: true,
+              datumEinde: true,
+              duurMinuten: true,
+              behandeling: true,
+              behandelingKleur: true,
+              status: true
+            }
+          }
+        }
+      });
+    });
+
+    await createAuditLog({
+      salonId: user.salonId,
+      actorUserId: user.id,
+      action: "APPOINTMENT_VISIT_UPDATED",
+      entityType: "AppointmentVisit",
+      entityId: updatedVisit.id,
+      message: `Samengesteld bezoek bijgewerkt voor ${customer.naam}.`,
+      ipAddress,
+      metadata: {
+        customerId: customer.id,
+        customerName: customer.naam,
+        datum: updatedVisit.datum.toISOString(),
+        segmentCount: updatedVisit.segments.length,
+        segments: updatedVisit.segments.map((segment) => ({
+          id: segment.id,
+          userId: segment.userId,
+          datumStart: segment.datumStart.toISOString(),
+          datumEinde: segment.datumEinde.toISOString(),
+          duurMinuten: segment.duurMinuten,
+          behandeling: segment.behandeling,
+          behandelingKleur: segment.behandelingKleur,
+          status: segment.status
+        }))
+      }
+    });
+
+    revalidatePath(`/agenda?datum=${toDateParam(existingVisit.datum)}`);
+    revalidatePath(`/agenda?datum=${toDateParam(updatedVisit.datum)}`);
+    revalidatePath(`/agenda/bezoeken/${updatedVisit.id}/bewerken`);
+    revalidatePath("/dashboard");
+    return { success: "Samengesteld bezoek is bijgewerkt." };
+  } catch {
+    return { error: "Bijwerken van het samengestelde bezoek is mislukt." };
+  }
+}
+
 export async function deleteAppointmentAction(formData: FormData): Promise<void> {
   const user = await requireSalonSession();
   const ipAddress = await getRequestIp();
@@ -438,4 +606,58 @@ export async function deleteAppointmentAction(formData: FormData): Promise<void>
 
   revalidatePath(`/agenda?datum=${toDateParam(appointment.datumStart)}`);
   redirect(`/agenda?datum=${toDateParam(appointment.datumStart)}`);
+}
+
+export async function deleteAppointmentVisitAction(formData: FormData): Promise<void> {
+  const user = await requireSalonSession();
+  const ipAddress = await getRequestIp();
+  const visitId = Number(formData.get("visitId"));
+
+  if (!Number.isInteger(visitId)) {
+    throw new Error("Ongeldig bezoek geselecteerd.");
+  }
+
+  const visit = await prisma.appointmentVisit.findFirst({
+    where: {
+      id: visitId,
+      salonId: user.salonId
+    },
+    select: {
+      id: true,
+      datum: true,
+      customer: {
+        select: {
+          id: true,
+          naam: true
+        }
+      }
+    }
+  });
+
+  if (!visit) {
+    throw new Error("Samengesteld bezoek niet gevonden.");
+  }
+
+  await prisma.appointmentVisit.delete({
+    where: { id: visitId }
+  });
+
+  await createAuditLog({
+    salonId: user.salonId,
+    actorUserId: user.id,
+    action: "APPOINTMENT_VISIT_DELETED",
+    entityType: "AppointmentVisit",
+    entityId: visitId,
+    message: `Samengesteld bezoek verwijderd voor ${visit.customer.naam}.`,
+    ipAddress,
+    metadata: {
+      customerId: visit.customer.id,
+      customerName: visit.customer.naam,
+      datum: visit.datum.toISOString()
+    }
+  });
+
+  revalidatePath(`/agenda?datum=${toDateParam(visit.datum)}`);
+  revalidatePath("/dashboard");
+  redirect(`/agenda?datum=${toDateParam(visit.datum)}`);
 }

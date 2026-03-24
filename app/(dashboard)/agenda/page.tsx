@@ -68,7 +68,7 @@ export default async function AgendaPage({ searchParams }: AgendaPageProps) {
     ...segments.map((segment) => ({
       kind: "segment" as const,
       id: segment.id,
-      href: null,
+      href: `/agenda/bezoeken/${segment.visit.id}/bewerken`,
       badge: dict.groupedVisitBadge,
       datumStart: segment.datumStart,
       datumEinde: segment.datumEinde,
@@ -206,15 +206,14 @@ export default async function AgendaPage({ searchParams }: AgendaPageProps) {
                   </div>
 
                   <div className="acties" style={{ marginTop: 16 }}>
-                    {appointment.href ? (
-                      <Link href={appointment.href} className="knop-secundair">
-                        {dict.edit}
-                      </Link>
-                    ) : (
+                    <Link href={appointment.href ?? `/agenda`} className="knop-secundair">
+                      {dict.edit}
+                    </Link>
+                    {appointment.kind === "segment" ? (
                       <span className="melding-info" style={{ margin: 0 }}>
                         {dict.groupedVisitInfo}
                       </span>
-                    )}
+                    ) : null}
                     {appointment.convertedTreatment ? (
                       <Link
                         href={`/klanten/${appointment.customer.id}/behandelingen/${appointment.convertedTreatment.id}/bewerken`}
