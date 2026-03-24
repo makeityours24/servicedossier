@@ -7,6 +7,7 @@ import { FormMessage } from "@/components/form-message";
 import { SubmitButton } from "@/components/submit-button";
 import type { FormState } from "@/components/customer-form";
 import { getDefaultTreatmentPresets, type BranchType } from "@/lib/branch-profile";
+import { getSalonThemeStyle } from "@/lib/salon-theme";
 
 const initialState: FormState = {};
 
@@ -21,6 +22,11 @@ type SalonSettingsFormProps = {
     branchMassage: string;
     branchBeauty: string;
     primaryColor: string;
+    primaryColorHelp: string;
+    colorPreviewTitle: string;
+    colorPreviewText: string;
+    previewButton: string;
+    previewSoft: string;
     email: string;
     phone: string;
     address: string;
@@ -55,6 +61,11 @@ const defaultDictionary = {
   branchMassage: "Massagesalon",
   branchBeauty: "Schoonheidssalon",
   primaryColor: "Primaire kleur",
+  primaryColorHelp: "Deze kleur wordt gebruikt voor knoppen en accentdelen in de dashboardomgeving van deze salon.",
+  colorPreviewTitle: "Live kleurpreview",
+  colorPreviewText: "Zo zien de hoofdaccenten eruit zodra je de instellingen opslaat.",
+  previewButton: "Primaire knop",
+  previewSoft: "Zacht accent",
   email: "E-mailadres",
   phone: "Telefoonnummer",
   address: "Adres",
@@ -81,7 +92,9 @@ export function SalonSettingsForm({
   const [branchType, setBranchType] = useState<BranchType>(settings.branchType);
   const [treatmentPresets, setTreatmentPresets] = useState(settings.treatmentPresets);
   const [treatmentPresetsTouched, setTreatmentPresetsTouched] = useState(false);
+  const [primaryColor, setPrimaryColor] = useState(settings.primaireKleur);
   const previewLogo = settings.logoUrl?.trim() || "/logo-salon.svg";
+  const previewThemeStyle = getSalonThemeStyle(primaryColor);
 
   useEffect(() => {
     if (state.success) {
@@ -93,6 +106,7 @@ export function SalonSettingsForm({
     setBranchType(settings.branchType);
     setTreatmentPresets(settings.treatmentPresets);
     setTreatmentPresetsTouched(false);
+    setPrimaryColor(settings.primaireKleur);
   }, [settings.branchType, settings.treatmentPresets]);
 
   function getDefaultPresetText(nextBranchType: BranchType) {
@@ -142,7 +156,16 @@ export function SalonSettingsForm({
 
         <div className="veld">
           <label htmlFor="primaireKleur">{dictionary.primaryColor}</label>
-          <input id="primaireKleur" name="primaireKleur" defaultValue={settings.primaireKleur} required />
+          <input
+            id="primaireKleur"
+            name="primaireKleur"
+            value={primaryColor}
+            onChange={(event) => setPrimaryColor(event.target.value)}
+            required
+          />
+          <p className="meta" style={{ margin: 0 }}>
+            {dictionary.primaryColorHelp}
+          </p>
         </div>
 
         <div className="veld">
@@ -158,6 +181,24 @@ export function SalonSettingsForm({
         <div className="veld-groot">
           <label htmlFor="adres">{dictionary.address}</label>
           <textarea id="adres" name="adres" defaultValue={settings.adres} />
+        </div>
+
+        <div className="veld-groot">
+          <div className="kleur-preview-kaart" style={previewThemeStyle}>
+            <div className="kleur-preview-kop">
+              <div>
+                <h3>{dictionary.colorPreviewTitle}</h3>
+                <p className="meta" style={{ margin: 0 }}>
+                  {dictionary.colorPreviewText}
+                </p>
+              </div>
+              <span className="kleur-chip" style={{ backgroundColor: primaryColor }} aria-hidden="true" />
+            </div>
+            <div className="acties">
+              <span className="knop kleur-preview-knop">{dictionary.previewButton}</span>
+              <span className="knop-zacht kleur-preview-knop">{dictionary.previewSoft}</span>
+            </div>
+          </div>
         </div>
 
         <div className="veld-groot">
