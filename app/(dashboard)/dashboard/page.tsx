@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { requireSalonSession } from "@/lib/auth";
-import { formatTime, getDashboardData } from "@/lib/dashboard-queries";
+import { formatTime, getDashboardData, getDashboardVisitData } from "@/lib/dashboard-queries";
 import { dashboardDictionary, getCurrentLocale } from "@/lib/i18n";
 import { formatDate } from "@/lib/utils";
 
@@ -19,6 +19,42 @@ export default async function DashboardPage() {
     laatsteBehandelingen,
     openPakketten
   } = await getDashboardData(user.salonId);
+  const {
+    aantalBezoekenVandaag,
+    openBezoekenVandaag,
+    bezoekenVandaag
+  } = await getDashboardVisitData(user.salonId);
+  const totaalGeplandeMomentenVandaag = aantalAfsprakenVandaag + aantalBezoekenVandaag;
+  const totaalOpenMomentenVandaag = openAfsprakenVandaag + openBezoekenVandaag;
+  const dagoverzicht = [
+    ...afsprakenVandaag.map((afspraak) => ({
+      kind: "appointment" as const,
+      id: afspraak.id,
+      customerName: afspraak.customer.naam,
+      label: afspraak.behandeling,
+      timeText: `${formatTime(afspraak.datumStart, locale)} - ${formatTime(afspraak.datumEinde, locale)}`,
+      staffText: afspraak.user?.naam ?? dict.unassigned,
+      href: `/agenda/${afspraak.id}/bewerken`,
+      status: afspraak.status,
+      sortDate: afspraak.datumStart
+    })),
+    ...bezoekenVandaag.map((visit) => ({
+      kind: "visit" as const,
+      id: visit.id,
+      customerName: visit.customer.naam,
+      label: dict.groupedVisitBadge,
+      timeText: `${formatTime(visit.segments[0]?.datumStart ?? visit.datum, locale)} - ${dict.groupedVisitCount.replace(
+        "{count}",
+        String(visit.segments.length)
+      )}`,
+      staffText: visit.segments.map((segment) => segment.user?.naam ?? dict.unassigned).join(", "),
+      href: `/agenda/bezoeken/${visit.id}/bewerken`,
+      status: visit.status,
+      sortDate: visit.segments[0]?.datumStart ?? visit.datum
+    }))
+  ]
+    .sort((left, right) => left.sortDate.getTime() - right.sortDate.getTime())
+    .slice(0, 6);
 
   return (
     <div className="rooster">
@@ -46,12 +82,12 @@ export default async function DashboardPage() {
       <section className="statistieken">
         <article className="kaart stat-kaart">
           <h3>{dict.stats.appointmentsToday}</h3>
-          <strong>{aantalAfsprakenVandaag}</strong>
+          <strong>{totaalGeplandeMomentenVandaag}</strong>
         </article>
 
         <article className="kaart stat-kaart">
           <h3>{dict.stats.openAppointments}</h3>
-          <strong>{openAfsprakenVandaag}</strong>
+          <strong>{totaalOpenMomentenVandaag}</strong>
         </article>
 
         <article className="kaart stat-kaart">
@@ -90,32 +126,42 @@ export default async function DashboardPage() {
           </div>
 
           <div className="lijst">
-            {afsprakenVandaag.length === 0 ? (
+            {dagoverzicht.length === 0 ? (
               <div className="leeg">{dict.noAppointments}</div>
             ) : (
-              afsprakenVandaag.map((afspraak) => (
-                <div className="lijst-item" key={afspraak.id}>
+              dagoverzicht.map((afspraak) => (
+                <div className="lijst-item" key={`${afspraak.kind}-${afspraak.id}`}>
                   <div className="acties" style={{ justifyContent: "space-between", alignItems: "flex-start" }}>
                     <div>
-                      <h4>{afspraak.customer.naam}</h4>
+                      <h4>{afspraak.customerName}</h4>
                       <p className="meta">
-                        {afspraak.behandeling}
+                        {afspraak.label}
                         <br />
-                        {formatTime(afspraak.datumStart, locale)} - {formatTime(afspraak.datumEinde, locale)}
+                        {afspraak.timeText}
                         <br />
-                        {afspraak.user?.naam ?? dict.unassigned}
+                        {afspraak.staffText}
                       </p>
                     </div>
-                    <span
-                      className="status-badge"
-                      data-inactive={
-                        afspraak.status === "GEANNULEERD" || afspraak.status === "NIET_GEKOMEN"
-                          ? "true"
-                          : undefined
-                      }
-                    >
-                      {dict.status[afspraak.status]}
-                    </span>
+                    <div className="acties" style={{ alignItems: "center" }}>
+                      {afspraak.kind === "visit" ? (
+                        <span className="badge">{dict.groupedVisitBadge}</span>
+                      ) : null}
+                      <span
+                        className="status-badge"
+                        data-inactive={
+                          afspraak.status === "GEANNULEERD" || afspraak.status === "NIET_GEKOMEN"
+                            ? "true"
+                            : undefined
+                        }
+                      >
+                        {dict.status[afspraak.status]}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="acties" style={{ marginTop: 16 }}>
+                    <Link href={afspraak.href} className="knop-secundair">
+                      {dict.openInAgenda}
+                    </Link>
                   </div>
                 </div>
               ))
