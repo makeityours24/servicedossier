@@ -23,6 +23,7 @@ type SalonSettingsFormProps = {
     branchBeauty: string;
     primaryColor: string;
     primaryColorHelp: string;
+    primaryColorPicker: string;
     colorPreviewTitle: string;
     colorPreviewText: string;
     previewButton: string;
@@ -62,6 +63,7 @@ const defaultDictionary = {
   branchBeauty: "Schoonheidssalon",
   primaryColor: "Primaire kleur",
   primaryColorHelp: "Deze kleur wordt gebruikt voor knoppen en accentdelen in de dashboardomgeving van deze salon.",
+  primaryColorPicker: "Kies kleur",
   colorPreviewTitle: "Live kleurpreview",
   colorPreviewText: "Zo zien de hoofdaccenten eruit zodra je de instellingen opslaat.",
   previewButton: "Primaire knop",
@@ -156,13 +158,28 @@ export function SalonSettingsForm({
 
         <div className="veld">
           <label htmlFor="primaireKleur">{dictionary.primaryColor}</label>
-          <input
-            id="primaireKleur"
-            name="primaireKleur"
-            value={primaryColor}
-            onChange={(event) => setPrimaryColor(event.target.value)}
-            required
-          />
+          <div className="kleur-invoer-rij">
+            <input
+              id="primaireKleur"
+              name="primaireKleur"
+              value={primaryColor}
+              onChange={(event) => setPrimaryColor(event.target.value)}
+              required
+            />
+            <div className="kleur-kiezer-blok">
+              <label htmlFor="primaireKleurPicker" className="sr-only">
+                {dictionary.primaryColorPicker}
+              </label>
+              <input
+                id="primaireKleurPicker"
+                type="color"
+                value={normalizeColorInput(primaryColor)}
+                onChange={(event) => setPrimaryColor(event.target.value)}
+                aria-label={dictionary.primaryColorPicker}
+                className="kleur-kiezer"
+              />
+            </div>
+          </div>
           <p className="meta" style={{ margin: 0 }}>
             {dictionary.primaryColorHelp}
           </p>
@@ -274,4 +291,8 @@ function normalizePresetText(value: string) {
     .map((item) => item.trim())
     .filter(Boolean)
     .join("\n");
+}
+
+function normalizeColorInput(value: string) {
+  return /^#[0-9A-Fa-f]{6}$/.test(value.trim()) ? value.trim() : "#b42323";
 }
