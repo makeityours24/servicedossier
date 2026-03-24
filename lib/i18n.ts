@@ -1551,8 +1551,12 @@ export const customerDictionary = {
     upcomingAppointments: "Komende afspraken",
     upcomingAppointmentsText: "Snel zicht op wat er voor deze klant al gepland staat.",
     noUpcomingAppointments: "Voor deze klant staan nog geen komende afspraken gepland.",
+    upcomingVisitTitle: "Komend samengesteld bezoek",
+    upcomingVisitCount: "{count} onderdeel(en) in dit bezoek",
     newAppointment: "Nieuwe afspraak",
     openAppointment: "Open afspraak",
+    openVisit: "Open bezoek",
+    loadSegmentIntoForm: "Onderdeel in formulier laden",
     notAssigned: "Nog niet toegewezen",
     reminderLabels: {
       copied: "Herinnering gekopieerd",
@@ -1666,6 +1670,12 @@ export const customerDictionary = {
       "De velden zijn vooringevuld vanuit een eerdere behandeling. Pas ze aan waar nodig en sla de nieuwe behandeling op.",
     treatmentHelperFromTemplate:
       "De velden zijn vooringevuld vanuit een receptsjabloon. Pas ze aan waar nodig en sla de nieuwe behandeling op.",
+    treatmentHelperFromSegment:
+      "De velden zijn vooringevuld vanuit een onderdeel van een samengesteld bezoek. Sla op om dit onderdeel als behandeling vast te leggen.",
+    appointmentSegmentAlreadyConverted: "Van dit bezoekonderdeel is al een behandeling gemaakt.",
+    appointmentSegmentLoaded:
+      "Bezoekonderdeel geladen uit {date}. Sla op om dit onderdeel als behandeling vast te leggen en eventuele stempelkaarten of pakketten af te boeken.",
+    fromCombinedVisit: "Onderdeel van samengesteld bezoek",
     customerFormNew: {
       label: "Nieuwe klant",
       title: "Klant registreren",
@@ -1806,8 +1816,12 @@ export const customerDictionary = {
     upcomingAppointments: "Upcoming appointments",
     upcomingAppointmentsText: "Quick visibility into what is already scheduled for this client.",
     noUpcomingAppointments: "There are no upcoming appointments scheduled for this client yet.",
+    upcomingVisitTitle: "Upcoming combined visit",
+    upcomingVisitCount: "{count} segment(s) in this visit",
     newAppointment: "New appointment",
     openAppointment: "Open appointment",
+    openVisit: "Open visit",
+    loadSegmentIntoForm: "Load segment into form",
     notAssigned: "Not assigned yet",
     reminderLabels: {
       copied: "Reminder copied",
@@ -1921,6 +1935,12 @@ export const customerDictionary = {
       "The fields are prefilled from an earlier treatment. Adjust where needed and save the new treatment.",
     treatmentHelperFromTemplate:
       "The fields are prefilled from a formula template. Adjust where needed and save the new treatment.",
+    treatmentHelperFromSegment:
+      "The fields are prefilled from a segment in a combined visit. Save to register this segment as a treatment.",
+    appointmentSegmentAlreadyConverted: "A treatment has already been created from this visit segment.",
+    appointmentSegmentLoaded:
+      "Visit segment loaded from {date}. Save to register this segment as a treatment and deduct any stamp cards or packages.",
+    fromCombinedVisit: "Part of combined visit",
     customerFormNew: {
       label: "New client",
       title: "Create client record",
@@ -2061,8 +2081,12 @@ export const customerDictionary = {
     upcomingAppointments: "Kommende Termine",
     upcomingAppointmentsText: "Schneller Überblick über bereits geplante Termine für diese Kundin oder diesen Kunden.",
     noUpcomingAppointments: "Für diese Kundin oder diesen Kunden sind noch keine kommenden Termine geplant.",
+    upcomingVisitTitle: "Kommender kombinierter Besuch",
+    upcomingVisitCount: "{count} Teil(e) in diesem Besuch",
     newAppointment: "Neuer Termin",
     openAppointment: "Termin öffnen",
+    openVisit: "Besuch öffnen",
+    loadSegmentIntoForm: "Teil ins Formular laden",
     notAssigned: "Noch nicht zugewiesen",
     reminderLabels: {
       copied: "Erinnerung kopiert",
@@ -2177,6 +2201,12 @@ export const customerDictionary = {
       "Die Felder wurden aus einer früheren Behandlung vorausgefüllt. Passe sie bei Bedarf an und speichere die neue Behandlung.",
     treatmentHelperFromTemplate:
       "Die Felder wurden aus einer Rezeptvorlage vorausgefüllt. Passe sie bei Bedarf an und speichere die neue Behandlung.",
+    treatmentHelperFromSegment:
+      "Die Felder wurden aus einem Teil eines kombinierten Besuchs vorausgefüllt. Speichere, um diesen Teil als Behandlung zu erfassen.",
+    appointmentSegmentAlreadyConverted: "Aus diesem Besuchsteil wurde bereits eine Behandlung erstellt.",
+    appointmentSegmentLoaded:
+      "Besuchsteil aus {date} geladen. Speichere, um diesen Teil als Behandlung zu erfassen und eventuelle Stempelkarten oder Pakete abzubuchen.",
+    fromCombinedVisit: "Teil eines kombinierten Besuchs",
     customerFormNew: {
       label: "Neue Kundin / neuer Kunde",
       title: "Kundenkartei anlegen",

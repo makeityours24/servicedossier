@@ -14,6 +14,7 @@ import { ReminderCopyButton } from "@/components/reminder-copy-button";
 import { TreatmentForm } from "@/components/treatment-form";
 import { TreatmentPhotoGallery } from "@/components/treatment-photo-gallery";
 import { requireSalonSession } from "@/lib/auth";
+import { groupAppointmentSegmentsByVisit } from "@/lib/appointment-visits";
 import { getBranchProfileCopy, normalizeBranchType } from "@/lib/branch-profile";
 import { customerDictionary, getCurrentLocale } from "@/lib/i18n";
 import { prisma } from "@/lib/prisma";
@@ -81,6 +82,19 @@ export default async function KlantDetailPage({
         },
         orderBy: { datum: "asc" },
         include: {
+          sourceAppointmentSegment: {
+            select: {
+              id: true,
+              visitId: true,
+              behandeling: true,
+              datumStart: true,
+              user: {
+                select: {
+                  naam: true
+                }
+              }
+            }
+          },
           photos: {
             orderBy: { createdAt: "desc" },
             select: {
@@ -327,6 +341,44 @@ export default async function KlantDetailPage({
     }
   });
 
+  const aankomendeVisitSegments = await prisma.appointmentSegment.findMany({
+    where: {
+      salonId: user.salonId,
+      customerId: klant.id,
+      datumStart: {
+        gte: new Date()
+      },
+      status: {
+        in: ["GEPLAND", "NIET_GEKOMEN"]
+      }
+    },
+    orderBy: [{ datumStart: "asc" }, { id: "asc" }],
+    include: {
+      visit: {
+        select: {
+          id: true,
+          datum: true,
+          notities: true,
+          status: true
+        }
+      },
+      customer: {
+        select: {
+          id: true,
+          naam: true,
+          telefoonnummer: true
+        }
+      },
+      user: {
+        select: {
+          id: true,
+          naam: true
+        }
+      }
+    }
+  });
+  const aankomendeBezoeken = groupAppointmentSegmentsByVisit(aankomendeVisitSegments);
+
   const actieveKlantPakketten = customerPackages.filter((customerPackage) => customerPackage.status === "ACTIEF");
   const overigeKlantPakketten = customerPackages.filter((customerPackage) => customerPackage.status !== "ACTIEF");
   const totaalOpenBeurten = actieveKlantPakketten.reduce(
@@ -504,7 +556,7 @@ export default async function KlantDetailPage({
             </div>
           </div>
 
-          {aankomendeAfspraken.length > 0 ? (
+          {aankomendeAfspraken.length > 0 || aankomendeBezoeken.length > 0 ? (
             <div className="info-kaart" style={{ marginBottom: 18 }}>
               <div className="acties" style={{ justifyContent: "space-between", alignItems: "flex-start" }}>
                 <div>
@@ -519,6 +571,61 @@ export default async function KlantDetailPage({
               </div>
 
               <div className="lijst" style={{ marginTop: 16 }}>
+                {aankomendeBezoeken.map((visit) => (
+                  <div key={`visit-${visit.id}`} className="lijst-item">
+                    <div className="acties" style={{ justifyContent: "space-between", alignItems: "flex-start" }}>
+                      <div>
+                        <h4>{copy.upcomingVisitTitle}</h4>
+                        <p className="meta">
+                          {formatDate(visit.datum, locale)}
+                          <br />
+                          {replace(copy.upcomingVisitCount, { count: visit.segments.length })}
+                        </p>
+                      </div>
+                      <div className="acties">
+                        <Link href={`/agenda/bezoeken/${visit.id}/bewerken`} className="knop-zacht">
+                          {copy.openVisit}
+                        </Link>
+                        <ReminderCopyButton
+                          phoneNumber={klant.telefoonnummer}
+                          message={buildAppointmentReminderMessage({
+                            customerName: klant.naam,
+                            salonName: user.salon.instellingen?.weergavenaam ?? user.salon.naam,
+                            treatmentName: visit.segments.map((segment) => segment.behandeling).join(", "),
+                            startAt: visit.segments[0]?.datumStart ?? visit.datum,
+                            contactPhone:
+                              user.salon.instellingen?.contactTelefoon ?? user.salon.telefoonnummer ?? null
+                          })}
+                          labels={copy.reminderLabels}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="lijst" style={{ marginTop: 14 }}>
+                      {visit.segments.map((segment) => (
+                        <div key={segment.id} className="lijst-item">
+                          <div className="acties" style={{ justifyContent: "space-between", alignItems: "flex-start" }}>
+                            <div>
+                              <h4>{segment.behandeling}</h4>
+                              <p className="meta">
+                                {formatDate(segment.datumStart, locale)}
+                                <br />
+                                {segment.user?.naam ?? copy.notAssigned}
+                              </p>
+                            </div>
+                            <Link
+                              href={`/klanten/${klant.id}?afspraakSegmentId=${segment.id}#nieuwe-behandeling`}
+                              className="knop-secundair"
+                            >
+                              {copy.loadSegmentIntoForm}
+                            </Link>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+
                 {aankomendeAfspraken.map((afspraak) => (
                   <div key={afspraak.id} className="lijst-item">
                     <div className="acties" style={{ justifyContent: "space-between", alignItems: "flex-start" }}>
@@ -703,6 +810,14 @@ export default async function KlantDetailPage({
                   {behandeling.notities ? (
                     <p className="meta">
                       <strong>{copy.notes}:</strong> {behandeling.notities}
+                    </p>
+                  ) : null}
+                  {behandeling.sourceAppointmentSegment ? (
+                    <p className="meta">
+                      <strong>{copy.fromCombinedVisit}:</strong>{" "}
+                      {behandeling.sourceAppointmentSegment.behandeling}
+                      {" · "}
+                      {behandeling.sourceAppointmentSegment.user?.naam ?? copy.notAssigned}
                     </p>
                   ) : null}
                   {behandeling.photos.length > 0 ? (
@@ -1083,6 +1198,27 @@ export default async function KlantDetailPage({
                 </Link>
               ) : null}
             </div>
+          ) : geselecteerdAfspraakSegment ? (
+            <div className="acties" style={{ marginTop: 16 }}>
+              <span className="badge">
+                {geselecteerdAfspraakSegment.convertedTreatment
+                  ? copy.appointmentSegmentAlreadyConverted
+                  : replace(copy.appointmentSegmentLoaded, {
+                      date: formatDate(geselecteerdAfspraakSegment.datumStart, locale)
+                    })}
+              </span>
+              <Link href={`/klanten/${klant.id}`} className="knop-secundair">
+                {copy.clearForm}
+              </Link>
+              {geselecteerdAfspraakSegment.convertedTreatment ? (
+                <Link
+                  href={`/klanten/${klant.id}/behandelingen/${geselecteerdAfspraakSegment.convertedTreatment.id}/bewerken`}
+                  className="knop-zacht"
+                >
+                  {copy.openCompletedTreatment}
+                </Link>
+              ) : null}
+            </div>
           ) : null}
 
           <TreatmentForm
@@ -1101,6 +1237,8 @@ export default async function KlantDetailPage({
                 ? copy.treatmentHelperFromPrevious
                 : geselecteerdSjabloon
                   ? copy.treatmentHelperFromTemplate
+                  : geselecteerdAfspraakSegment
+                    ? copy.treatmentHelperFromSegment
                   : undefined
             }
             activePackages={activePackagesForTreatment}
