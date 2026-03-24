@@ -2382,6 +2382,7 @@ export const managementDictionary = {
         quickTreatments: "Snelle behandelingen",
         quickTreatmentsPlaceholder:
           "Eén behandeling per regel\nUitgroei kleuren\nVolledige kleuring\nToner",
+        loadBranchDefaults: "Laad standaardbehandelingen van deze branche",
         saving: "Opslaan..."
       }
     }
@@ -2522,6 +2523,7 @@ export const managementDictionary = {
         quickTreatments: "Quick treatments",
         quickTreatmentsPlaceholder:
           "One treatment per line\nRoot colour\nFull colour\nToner",
+        loadBranchDefaults: "Load the default treatments for this business type",
         saving: "Saving..."
       }
     }
@@ -2663,6 +2665,7 @@ export const managementDictionary = {
         quickTreatments: "Schnelle Behandlungen",
         quickTreatmentsPlaceholder:
           "Eine Behandlung pro Zeile\nAnsatz färben\nKomplettfärbung\nToner",
+        loadBranchDefaults: "Standardbehandlungen dieser Betriebsart laden",
         saving: "Speichern..."
       }
     }

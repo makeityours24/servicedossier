@@ -1,7 +1,7 @@
 import { SalonSettingsForm } from "@/components/salon-settings-form";
 import { updateSalonSettingsAction } from "@/app/(dashboard)/instellingen/actions";
 import { requireSalonSession } from "@/lib/auth";
-import { getDefaultTreatmentPresets, normalizeBranchType } from "@/lib/branch-profile";
+import { normalizeBranchType, normalizeTreatmentPresetsForBranch } from "@/lib/branch-profile";
 import { getCurrentLocale, managementDictionary } from "@/lib/i18n";
 
 export default async function InstellingenPage() {
@@ -10,6 +10,7 @@ export default async function InstellingenPage() {
   const user = await requireSalonSession();
   const settings = user.salon.instellingen;
   const branchType = normalizeBranchType(settings?.branchType);
+  const normalizedTreatmentPresets = normalizeTreatmentPresetsForBranch(settings?.treatmentPresets, branchType);
 
   return (
     <div className="rooster">
@@ -35,7 +36,7 @@ export default async function InstellingenPage() {
             primaireKleur: settings?.primaireKleur ?? "#b42323",
             logoUrl: settings?.logoUrl ?? "",
             logoBlobPath: settings?.logoBlobPath ?? "",
-            treatmentPresets: (settings?.treatmentPresets ?? getDefaultTreatmentPresets(branchType)).join("\n")
+            treatmentPresets: normalizedTreatmentPresets.join("\n")
           }}
         />
       </section>

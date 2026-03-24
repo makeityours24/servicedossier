@@ -1,6 +1,7 @@
 import type { Locale } from "@/lib/i18n";
 
 export type BranchType = "HAIR" | "MASSAGE" | "BEAUTY";
+export const BRANCH_TYPES: BranchType[] = ["HAIR", "MASSAGE", "BEAUTY"];
 
 const branchDefaults: Record<BranchType, string[]> = {
   HAIR: [
@@ -193,4 +194,28 @@ export function getDefaultTreatmentPresets(branchType: BranchType) {
 
 export function getBranchProfileCopy(locale: Locale, branchType: BranchType) {
   return branchProfileCopy[locale][branchType];
+}
+
+export function areTreatmentPresetsEqual(left: string[], right: string[]) {
+  return JSON.stringify(left) === JSON.stringify(right);
+}
+
+export function normalizeTreatmentPresetsForBranch(
+  treatmentPresets: string[] | null | undefined,
+  branchType: BranchType
+) {
+  if (!treatmentPresets || treatmentPresets.length === 0) {
+    return getDefaultTreatmentPresets(branchType);
+  }
+
+  const matchesOtherBranchDefaults = BRANCH_TYPES.some(
+    (candidate) =>
+      candidate !== branchType && areTreatmentPresetsEqual(treatmentPresets, getDefaultTreatmentPresets(candidate))
+  );
+
+  if (matchesOtherBranchDefaults) {
+    return getDefaultTreatmentPresets(branchType);
+  }
+
+  return treatmentPresets;
 }

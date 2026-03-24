@@ -1,11 +1,12 @@
 "use client";
 
 import Image from "next/image";
-import { useActionState, useEffect } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { FormMessage } from "@/components/form-message";
 import { SubmitButton } from "@/components/submit-button";
 import type { FormState } from "@/components/customer-form";
+import { getDefaultTreatmentPresets, type BranchType } from "@/lib/branch-profile";
 
 const initialState: FormState = {};
 
@@ -30,6 +31,7 @@ type SalonSettingsFormProps = {
     logoPreviewHelp: string;
     quickTreatments: string;
     quickTreatmentsPlaceholder: string;
+    loadBranchDefaults: string;
     saving: string;
   };
   settings: {
@@ -64,6 +66,7 @@ const defaultDictionary = {
   quickTreatments: "Snelle behandelingen",
   quickTreatmentsPlaceholder:
     "Eén behandeling per regel\nUitgroei kleuren\nVolledige kleuring\nToner",
+  loadBranchDefaults: "Laad standaardbehandelingen van deze branche",
   saving: "Opslaan..."
 };
 
@@ -75,6 +78,9 @@ export function SalonSettingsForm({
 }: SalonSettingsFormProps) {
   const router = useRouter();
   const [state, formAction] = useActionState(action, initialState);
+  const [branchType, setBranchType] = useState<BranchType>(settings.branchType);
+  const [treatmentPresets, setTreatmentPresets] = useState(settings.treatmentPresets);
+  const [treatmentPresetsTouched, setTreatmentPresetsTouched] = useState(false);
   const previewLogo = settings.logoUrl?.trim() || "/logo-salon.svg";
 
   useEffect(() => {
@@ -82,6 +88,30 @@ export function SalonSettingsForm({
       router.refresh();
     }
   }, [router, state.success]);
+
+  useEffect(() => {
+    setBranchType(settings.branchType);
+    setTreatmentPresets(settings.treatmentPresets);
+    setTreatmentPresetsTouched(false);
+  }, [settings.branchType, settings.treatmentPresets]);
+
+  function getDefaultPresetText(nextBranchType: BranchType) {
+    return getDefaultTreatmentPresets(nextBranchType).join("\n");
+  }
+
+  function handleBranchTypeChange(nextBranchType: BranchType) {
+    const currentDefaultPresetText = getDefaultPresetText(branchType);
+    const nextDefaultPresetText = getDefaultPresetText(nextBranchType);
+
+    setBranchType(nextBranchType);
+    setTreatmentPresets((currentValue) => {
+      if (!treatmentPresetsTouched || normalizePresetText(currentValue) === normalizePresetText(currentDefaultPresetText)) {
+        return nextDefaultPresetText;
+      }
+
+      return currentValue;
+    });
+  }
 
   return (
     <form action={formAction} className="formulier">
@@ -95,7 +125,12 @@ export function SalonSettingsForm({
 
         <div className="veld">
           <label htmlFor="branchType">{dictionary.branchType}</label>
-          <select id="branchType" name="branchType" defaultValue={settings.branchType}>
+          <select
+            id="branchType"
+            name="branchType"
+            value={branchType}
+            onChange={(event) => handleBranchTypeChange(event.target.value as BranchType)}
+          >
             <option value="HAIR">{dictionary.branchHair}</option>
             <option value="MASSAGE">{dictionary.branchMassage}</option>
             <option value="BEAUTY">{dictionary.branchBeauty}</option>
@@ -165,13 +200,37 @@ export function SalonSettingsForm({
           <textarea
             id="treatmentPresets"
             name="treatmentPresets"
-            defaultValue={settings.treatmentPresets}
+            value={treatmentPresets}
+            onChange={(event) => {
+              setTreatmentPresets(event.target.value);
+              setTreatmentPresetsTouched(true);
+            }}
             placeholder={dictionary.quickTreatmentsPlaceholder}
           />
+          <div className="acties">
+            <button
+              type="button"
+              className="knop-zacht"
+              onClick={() => {
+                setTreatmentPresets(getDefaultPresetText(branchType));
+                setTreatmentPresetsTouched(false);
+              }}
+            >
+              {dictionary.loadBranchDefaults}
+            </button>
+          </div>
         </div>
       </div>
 
       <SubmitButton label={submitLabel} bezigLabel={dictionary.saving} />
     </form>
   );
+}
+
+function normalizePresetText(value: string) {
+  return value
+    .split("\n")
+    .map((item) => item.trim())
+    .filter(Boolean)
+    .join("\n");
 }
