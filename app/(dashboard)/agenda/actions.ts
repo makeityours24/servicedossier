@@ -435,7 +435,17 @@ export async function updateAppointmentVisitAction(
         },
         select: {
           id: true,
-          datum: true
+          datum: true,
+          segments: {
+            select: {
+              id: true,
+              convertedTreatment: {
+                select: {
+                  id: true
+                }
+              }
+            }
+          }
         }
       }),
       prisma.customer.findFirst({
@@ -456,6 +466,13 @@ export async function updateAppointmentVisitAction(
 
     if (!customer) {
       return { error: "Deze klant hoort niet bij deze salon." };
+    }
+
+    if (existingVisit.segments.some((segment) => segment.convertedTreatment)) {
+      return {
+        error:
+          "Dit samengestelde bezoek kan niet meer worden aangepast omdat er al een behandeling aan een onderdeel is gekoppeld."
+      };
     }
 
     const userIds = Array.from(
@@ -653,6 +670,25 @@ export async function deleteAppointmentVisitAction(formData: FormData): Promise<
 
   if (!visit) {
     throw new Error("Samengesteld bezoek niet gevonden.");
+  }
+
+  const convertedSegment = await prisma.appointmentSegment.findFirst({
+    where: {
+      visitId,
+      salonId: user.salonId,
+      convertedTreatment: {
+        isNot: null
+      }
+    },
+    select: {
+      id: true
+    }
+  });
+
+  if (convertedSegment) {
+    throw new Error(
+      "Dit samengestelde bezoek kan niet meer worden verwijderd omdat er al een behandeling aan een onderdeel is gekoppeld."
+    );
   }
 
   await prisma.appointmentVisit.delete({

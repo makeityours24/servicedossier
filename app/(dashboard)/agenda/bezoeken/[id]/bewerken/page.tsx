@@ -56,6 +56,12 @@ export default async function BewerkVisitPage({ params }: BewerkVisitPageProps) 
               behandelingKleur: true,
               notities: true,
               status: true
+              ,
+              convertedTreatment: {
+                select: {
+                  id: true
+                }
+              }
             }
           }
         }
@@ -93,6 +99,8 @@ export default async function BewerkVisitPage({ params }: BewerkVisitPageProps) 
     notFound();
   }
 
+  const visitIsLocked = visit.segments.some((segment) => Boolean(segment.convertedTreatment));
+
   return (
     <div className="rooster">
       <section className="bovenbalk">
@@ -110,45 +118,73 @@ export default async function BewerkVisitPage({ params }: BewerkVisitPageProps) 
       </section>
 
       <section className="kaart">
+        {visitIsLocked ? (
+          <p className="melding-info" style={{ marginBottom: 18 }}>
+            {dict.visitLockedByTreatment}
+          </p>
+        ) : null}
+
         <div className="acties" style={{ justifyContent: "space-between", alignItems: "center", marginBottom: 18 }}>
           <Link href={`/klanten/${visit.customerId}`} className="knop-zacht">
             {dict.toClientFile}
           </Link>
-          <form action={deleteAppointmentVisitAction}>
-            <input type="hidden" name="visitId" value={visit.id} />
-            <DeleteCustomerButton
-              naam={visit.customer.naam}
-              confirmMessage={dict.deleteVisitConfirm}
-              label={dict.delete}
-            />
-          </form>
+          {!visitIsLocked ? (
+            <form action={deleteAppointmentVisitAction}>
+              <input type="hidden" name="visitId" value={visit.id} />
+              <DeleteCustomerButton
+                naam={visit.customer.naam}
+                confirmMessage={dict.deleteVisitConfirm}
+                label={dict.delete}
+              />
+            </form>
+          ) : null}
         </div>
 
-        <AppointmentVisitForm
-          action={updateAppointmentVisitAction}
-          submitLabel={dict.form.saveVisit}
-          busyLabel={dict.form.savingVisit}
-          dictionary={dict.form}
-          customers={customers}
-          medewerkers={medewerkers}
-          visit={{
-            id: visit.id,
-            customerId: visit.customerId,
-            datum: toDateTimeLocalValue(visit.datum),
-            notities: visit.notities,
-            status: visit.status,
-            segments: visit.segments.map((segment) => ({
-              id: segment.id,
-              userId: segment.userId,
-              datumStart: toDateTimeLocalValue(segment.datumStart),
-              duurMinuten: segment.duurMinuten,
-              behandeling: segment.behandeling,
-              behandelingKleur: segment.behandelingKleur,
-              notities: segment.notities,
-              status: segment.status
-            }))
-          }}
-        />
+        {visitIsLocked ? (
+          <div className="lijst">
+            {visit.segments.map((segment) => (
+              <article className="lijst-item" key={segment.id}>
+                <div className="acties" style={{ justifyContent: "space-between", alignItems: "flex-start" }}>
+                  <div>
+                    <h4>{segment.behandeling}</h4>
+                    <p className="meta">
+                      {toDateTimeLocalValue(segment.datumStart).replace("T", " ")}
+                      <br />
+                      {medewerkers.find((medewerker) => medewerker.id === segment.userId)?.naam ?? dict.unassigned}
+                    </p>
+                  </div>
+                  {segment.convertedTreatment ? <span className="badge">{dict.openCompletedTreatment}</span> : null}
+                </div>
+              </article>
+            ))}
+          </div>
+        ) : (
+          <AppointmentVisitForm
+            action={updateAppointmentVisitAction}
+            submitLabel={dict.form.saveVisit}
+            busyLabel={dict.form.savingVisit}
+            dictionary={dict.form}
+            customers={customers}
+            medewerkers={medewerkers}
+            visit={{
+              id: visit.id,
+              customerId: visit.customerId,
+              datum: toDateTimeLocalValue(visit.datum),
+              notities: visit.notities,
+              status: visit.status,
+              segments: visit.segments.map((segment) => ({
+                id: segment.id,
+                userId: segment.userId,
+                datumStart: toDateTimeLocalValue(segment.datumStart),
+                duurMinuten: segment.duurMinuten,
+                behandeling: segment.behandeling,
+                behandelingKleur: segment.behandelingKleur,
+                notities: segment.notities,
+                status: segment.status
+              }))
+            }}
+          />
+        )}
       </section>
     </div>
   );

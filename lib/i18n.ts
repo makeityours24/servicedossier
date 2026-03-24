@@ -1224,6 +1224,8 @@ export const agendaDictionary = {
     editVisitTitle: "Samengesteld bezoek bewerken",
     editVisitText: "Werk dit klantbezoek met meerdere onderdelen bij zonder het dagoverzicht te verliezen.",
     deleteVisitConfirm: "Weet je zeker dat je samengesteld bezoek {naam} wilt verwijderen?",
+    visitLockedByTreatment:
+      "Dit samengestelde bezoek is vergrendeld omdat er al een behandeling aan een onderdeel is gekoppeld.",
     editAppointmentTitle: "Afspraak bewerken",
     editAppointmentText: "Werk deze afspraak bij voor {customerName} zonder het dagoverzicht te verliezen.",
     backToAgenda: "Terug naar agenda",
@@ -1347,6 +1349,8 @@ export const agendaDictionary = {
     editVisitTitle: "Edit combined visit",
     editVisitText: "Update this client visit with multiple segments without losing the day overview.",
     deleteVisitConfirm: "Are you sure you want to delete combined visit {naam}?",
+    visitLockedByTreatment:
+      "This combined visit is locked because a treatment has already been linked to one of its segments.",
     editAppointmentTitle: "Edit appointment",
     editAppointmentText: "Update this appointment for {customerName} without losing the day overview.",
     backToAgenda: "Back to appointment book",
@@ -1470,6 +1474,8 @@ export const agendaDictionary = {
     editVisitTitle: "Kombinierten Besuch bearbeiten",
     editVisitText: "Bearbeite diesen Kundenbesuch mit mehreren Teilen, ohne die Tagesübersicht zu verlassen.",
     deleteVisitConfirm: "Möchtest du den kombinierten Besuch {naam} wirklich löschen?",
+    visitLockedByTreatment:
+      "Dieser kombinierte Besuch ist gesperrt, weil bereits eine Behandlung mit einem Teil verknüpft wurde.",
     editAppointmentTitle: "Termin bearbeiten",
     editAppointmentText: "Bearbeite diesen Termin für {customerName}, ohne die Tagesübersicht zu verlassen.",
     backToAgenda: "Zurück zum Terminbuch",
