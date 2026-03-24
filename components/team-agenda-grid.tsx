@@ -15,6 +15,8 @@ type TeamAgendaGridProps = {
   }>;
   afspraken: Array<{
     id: number;
+    href?: string | null;
+    badge?: string | null;
     datumStart: Date;
     datumEinde: Date;
     behandeling: string;
@@ -116,11 +118,39 @@ export function TeamAgendaGrid({ dayStart, medewerkers, afspraken, locale, label
                     30,
                     Math.round((afspraak.datumEinde.getTime() - afspraak.datumStart.getTime()) / 60000)
                   );
+                  const content = (
+                    <>
+                      <strong>{afspraak.customer.naam}</strong>
+                      {afspraak.badge ? <span>{afspraak.badge}</span> : null}
+                      <span>{afspraak.behandeling}</span>
+                      <span>
+                        {formatTime(afspraak.datumStart, locale)} - {formatTime(afspraak.datumEinde, locale)}
+                      </span>
+                      <span>{labels.minutes.replace("{count}", String(afspraak.duurMinuten))}</span>
+                    </>
+                  );
+
+                  if (!afspraak.href) {
+                    return (
+                      <div
+                        key={afspraak.id}
+                        className={`agenda-afspraakblok ${getStatusClass(afspraak.status)}`}
+                        style={{
+                          top,
+                          height: duurMinuten * PIXELS_PER_MINUTE,
+                          borderColor: `${afspraak.behandelingKleur}45`,
+                          background: `linear-gradient(180deg, ${afspraak.behandelingKleur}20 0%, ${afspraak.behandelingKleur}14 100%)`
+                        }}
+                      >
+                        {content}
+                      </div>
+                    );
+                  }
 
                   return (
                     <Link
                       key={afspraak.id}
-                      href={`/agenda/${afspraak.id}/bewerken`}
+                      href={afspraak.href}
                       className={`agenda-afspraakblok ${getStatusClass(afspraak.status)}`}
                       style={{
                         top,
@@ -129,12 +159,7 @@ export function TeamAgendaGrid({ dayStart, medewerkers, afspraken, locale, label
                         background: `linear-gradient(180deg, ${afspraak.behandelingKleur}20 0%, ${afspraak.behandelingKleur}14 100%)`
                       }}
                     >
-                      <strong>{afspraak.customer.naam}</strong>
-                      <span>{afspraak.behandeling}</span>
-                      <span>
-                        {formatTime(afspraak.datumStart, locale)} - {formatTime(afspraak.datumEinde, locale)}
-                      </span>
-                      <span>{labels.minutes.replace("{count}", String(afspraak.duurMinuten))}</span>
+                      {content}
                     </Link>
                   );
                 })}

@@ -1,5 +1,10 @@
 import Link from "next/link";
-import { createAppointmentAction, deleteAppointmentAction } from "@/app/(dashboard)/agenda/actions";
+import {
+  createAppointmentAction,
+  createAppointmentVisitAction,
+  deleteAppointmentAction
+} from "@/app/(dashboard)/agenda/actions";
+import { AppointmentVisitForm } from "@/components/appointment-visit-form";
 import { createQuickCustomerAction } from "@/app/(dashboard)/klanten/customer-actions";
 import { AgendaViewSwitch } from "@/components/agenda-view-switch";
 import { AppointmentForm } from "@/components/appointment-form";
@@ -7,7 +12,7 @@ import { DeleteCustomerButton } from "@/components/delete-customer-button";
 import { ReminderCopyButton } from "@/components/reminder-copy-button";
 import { TeamAgendaGrid } from "@/components/team-agenda-grid";
 import { requireSalonSession } from "@/lib/auth";
-import { getAdjacentAgendaDates, getAgendaData, getDayRange } from "@/lib/agenda-queries";
+import { getAdjacentAgendaDates, getAgendaData, getAgendaVisitData, getDayRange } from "@/lib/agenda-queries";
 import { agendaDictionary, getCurrentLocale } from "@/lib/i18n";
 import { buildAppointmentReminderMessage, formatDate, formatDateParamLocal } from "@/lib/utils";
 
@@ -36,7 +41,48 @@ export default async function AgendaPage({ searchParams }: AgendaPageProps) {
     dayEnd,
     medewerkerFilter: filters.medewerker
   });
+  const { segments } = await getAgendaVisitData({
+    salonId: user.salonId,
+    dayStart,
+    dayEnd,
+    medewerkerFilter: filters.medewerker
+  });
   const { vorigeDagParam, volgendeDagParam } = getAdjacentAgendaDates(dayStart);
+  const agendaItems = [
+    ...appointments.map((appointment) => ({
+      kind: "appointment" as const,
+      id: appointment.id,
+      href: `/agenda/${appointment.id}/bewerken`,
+      badge: null as string | null,
+      datumStart: appointment.datumStart,
+      datumEinde: appointment.datumEinde,
+      behandeling: appointment.behandeling,
+      behandelingKleur: appointment.behandelingKleur,
+      duurMinuten: appointment.duurMinuten,
+      status: appointment.status,
+      notities: appointment.notities,
+      customer: appointment.customer,
+      user: appointment.user,
+      convertedTreatment: appointment.convertedTreatment
+    })),
+    ...segments.map((segment) => ({
+      kind: "segment" as const,
+      id: segment.id,
+      href: null,
+      badge: dict.groupedVisitBadge,
+      datumStart: segment.datumStart,
+      datumEinde: segment.datumEinde,
+      behandeling: segment.behandeling,
+      behandelingKleur: segment.behandelingKleur,
+      duurMinuten: segment.duurMinuten,
+      status: segment.status,
+      notities: segment.notities,
+      customer: segment.customer,
+      user: segment.user,
+      convertedTreatment: segment.convertedTreatment,
+      visit: segment.visit
+    }))
+  ].sort((left, right) => left.datumStart.getTime() - right.datumStart.getTime());
 
   return (
     <div className="rooster">
@@ -103,7 +149,7 @@ export default async function AgendaPage({ searchParams }: AgendaPageProps) {
             </div>
           </div>
 
-          {appointments.length === 0 ? (
+          {agendaItems.length === 0 ? (
             <div className="leeg">{dict.noAppointmentsForDay}</div>
           ) : weergave === "team" ? (
             <TeamAgendaGrid
@@ -111,12 +157,12 @@ export default async function AgendaPage({ searchParams }: AgendaPageProps) {
               labels={dict.teamGrid}
               dayStart={dayStart}
               medewerkers={medewerkers}
-              afspraken={appointments}
+              afspraken={agendaItems}
             />
           ) : (
             <div className="lijst">
-              {appointments.map((appointment) => (
-                <article className="lijst-item" key={appointment.id}>
+              {agendaItems.map((appointment) => (
+                <article className="lijst-item" key={`${appointment.kind}-${appointment.id}`}>
                   <div className="acties" style={{ justifyContent: "space-between", alignItems: "flex-start" }}>
                     <div>
                       <h4>{appointment.customer.naam}</h4>
@@ -133,6 +179,12 @@ export default async function AgendaPage({ searchParams }: AgendaPageProps) {
                         <strong>{dict.stylistLabel}:</strong> {appointment.user?.naam ?? dict.unassigned}
                         <br />
                         <strong>{dict.statusLabel}:</strong> {dict.status[appointment.status]}
+                        {appointment.badge ? (
+                          <>
+                            <br />
+                            <strong>{appointment.badge}</strong>
+                          </>
+                        ) : null}
                         {appointment.notities ? (
                           <>
                             <br />
@@ -154,9 +206,15 @@ export default async function AgendaPage({ searchParams }: AgendaPageProps) {
                   </div>
 
                   <div className="acties" style={{ marginTop: 16 }}>
-                    <Link href={`/agenda/${appointment.id}/bewerken`} className="knop-secundair">
-                      {dict.edit}
-                    </Link>
+                    {appointment.href ? (
+                      <Link href={appointment.href} className="knop-secundair">
+                        {dict.edit}
+                      </Link>
+                    ) : (
+                      <span className="melding-info" style={{ margin: 0 }}>
+                        {dict.groupedVisitInfo}
+                      </span>
+                    )}
                     {appointment.convertedTreatment ? (
                       <Link
                         href={`/klanten/${appointment.customer.id}/behandelingen/${appointment.convertedTreatment.id}/bewerken`}
@@ -191,14 +249,16 @@ export default async function AgendaPage({ searchParams }: AgendaPageProps) {
                           user.salon.instellingen?.contactTelefoon ?? user.salon.telefoonnummer ?? null
                       })}
                     />
-                    <form action={deleteAppointmentAction}>
-                      <input type="hidden" name="appointmentId" value={appointment.id} />
-                      <DeleteCustomerButton
-                        naam={`${appointment.customer.naam} - ${appointment.behandeling}`}
-                        confirmMessage={dict.deleteAppointmentConfirm}
-                        label={dict.delete}
-                      />
-                    </form>
+                    {appointment.kind === "appointment" ? (
+                      <form action={deleteAppointmentAction}>
+                        <input type="hidden" name="appointmentId" value={appointment.id} />
+                        <DeleteCustomerButton
+                          naam={`${appointment.customer.naam} - ${appointment.behandeling}`}
+                          confirmMessage={dict.deleteAppointmentConfirm}
+                          label={dict.delete}
+                        />
+                      </form>
+                    ) : null}
                   </div>
                 </article>
               ))}
@@ -227,6 +287,27 @@ export default async function AgendaPage({ searchParams }: AgendaPageProps) {
               medewerkers={medewerkers}
             />
           )}
+
+          <div className="kaart" style={{ marginTop: 22, padding: 22 }}>
+            <h3>{dict.newVisit}</h3>
+            <p className="subtitel" style={{ marginTop: 8 }}>
+              {dict.newVisitText}
+            </p>
+            {customers.length === 0 ? (
+              <div className="leeg" style={{ marginTop: 18 }}>
+                {dict.addCustomerFirst}
+              </div>
+            ) : (
+              <AppointmentVisitForm
+                action={createAppointmentVisitAction}
+                submitLabel={dict.form.saveVisit}
+                busyLabel={dict.form.savingVisit}
+                dictionary={dict.form}
+                customers={customers}
+                medewerkers={medewerkers}
+              />
+            )}
+          </div>
         </aside>
       </section>
     </div>

@@ -1199,9 +1199,14 @@ export const agendaDictionary = {
     deleteAppointmentConfirm: "Weet je zeker dat je afspraak {naam} wilt verwijderen?",
     delete: "Verwijderen",
     newAppointment: "Nieuwe afspraak",
+    newVisit: "Samengesteld bezoek",
     newAppointmentText:
       "Plan snel een nieuwe afspraak voor een bestaande klant. Dit is bewust een lichte dagagenda zonder zware planner.",
+    newVisitText:
+      "Gebruik dit wanneer één klant in hetzelfde bezoek meerdere behandelingen of behandelaars heeft.",
     addCustomerFirst: "Voeg eerst een klant toe voordat je een afspraak kunt plannen.",
+    groupedVisitBadge: "Samengesteld bezoek",
+    groupedVisitInfo: "Dit onderdeel hoort bij een samengesteld bezoek en heeft nog geen aparte bewerkpagina.",
     editAppointmentTitle: "Afspraak bewerken",
     editAppointmentText: "Werk deze afspraak bij voor {customerName} zonder het dagoverzicht te verliezen.",
     backToAgenda: "Terug naar agenda",
@@ -1312,9 +1317,14 @@ export const agendaDictionary = {
     deleteAppointmentConfirm: "Are you sure you want to delete appointment {naam}?",
     delete: "Delete",
     newAppointment: "New appointment",
+    newVisit: "Combined visit",
     newAppointmentText:
       "Quickly add a new appointment for an existing client. This is intentionally a lightweight appointment book, not a heavy planner.",
+    newVisitText:
+      "Use this when one client visit includes multiple services or different stylists in the same booking.",
     addCustomerFirst: "Add a client first before you can book an appointment.",
+    groupedVisitBadge: "Combined visit",
+    groupedVisitInfo: "This segment belongs to a combined visit and does not have its own edit page yet.",
     editAppointmentTitle: "Edit appointment",
     editAppointmentText: "Update this appointment for {customerName} without losing the day overview.",
     backToAgenda: "Back to appointment book",
@@ -1425,9 +1435,14 @@ export const agendaDictionary = {
     deleteAppointmentConfirm: "Möchtest du den Termin {naam} wirklich löschen?",
     delete: "Löschen",
     newAppointment: "Neuer Termin",
+    newVisit: "Kombinierter Besuch",
     newAppointmentText:
       "Plane schnell einen neuen Termin für eine bestehende Kundin oder einen bestehenden Kunden. Das ist bewusst ein leichtes Terminbuch ohne schweren Planer.",
+    newVisitText:
+      "Nutze dies, wenn ein Kundenbesuch mehrere Behandlungen oder unterschiedliche Mitarbeitende im selben Besuch umfasst.",
     addCustomerFirst: "Lege zuerst eine Kundin oder einen Kunden an, bevor du einen Termin planen kannst.",
+    groupedVisitBadge: "Kombinierter Besuch",
+    groupedVisitInfo: "Dieser Teil gehört zu einem kombinierten Besuch und hat noch keine eigene Bearbeitungsseite.",
     editAppointmentTitle: "Termin bearbeiten",
     editAppointmentText: "Bearbeite diesen Termin für {customerName}, ohne die Tagesübersicht zu verlassen.",
     backToAgenda: "Zurück zum Terminbuch",
