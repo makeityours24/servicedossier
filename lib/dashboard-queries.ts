@@ -1,3 +1,4 @@
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { groupAppointmentSegmentsByVisit } from "@/lib/appointment-visits";
 
@@ -19,6 +20,19 @@ export function formatTime(date: Date | string, locale?: string) {
     hour: "2-digit",
     minute: "2-digit"
   }).format(new Date(date));
+}
+
+function isMissingVisitSchemaError(error: unknown) {
+  if (!(error instanceof Prisma.PrismaClientKnownRequestError)) {
+    return false;
+  }
+
+  if (error.code !== "P2021" && error.code !== "P2022") {
+    return false;
+  }
+
+  const message = error.message.toLowerCase();
+  return message.includes("appointmentvisit") || message.includes("appointmentsegment");
 }
 
 export async function getDashboardData(salonId: number) {
@@ -153,98 +167,115 @@ export async function getDashboardData(salonId: number) {
 export async function getDashboardVisitData(salonId: number) {
   const { start: vandaagStart, end: vandaagEinde } = getTodayRange();
 
-  const [
-    aantalBezoekenVandaag,
-    openBezoekenVandaag,
-    aantalSegmentenVandaag,
-    openSegmentenVandaag,
-    segmentenVandaag
-  ] = await Promise.all([
-    prisma.appointmentVisit.count({
-      where: {
-        salonId,
-        datum: {
-          gte: vandaagStart,
-          lte: vandaagEinde
+  try {
+    const [
+      aantalBezoekenVandaag,
+      openBezoekenVandaag,
+      aantalSegmentenVandaag,
+      openSegmentenVandaag,
+      segmentenVandaag
+    ] = await Promise.all([
+      prisma.appointmentVisit.count({
+        where: {
+          salonId,
+          datum: {
+            gte: vandaagStart,
+            lte: vandaagEinde
+          }
         }
-      }
-    }),
-    prisma.appointmentVisit.count({
-      where: {
-        salonId,
-        status: "GEPLAND",
-        datum: {
-          gte: vandaagStart,
-          lte: vandaagEinde
+      }),
+      prisma.appointmentVisit.count({
+        where: {
+          salonId,
+          status: "GEPLAND",
+          datum: {
+            gte: vandaagStart,
+            lte: vandaagEinde
+          }
         }
-      }
-    }),
-    prisma.appointmentSegment.count({
-      where: {
-        salonId,
-        datumStart: {
-          gte: vandaagStart,
-          lte: vandaagEinde
+      }),
+      prisma.appointmentSegment.count({
+        where: {
+          salonId,
+          datumStart: {
+            gte: vandaagStart,
+            lte: vandaagEinde
+          }
         }
-      }
-    }),
-    prisma.appointmentSegment.count({
-      where: {
-        salonId,
-        status: "GEPLAND",
-        datumStart: {
-          gte: vandaagStart,
-          lte: vandaagEinde
+      }),
+      prisma.appointmentSegment.count({
+        where: {
+          salonId,
+          status: "GEPLAND",
+          datumStart: {
+            gte: vandaagStart,
+            lte: vandaagEinde
+          }
         }
-      }
-    }),
-    prisma.appointmentSegment.findMany({
-      where: {
-        salonId,
-        datumStart: {
-          gte: vandaagStart,
-          lte: vandaagEinde
-        }
-      },
-      orderBy: [{ datumStart: "asc" }, { id: "asc" }],
-      take: 8,
-      include: {
-        visit: {
-          select: {
-            id: true,
-            datum: true,
-            notities: true,
-            status: true
+      }),
+      prisma.appointmentSegment.findMany({
+        where: {
+          salonId,
+          datumStart: {
+            gte: vandaagStart,
+            lte: vandaagEinde
           }
         },
-        customer: {
-          select: {
-            id: true,
-            naam: true,
-            telefoonnummer: true
-          }
-        },
-        user: {
-          select: {
-            id: true,
-            naam: true
-          }
-        },
-        convertedTreatment: {
-          select: {
-            id: true
+        orderBy: [{ datumStart: "asc" }, { id: "asc" }],
+        take: 8,
+        include: {
+          visit: {
+            select: {
+              id: true,
+              datum: true,
+              notities: true,
+              status: true
+            }
+          },
+          customer: {
+            select: {
+              id: true,
+              naam: true,
+              telefoonnummer: true
+            }
+          },
+          user: {
+            select: {
+              id: true,
+              naam: true
+            }
+          },
+          convertedTreatment: {
+            select: {
+              id: true
+            }
           }
         }
-      }
-    })
-  ]);
+      })
+    ]);
 
-  return {
-    aantalBezoekenVandaag,
-    openBezoekenVandaag,
-    aantalSegmentenVandaag,
-    openSegmentenVandaag,
-    segmentenVandaag,
-    bezoekenVandaag: groupAppointmentSegmentsByVisit(segmentenVandaag)
-  };
+    return {
+      aantalBezoekenVandaag,
+      openBezoekenVandaag,
+      aantalSegmentenVandaag,
+      openSegmentenVandaag,
+      segmentenVandaag,
+      bezoekenVandaag: groupAppointmentSegmentsByVisit(segmentenVandaag)
+    };
+  } catch (error) {
+    if (!isMissingVisitSchemaError(error)) {
+      throw error;
+    }
+
+    console.error("Dashboard visit data skipped because the production database is missing the visit schema.", error);
+
+    return {
+      aantalBezoekenVandaag: 0,
+      openBezoekenVandaag: 0,
+      aantalSegmentenVandaag: 0,
+      openSegmentenVandaag: 0,
+      segmentenVandaag: [],
+      bezoekenVandaag: []
+    };
+  }
 }
