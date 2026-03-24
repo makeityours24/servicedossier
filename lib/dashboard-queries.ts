@@ -1,6 +1,6 @@
-import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { groupAppointmentSegmentsByVisit } from "@/lib/appointment-visits";
+import { isMissingVisitSchemaError } from "@/lib/visit-schema-support";
 
 function getTodayRange() {
   const now = new Date();
@@ -20,19 +20,6 @@ export function formatTime(date: Date | string, locale?: string) {
     hour: "2-digit",
     minute: "2-digit"
   }).format(new Date(date));
-}
-
-function isMissingVisitSchemaError(error: unknown) {
-  if (!(error instanceof Prisma.PrismaClientKnownRequestError)) {
-    return false;
-  }
-
-  if (error.code !== "P2021" && error.code !== "P2022") {
-    return false;
-  }
-
-  const message = error.message.toLowerCase();
-  return message.includes("appointmentvisit") || message.includes("appointmentsegment");
 }
 
 export async function getDashboardData(salonId: number) {
