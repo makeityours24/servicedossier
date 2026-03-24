@@ -1131,6 +1131,21 @@ textarea {
   pointer-events: none;
 }
 
+.instellingen-checklist {
+  margin-top: 4px;
+}
+
+.instellingen-checklist h3 {
+  margin-top: 0;
+  margin-bottom: 14px;
+}
+
+.instellingen-checklist-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
 .shell {
   display: grid;
   grid-template-columns: 280px minmax(0, 1fr);

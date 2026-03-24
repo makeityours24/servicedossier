@@ -24,6 +24,7 @@ type SalonSettingsFormProps = {
     primaryColor: string;
     primaryColorHelp: string;
     primaryColorPicker: string;
+    resetPrimaryColor: string;
     colorPreviewTitle: string;
     colorPreviewText: string;
     previewButton: string;
@@ -36,9 +37,17 @@ type SalonSettingsFormProps = {
     logoUpload: string;
     logoUploadHelp: string;
     logoPreviewHelp: string;
+    logoPreviewSelected: string;
     quickTreatments: string;
     quickTreatmentsPlaceholder: string;
     loadBranchDefaults: string;
+    checklistTitle: string;
+    checklistReady: string;
+    checklistTodo: string;
+    checklistBranding: string;
+    checklistBranch: string;
+    checklistQuickTreatments: string;
+    checklistContact: string;
     saving: string;
   };
   settings: {
@@ -64,6 +73,7 @@ const defaultDictionary = {
   primaryColor: "Primaire kleur",
   primaryColorHelp: "Deze kleur wordt gebruikt voor knoppen en accentdelen in de dashboardomgeving van deze salon.",
   primaryColorPicker: "Kies kleur",
+  resetPrimaryColor: "Reset naar standaardkleur",
   colorPreviewTitle: "Live kleurpreview",
   colorPreviewText: "Zo zien de hoofdaccenten eruit zodra je de instellingen opslaat.",
   previewButton: "Primaire knop",
@@ -76,12 +86,22 @@ const defaultDictionary = {
   logoUpload: "Logo uploaden",
   logoUploadHelp: "Gebruik bij voorkeur een vierkant logo in JPG, PNG, WEBP of SVG tot 2 MB.",
   logoPreviewHelp: "Dit logo wordt gebruikt in de login en in de zijbalk. Een eigen logo is dus juist handig voor herkenning.",
+  logoPreviewSelected: "Voorbeeld van het nieuw gekozen bestand",
   quickTreatments: "Snelle behandelingen",
   quickTreatmentsPlaceholder:
     "Eén behandeling per regel\nUitgroei kleuren\nVolledige kleuring\nToner",
   loadBranchDefaults: "Laad standaardbehandelingen van deze branche",
+  checklistTitle: "Snelle inrichting-check",
+  checklistReady: "Klaar",
+  checklistTodo: "Nog doen",
+  checklistBranding: "Salonnaam, kleur en logo controleren",
+  checklistBranch: "Juiste branche voor deze salon kiezen",
+  checklistQuickTreatments: "Snelle behandelingen nalopen",
+  checklistContact: "Contactgegevens invullen voor team en herinneringen",
   saving: "Opslaan..."
 };
+
+const DEFAULT_PRIMARY_COLOR = "#b42323";
 
 export function SalonSettingsForm({
   action,
@@ -95,8 +115,27 @@ export function SalonSettingsForm({
   const [treatmentPresets, setTreatmentPresets] = useState(settings.treatmentPresets);
   const [treatmentPresetsTouched, setTreatmentPresetsTouched] = useState(false);
   const [primaryColor, setPrimaryColor] = useState(settings.primaireKleur);
-  const previewLogo = settings.logoUrl?.trim() || "/logo-salon.svg";
+  const [logoPreviewUrl, setLogoPreviewUrl] = useState(settings.logoUrl?.trim() || "/logo-salon.svg");
+  const [selectedLogoName, setSelectedLogoName] = useState("");
   const previewThemeStyle = getSalonThemeStyle(primaryColor);
+  const checklistItems = [
+    {
+      label: dictionary.checklistBranding,
+      ready: Boolean(settings.weergavenaam.trim() && (logoPreviewUrl || primaryColor.trim()))
+    },
+    {
+      label: dictionary.checklistBranch,
+      ready: Boolean(branchType)
+    },
+    {
+      label: dictionary.checklistQuickTreatments,
+      ready: normalizePresetText(treatmentPresets).length > 0
+    },
+    {
+      label: dictionary.checklistContact,
+      ready: Boolean(settings.contactEmail.trim() || settings.contactTelefoon.trim())
+    }
+  ];
 
   useEffect(() => {
     if (state.success) {
@@ -109,7 +148,17 @@ export function SalonSettingsForm({
     setTreatmentPresets(settings.treatmentPresets);
     setTreatmentPresetsTouched(false);
     setPrimaryColor(settings.primaireKleur);
-  }, [settings.branchType, settings.treatmentPresets]);
+    setLogoPreviewUrl(settings.logoUrl?.trim() || "/logo-salon.svg");
+    setSelectedLogoName("");
+  }, [settings.branchType, settings.treatmentPresets, settings.primaireKleur, settings.logoUrl]);
+
+  useEffect(() => {
+    return () => {
+      if (logoPreviewUrl.startsWith("blob:")) {
+        URL.revokeObjectURL(logoPreviewUrl);
+      }
+    };
+  }, [logoPreviewUrl]);
 
   function getDefaultPresetText(nextBranchType: BranchType) {
     return getDefaultTreatmentPresets(nextBranchType).join("\n");
@@ -180,6 +229,15 @@ export function SalonSettingsForm({
               />
             </div>
           </div>
+          <div className="acties">
+            <button
+              type="button"
+              className="knop-zacht"
+              onClick={() => setPrimaryColor(DEFAULT_PRIMARY_COLOR)}
+            >
+              {dictionary.resetPrimaryColor}
+            </button>
+          </div>
           <p className="meta" style={{ margin: 0 }}>
             {dictionary.primaryColorHelp}
           </p>
@@ -235,21 +293,46 @@ export function SalonSettingsForm({
             name="logoBestand"
             type="file"
             accept="image/jpeg,image/png,image/webp,image/svg+xml"
+            onChange={(event) => {
+              const file = event.target.files?.[0];
+
+              if (!file) {
+                setLogoPreviewUrl(settings.logoUrl?.trim() || "/logo-salon.svg");
+                setSelectedLogoName("");
+                return;
+              }
+
+              setLogoPreviewUrl((currentUrl) => {
+                if (currentUrl.startsWith("blob:")) {
+                  URL.revokeObjectURL(currentUrl);
+                }
+
+                return URL.createObjectURL(file);
+              });
+              setSelectedLogoName(file.name);
+            }}
           />
           <p className="meta" style={{ margin: 0 }}>
             {dictionary.logoUploadHelp}
           </p>
           <div className="instellingen-logo-preview">
             <Image
-              src={previewLogo}
+              src={logoPreviewUrl}
               alt="Logo preview"
               width={64}
               height={64}
               className="logo-afbeelding logo-afbeelding-klein"
             />
-            <p className="meta" style={{ margin: 0 }}>
-              {dictionary.logoPreviewHelp}
-            </p>
+            <div>
+              <p className="meta" style={{ margin: 0 }}>
+                {dictionary.logoPreviewHelp}
+              </p>
+              {selectedLogoName ? (
+                <p className="meta" style={{ margin: "6px 0 0" }}>
+                  <strong>{dictionary.logoPreviewSelected}:</strong> {selectedLogoName}
+                </p>
+              ) : null}
+            </div>
           </div>
         </div>
 
@@ -277,6 +360,22 @@ export function SalonSettingsForm({
               {dictionary.loadBranchDefaults}
             </button>
           </div>
+        </div>
+      </div>
+
+      <div className="instellingen-checklist kaart">
+        <h3>{dictionary.checklistTitle}</h3>
+        <div className="instellingen-checklist-grid">
+          {checklistItems.map((item) => (
+            <article className="info-kaart" key={item.label}>
+              <span className="status-badge" data-inactive={!item.ready}>
+                {item.ready ? dictionary.checklistReady : dictionary.checklistTodo}
+              </span>
+              <p className="meta" style={{ margin: "10px 0 0" }}>
+                {item.label}
+              </p>
+            </article>
+          ))}
         </div>
       </div>
 

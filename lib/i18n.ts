@@ -2372,6 +2372,7 @@ export const managementDictionary = {
         primaryColor: "Primaire kleur",
         primaryColorHelp: "Deze kleur wordt gebruikt voor knoppen en accentdelen in de dashboardomgeving van deze salon.",
         primaryColorPicker: "Kies kleur",
+        resetPrimaryColor: "Reset naar standaardkleur",
         colorPreviewTitle: "Live kleurpreview",
         colorPreviewText: "Zo zien de hoofdaccenten eruit zodra je de instellingen opslaat.",
         previewButton: "Primaire knop",
@@ -2385,10 +2386,18 @@ export const managementDictionary = {
         logoUploadHelp: "Gebruik bij voorkeur een vierkant logo in JPG, PNG, WEBP of SVG tot 2 MB.",
         logoPreviewHelp:
           "Dit logo wordt gebruikt in de login en in de zijbalk. Een eigen logo is dus juist handig voor herkenning.",
+        logoPreviewSelected: "Voorbeeld van het nieuw gekozen bestand",
         quickTreatments: "Snelle behandelingen",
         quickTreatmentsPlaceholder:
           "Eén behandeling per regel\nUitgroei kleuren\nVolledige kleuring\nToner",
         loadBranchDefaults: "Laad standaardbehandelingen van deze branche",
+        checklistTitle: "Snelle inrichting-check",
+        checklistReady: "Klaar",
+        checklistTodo: "Nog doen",
+        checklistBranding: "Salonnaam, kleur en logo controleren",
+        checklistBranch: "Juiste branche voor deze salon kiezen",
+        checklistQuickTreatments: "Snelle behandelingen nalopen",
+        checklistContact: "Contactgegevens invullen voor team en herinneringen",
         saving: "Opslaan..."
       }
     }
@@ -2519,6 +2528,7 @@ export const managementDictionary = {
         primaryColor: "Primary colour",
         primaryColorHelp: "This colour is used for buttons and accent elements in this salon's dashboard.",
         primaryColorPicker: "Choose colour",
+        resetPrimaryColor: "Reset to default colour",
         colorPreviewTitle: "Live colour preview",
         colorPreviewText: "This is how the main accents will look once you save the settings.",
         previewButton: "Primary button",
@@ -2532,10 +2542,18 @@ export const managementDictionary = {
         logoUploadHelp: "Preferably use a square logo in JPG, PNG, WEBP or SVG up to 2 MB.",
         logoPreviewHelp:
           "This logo is used on the login screen and in the sidebar, so a custom logo helps with recognition.",
+        logoPreviewSelected: "Preview of the newly selected file",
         quickTreatments: "Quick treatments",
         quickTreatmentsPlaceholder:
           "One treatment per line\nRoot colour\nFull colour\nToner",
         loadBranchDefaults: "Load the default treatments for this business type",
+        checklistTitle: "Quick setup check",
+        checklistReady: "Ready",
+        checklistTodo: "To do",
+        checklistBranding: "Check salon name, colour and logo",
+        checklistBranch: "Choose the right business type for this salon",
+        checklistQuickTreatments: "Review the quick treatments",
+        checklistContact: "Fill in contact details for staff and reminders",
         saving: "Saving..."
       }
     }
@@ -2667,6 +2685,7 @@ export const managementDictionary = {
         primaryColor: "Primärfarbe",
         primaryColorHelp: "Diese Farbe wird für Buttons und Akzente im Dashboard dieses Salons verwendet.",
         primaryColorPicker: "Farbe wählen",
+        resetPrimaryColor: "Auf Standardfarbe zurücksetzen",
         colorPreviewTitle: "Live-Farbvorschau",
         colorPreviewText: "So sehen die Hauptakzente aus, sobald du die Einstellungen speicherst.",
         previewButton: "Primärer Button",
@@ -2680,10 +2699,18 @@ export const managementDictionary = {
         logoUploadHelp: "Verwende möglichst ein quadratisches Logo in JPG, PNG, WEBP oder SVG bis 2 MB.",
         logoPreviewHelp:
           "Dieses Logo wird im Login und in der Seitenleiste verwendet. Ein eigenes Logo ist also sinnvoll für die Wiedererkennung.",
+        logoPreviewSelected: "Vorschau der neu ausgewählten Datei",
         quickTreatments: "Schnelle Behandlungen",
         quickTreatmentsPlaceholder:
           "Eine Behandlung pro Zeile\nAnsatz färben\nKomplettfärbung\nToner",
         loadBranchDefaults: "Standardbehandlungen dieser Betriebsart laden",
+        checklistTitle: "Kurzer Einrichtungscheck",
+        checklistReady: "Fertig",
+        checklistTodo: "Noch offen",
+        checklistBranding: "Salonname, Farbe und Logo prüfen",
+        checklistBranch: "Die richtige Betriebsart für diesen Salon wählen",
+        checklistQuickTreatments: "Schnelle Behandlungen prüfen",
+        checklistContact: "Kontaktdaten für Team und Erinnerungen eintragen",
         saving: "Speichern..."
       }
     }
