@@ -4,6 +4,7 @@ import { AppLanguageSwitcher } from "@/components/app-language-switcher";
 import { SidebarNav } from "@/components/sidebar-nav";
 import { LogoutForm } from "@/components/logout-form";
 import { dashboardDictionary, getCurrentLocale } from "@/lib/i18n";
+import { getSalonThemeStyle } from "@/lib/salon-theme";
 
 export default async function DashboardLayout({
   children
@@ -13,9 +14,10 @@ export default async function DashboardLayout({
   const dict = dashboardDictionary[locale];
   const salonNaam = user.salon.instellingen?.weergavenaam ?? user.salon.naam;
   const salonLogo = user.salon.instellingen?.logoUrl || "/logo-salon.svg";
+  const themeStyle = getSalonThemeStyle(user.salon.instellingen?.primaireKleur);
 
   return (
-    <div className="shell">
+    <div className="shell" style={themeStyle}>
       <aside className="zijbalk">
         <div className="merk">
           <div className="logo-blok">

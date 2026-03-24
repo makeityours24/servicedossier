@@ -3,6 +3,7 @@ import { LanguageSwitcher } from "@/components/language-switcher";
 import { LoginForm } from "@/components/login-form";
 import { getCurrentLocale, loginDictionary } from "@/lib/i18n";
 import { prisma } from "@/lib/prisma";
+import { getSalonThemeStyle } from "@/lib/salon-theme";
 
 type LoginPageProps = {
   searchParams: Promise<{
@@ -30,7 +31,8 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
           instellingen: {
             select: {
               weergavenaam: true,
-              logoUrl: true
+              logoUrl: true,
+              primaireKleur: true
             }
           }
         }
@@ -48,6 +50,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
     params.bericht === "reset-voltooid"
       ? dict.resetCompleted
       : undefined;
+  const themeStyle = getSalonThemeStyle(salon?.instellingen?.primaireKleur);
 
   const redirectPath = `/login${params.salon || params.fout || params.bericht ? `?${new URLSearchParams(
     Object.entries({
@@ -58,7 +61,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   ).toString()}` : ""}`;
 
   return (
-    <main className="inlog-scherm">
+    <main className="inlog-scherm" style={themeStyle}>
       <div className="container" style={{ display: "flex", justifyContent: "flex-end", marginBottom: 16 }}>
         <LanguageSwitcher currentLocale={locale} redirectPath={redirectPath} />
       </div>
