@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { getVisitSegmentValidationError } from "@/lib/appointment-visits";
 
 export const loginSchema = z.object({
   email: z.string().email("Vul een geldig e-mailadres in."),
@@ -153,6 +154,54 @@ export const appointmentSchema = appointmentBaseSchema;
 export const appointmentUpdateSchema = appointmentBaseSchema.extend({
   appointmentId: z.coerce.number().int().positive()
 });
+
+export const appointmentVisitSegmentSchema = z
+  .object({
+    userId: z
+      .union([z.coerce.number().int().positive(), z.literal(""), z.null(), z.undefined()])
+      .transform((value) => (typeof value === "number" ? value : null)),
+    datumStart: z
+      .string()
+      .min(1, "Starttijd is verplicht.")
+      .refine((value) => !Number.isNaN(new Date(value).getTime()), "Vul een geldige starttijd in."),
+    duurMinuten: z.coerce.number().int().min(15, "Duur moet minimaal 15 minuten zijn."),
+    behandeling: z.string().min(2, "Behandeling is verplicht."),
+    behandelingKleur: z
+      .string()
+      .regex(/^#[0-9A-Fa-f]{6}$/, "Gebruik een geldige kleur, bijvoorbeeld #B42323."),
+    notities: z.string().trim().max(500, "Notities zijn te lang.").optional(),
+    status: z.enum(["GEPLAND", "VOLTOOID", "GEANNULEERD", "NIET_GEKOMEN"]).default("GEPLAND")
+  })
+  .strict();
+
+export const appointmentVisitSchema = z
+  .object({
+    customerId: z.coerce.number().int().positive("Kies een klant."),
+    datum: z
+      .string()
+      .min(1, "Datum is verplicht.")
+      .refine((value) => !Number.isNaN(new Date(value).getTime()), "Vul een geldige datum in."),
+    notities: z.string().trim().max(500, "Notities zijn te lang.").optional(),
+    status: z.enum(["GEPLAND", "VOLTOOID", "GEANNULEERD", "NIET_GEKOMEN"]).default("GEPLAND"),
+    segments: z.array(appointmentVisitSegmentSchema).min(1, "Voeg minimaal één onderdeel toe.").max(8, "Gebruik maximaal 8 onderdelen per bezoek.")
+  })
+  .strict()
+  .superRefine((data, ctx) => {
+    const error = getVisitSegmentValidationError(
+      data.segments.map((segment) => ({
+        datumStart: segment.datumStart,
+        duurMinuten: segment.duurMinuten
+      }))
+    );
+
+    if (error) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: error,
+        path: ["segments"]
+      });
+    }
+  });
 
 export const salonSettingsSchema = z.object({
   weergavenaam: z.string().min(2, "Salonnaam is verplicht."),
