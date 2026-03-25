@@ -1,15 +1,15 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { clearSession, hashPassword, needsPasswordRehash, setSession, verifyPassword } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { clearSession, hashPassword, needsPasswordRehash, setSession, verifyPassword } from "@/lib/core/auth";
+import { prisma } from "@/lib/core/prisma";
 import {
   assertLoginAllowed,
   clearLoginThrottle,
   createAuditLog,
   getRequestIp,
   registerFailedLogin
-} from "@/lib/security";
+} from "@/lib/core/security";
 import { loginSchema } from "@/lib/core/validation/auth";
 
 export type LoginState = {

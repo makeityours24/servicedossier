@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { getAppHostname, getBaseDomain, getWebsiteUrl } from "@/lib/app-url";
-import { extractTenantSlugFromHostname } from "@/lib/tenant";
+import { getAppHostname, getBaseDomain, getWebsiteUrl } from "@/lib/core/app-url";
+import { extractTenantSlugFromHostname } from "@/lib/core/tenant";
 
 const publiekeAuthenticatiePaden = ["/login", "/platform-login", "/wachtwoord-vergeten", "/wachtwoord-reset"];
 const publiekeWebsitePaden = ["/", "/startgids", "/testformulier"];

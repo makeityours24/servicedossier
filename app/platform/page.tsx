@@ -2,9 +2,9 @@ import Link from "next/link";
 import { PlatformSalonForm } from "@/components/platform-salon-form";
 import { createSalonAction, deleteSalonAction } from "@/app/platform/actions";
 import { DeleteCustomerButton } from "@/components/delete-customer-button";
-import { getSalonLoginUrl } from "@/lib/app-url";
-import { requirePlatformAdmin } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { getSalonLoginUrl } from "@/lib/core/app-url";
+import { requirePlatformAdmin } from "@/lib/core/auth";
+import { prisma } from "@/lib/core/prisma";
 import { formatDate } from "@/lib/utils";
 
 type PlatformPageProps = {

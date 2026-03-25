@@ -2,16 +2,16 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { hashPassword, requirePlatformAdmin } from "@/lib/auth";
-import { getSalonLoginUrl } from "@/lib/app-url";
-import { prisma } from "@/lib/prisma";
+import { hashPassword, requirePlatformAdmin } from "@/lib/core/auth";
+import { getSalonLoginUrl } from "@/lib/core/app-url";
+import { prisma } from "@/lib/core/prisma";
 import {
   assertSensitiveActionAllowed,
   clearSensitiveActionThrottle,
   createAuditLog,
   getRequestIp,
   registerSensitiveActionAttempt
-} from "@/lib/security";
+} from "@/lib/core/security";
 import { platformSalonSchema, platformSalonUpdateSchema } from "@/lib/core/validation/platform";
 
 export type PlatformSalonFormState = {

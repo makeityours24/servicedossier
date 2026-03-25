@@ -3,8 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import type { FormState } from "@/components/customer-form";
-import { clearSession, hashPassword, requireSession, setSession, verifyPassword } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { clearSession, hashPassword, requireSession, setSession, verifyPassword } from "@/lib/core/auth";
+import { prisma } from "@/lib/core/prisma";
 import {
   assertSensitiveActionAllowed,
   clearSensitiveActionThrottle,
@@ -12,7 +12,7 @@ import {
   getRequestIp,
   revokeUserSessions,
   registerSensitiveActionAttempt
-} from "@/lib/security";
+} from "@/lib/core/security";
 import { passwordChangeSchema } from "@/lib/core/validation/auth";
 
 export async function changePasswordAction(

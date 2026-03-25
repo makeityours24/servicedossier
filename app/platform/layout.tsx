@@ -1,4 +1,4 @@
-import { requirePlatformAdmin } from "@/lib/auth";
+import { requirePlatformAdmin } from "@/lib/core/auth";
 import { LogoutForm } from "@/components/logout-form";
 
 export default async function PlatformLayout({

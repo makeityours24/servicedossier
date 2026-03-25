@@ -19,6 +19,11 @@ De eerste refactor heeft de validatielaag opgesplitst in:
 
 De bestaande `lib/validation.ts` blijft tijdelijk bestaan als compatibele barrel.
 
+Daarnaast ontsluit `lib/core/*` nu de eerste gedeelde infrastructuur en is de eerste installateursnamespace aangemaakt:
+
+- `lib/installateurs/validation.ts`
+- `lib/installateurs/search.ts`
+
 ## Richtlijnen voor nieuwe code
 
 - Gedeelde login-, sessie-, platform- en permissievalidaties gaan in `lib/core`.

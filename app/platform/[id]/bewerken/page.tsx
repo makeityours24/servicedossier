@@ -2,8 +2,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { updateSalonAction } from "@/app/platform/actions";
 import { PlatformSalonForm } from "@/components/platform-salon-form";
-import { requirePlatformAdmin } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { requirePlatformAdmin } from "@/lib/core/auth";
+import { prisma } from "@/lib/core/prisma";
 
 type BewerkSalonPageProps = {
   params: Promise<{ id: string }>;

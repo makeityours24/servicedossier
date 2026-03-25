@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getSalonLoginUrl } from "@/lib/app-url";
-import { requirePlatformAdmin } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { getSalonLoginUrl } from "@/lib/core/app-url";
+import { requirePlatformAdmin } from "@/lib/core/auth";
+import { prisma } from "@/lib/core/prisma";
 import { formatDate } from "@/lib/utils";
 
 type PlatformSalonDetailPageProps = {
