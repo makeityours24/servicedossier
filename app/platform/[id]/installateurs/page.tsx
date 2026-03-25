@@ -110,9 +110,14 @@ export default async function PlatformInstallateursOverviewPage({
                   <div className="lijst-item" key={customer.id}>
                     <div className="acties" style={{ justifyContent: "space-between", alignItems: "center" }}>
                       <h4>{customer.naam}</h4>
-                      <span className="badge">
-                        {customer.locations.length} locatie(s) · {customer.assets.length} installatie(s)
-                      </span>
+                      <div className="acties" style={{ gap: 10 }}>
+                        <span className="badge">
+                          {customer.locations.length} locatie(s) · {customer.assets.length} installatie(s)
+                        </span>
+                        <Link href={`/platform/${salonId}/installateurs/klanten/${customer.id}`} className="knop-zacht">
+                          Open klant
+                        </Link>
+                      </div>
                     </div>
                     <p className="meta">
                       {customer.type === "BEDRIJF" ? "Bedrijf" : "Particulier"}

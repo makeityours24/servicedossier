@@ -10,6 +10,7 @@ import { InstallateurServiceLocationForm } from "@/components/installateur-servi
 import { InstallateursModuleShell } from "@/components/installateurs-module-shell";
 import { InstallateursSchemaFallback } from "@/components/installateurs-schema-fallback";
 import { formatDate, formatDateOnly } from "@/lib/utils";
+import Link from "next/link";
 
 type PlatformInstallateursKlantenPageProps = {
   params: Promise<{ id: string }>;
@@ -136,7 +137,12 @@ export default async function PlatformInstallateursKlantenPage({
                         {customer.klantnummer ? ` · ${customer.klantnummer}` : ""}
                       </p>
                     </div>
-                    <span className="badge">{customer.locations.length} locatie(s) · {customer.assets.length} installatie(s)</span>
+                    <div className="acties" style={{ gap: 10 }}>
+                      <span className="badge">{customer.locations.length} locatie(s) · {customer.assets.length} installatie(s)</span>
+                      <Link href={`/platform/${salonId}/installateurs/klanten/${customer.id}`} className="knop-zacht">
+                        Open klant
+                      </Link>
+                    </div>
                   </div>
 
                   {customer.locations.length === 0 ? (
