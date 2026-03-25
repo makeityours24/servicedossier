@@ -9,7 +9,7 @@ import {
   getRequestIp,
   registerSensitiveActionAttempt
 } from "@/lib/security";
-import { passwordResetRequestSchema } from "@/lib/validation";
+import { passwordResetRequestSchema } from "@/lib/core/validation/auth";
 
 export type PasswordResetRequestState = {
   error?: string;

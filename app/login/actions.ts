@@ -10,7 +10,7 @@ import {
   getRequestIp,
   registerFailedLogin
 } from "@/lib/security";
-import { loginSchema } from "@/lib/validation";
+import { loginSchema } from "@/lib/core/validation/auth";
 
 export type LoginState = {
   error?: string;

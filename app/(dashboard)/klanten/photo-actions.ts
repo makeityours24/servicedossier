@@ -7,7 +7,7 @@ import type { FormState } from "@/components/customer-form";
 import { requireSalonSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { createAuditLog, getRequestIp } from "@/lib/security";
-import { treatmentPhotoSchema } from "@/lib/validation";
+import { treatmentPhotoSchema } from "@/lib/salon/validation";
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
 const ALLOWED_IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);

@@ -1,7 +1,7 @@
 import type { BranchType } from "@/lib/branch-profile";
 import type { Locale } from "@/lib/i18n";
 import { buildCsvRow } from "@/lib/utils";
-import { customerSchema } from "@/lib/validation";
+import { customerSchema } from "@/lib/salon/validation";
 
 type TemplateColumn = {
   label: string;

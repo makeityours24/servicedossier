@@ -15,7 +15,7 @@ import {
   getRequestIp,
   registerSensitiveActionAttempt
 } from "@/lib/security";
-import { customerSchema } from "@/lib/validation";
+import { customerSchema } from "@/lib/salon/validation";
 
 export type CustomerImportPreviewState = {
   error?: string;

@@ -17,7 +17,7 @@ import {
   getRequestIp,
   registerSensitiveActionAttempt
 } from "@/lib/security";
-import { medewerkerSchema, medewerkerUpdateSchema } from "@/lib/validation";
+import { medewerkerSchema, medewerkerUpdateSchema } from "@/lib/salon/validation";
 
 export async function createMedewerkerAction(
   _: FormState,

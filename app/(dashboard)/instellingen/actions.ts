@@ -14,7 +14,7 @@ import {
   getRequestIp,
   registerSensitiveActionAttempt
 } from "@/lib/security";
-import { salonSettingsSchema } from "@/lib/validation";
+import { salonSettingsSchema } from "@/lib/salon/validation";
 
 const salonSettingsSelect = {
   weergavenaam: true,

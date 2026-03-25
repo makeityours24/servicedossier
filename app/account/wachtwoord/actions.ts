@@ -13,7 +13,7 @@ import {
   revokeUserSessions,
   registerSensitiveActionAttempt
 } from "@/lib/security";
-import { passwordChangeSchema } from "@/lib/validation";
+import { passwordChangeSchema } from "@/lib/core/validation/auth";
 
 export async function changePasswordAction(
   _: FormState,

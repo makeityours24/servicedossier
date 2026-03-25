@@ -12,7 +12,7 @@ import {
   getRequestIp,
   registerSensitiveActionAttempt
 } from "@/lib/security";
-import { platformSalonSchema, platformSalonUpdateSchema } from "@/lib/validation";
+import { platformSalonSchema, platformSalonUpdateSchema } from "@/lib/core/validation/platform";
 
 export type PlatformSalonFormState = {
   error?: string;

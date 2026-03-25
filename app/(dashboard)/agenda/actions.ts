@@ -9,7 +9,7 @@ import { createAuditLog, getRequestIp } from "@/lib/security";
 import { buildAppointmentSegmentEnd } from "@/lib/appointment-visits";
 import { isMissingVisitSchemaError } from "@/lib/visit-schema-support";
 import { formatDateParamLocal } from "@/lib/utils";
-import { appointmentSchema, appointmentUpdateSchema, appointmentVisitSchema } from "@/lib/validation";
+import { appointmentSchema, appointmentUpdateSchema, appointmentVisitSchema } from "@/lib/salon/validation";
 
 function toDateParam(value: Date) {
   return formatDateParamLocal(value);
@@ -113,7 +113,7 @@ export async function createAppointmentAction(
     const dateParam = toDateParam(afspraak.datumStart);
     revalidatePath(`/agenda?datum=${dateParam}`);
     revalidatePath("/dashboard");
-    return { success: "Afspraak is toegevoegd." };
+    return { success: "Afspraak is toegevoegd. Je ziet deze nu direct terug in de agenda van deze dag." };
   } catch {
     return { error: "Opslaan van de afspraak is mislukt." };
   }
@@ -245,7 +245,7 @@ export async function updateAppointmentAction(
     revalidatePath(`/agenda?datum=${toDateParam(appointment.datumStart)}`);
     revalidatePath(`/agenda?datum=${toDateParam(updated.datumStart)}`);
     revalidatePath(`/agenda/${updated.id}/bewerken`);
-    return { success: "Afspraak is bijgewerkt." };
+    return { success: "Afspraak is bijgewerkt. De agenda van deze dag is direct ververst." };
   } catch {
     return { error: "Bijwerken van de afspraak is mislukt." };
   }
@@ -382,7 +382,7 @@ export async function createAppointmentVisitAction(
     const dateParam = toDateParam(visit.datum);
     revalidatePath(`/agenda?datum=${dateParam}`);
     revalidatePath("/dashboard");
-    return { success: "Samengesteld bezoek is toegevoegd." };
+    return { success: "Samengesteld bezoek is toegevoegd. De onderdelen staan nu direct in de agenda van deze dag." };
   } catch (error) {
     if (isMissingVisitSchemaError(error)) {
       return { error: "Samengestelde bezoeken zijn nog niet beschikbaar zolang de database-update niet live staat." };
@@ -570,7 +570,7 @@ export async function updateAppointmentVisitAction(
     revalidatePath(`/agenda?datum=${toDateParam(updatedVisit.datum)}`);
     revalidatePath(`/agenda/bezoeken/${updatedVisit.id}/bewerken`);
     revalidatePath("/dashboard");
-    return { success: "Samengesteld bezoek is bijgewerkt." };
+    return { success: "Samengesteld bezoek is bijgewerkt. De agenda van deze dag is direct ververst." };
   } catch (error) {
     if (isMissingVisitSchemaError(error)) {
       return { error: "Samengestelde bezoeken zijn nog niet beschikbaar zolang de database-update niet live staat." };

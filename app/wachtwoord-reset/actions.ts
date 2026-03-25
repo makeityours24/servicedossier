@@ -12,7 +12,7 @@ import {
   registerSensitiveActionAttempt,
   revokeUserSessions
 } from "@/lib/security";
-import { passwordResetCompleteSchema } from "@/lib/validation";
+import { passwordResetCompleteSchema } from "@/lib/core/validation/auth";
 
 export type PasswordResetCompleteState = {
   error?: string;

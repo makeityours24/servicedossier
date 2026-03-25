@@ -13,7 +13,7 @@ import {
   validateAppointmentConversion,
   validateAppointmentSegmentConversion
 } from "@/lib/treatment-workflows";
-import { treatmentSchema } from "@/lib/validation";
+import { treatmentSchema } from "@/lib/salon/validation";
 
 async function rollbackTreatmentPackageUsage(params: {
   treatmentId: number;

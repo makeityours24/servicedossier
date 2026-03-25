@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import type { FormState } from "@/components/customer-form";
 import { requireSalonSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { packageTypeSchema, packageTypeUpdateSchema } from "@/lib/validation";
+import { packageTypeSchema, packageTypeUpdateSchema } from "@/lib/salon/validation";
 
 function hasPakketBeheerRechten(rol: "OWNER" | "ADMIN" | "MEDEWERKER") {
   return rol === "OWNER" || rol === "ADMIN";

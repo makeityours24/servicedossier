@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import type { FormState } from "@/components/customer-form";
 import { requireSalonSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { recipeTemplateSchema, recipeTemplateUpdateSchema } from "@/lib/validation";
+import { recipeTemplateSchema, recipeTemplateUpdateSchema } from "@/lib/salon/validation";
 
 function hasTemplateBeheerRechten(rol: "OWNER" | "ADMIN" | "MEDEWERKER") {
   return rol === "OWNER" || rol === "ADMIN";

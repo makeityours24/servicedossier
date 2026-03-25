@@ -4,7 +4,7 @@ import type { FormState } from "@/components/customer-form";
 import { requireSalonSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { createAuditLog, getRequestIp } from "@/lib/security";
-import { customerPackageCorrectionSchema, customerPackageSchema } from "@/lib/validation";
+import { customerPackageCorrectionSchema, customerPackageSchema } from "@/lib/salon/validation";
 import { revalidatePath } from "next/cache";
 import {
   applyPackageUsage,
