@@ -118,6 +118,25 @@ enum InstallateurAttachmentType {
   VIDEO
 }
 
+enum CustomerPortalUserStatus {
+  ACTIEF
+  UITGESCHAKELD
+}
+
+enum AppointmentRequestType {
+  ONDERHOUD
+  STORING
+  INSPECTIE
+  OVERIG
+}
+
+enum AppointmentRequestStatus {
+  NIEUW
+  IN_BEOORDELING
+  BEVESTIGD
+  AFGEWEZEN
+}
+
 model User {
   id           Int         @id @default(autoincrement())
   salonId      Int?
@@ -299,6 +318,8 @@ model Salon {
   workOrders   WorkOrder[]
   serviceReports ServiceReport[]
   installateurAttachments InstallateurAttachment[]
+  customerPortalUsers CustomerPortalUser[]
+  appointmentRequests AppointmentRequest[]
 }
 
 model SalonSettings {
@@ -516,6 +537,8 @@ model CustomerAccount {
   workOrders  WorkOrder[]
   serviceReports ServiceReport[]
   installateurAttachments InstallateurAttachment[]
+  customerPortalUsers CustomerPortalUser[]
+  appointmentRequests AppointmentRequest[]
 
   @@index([salonId, naam])
   @@index([salonId, telefoon])
@@ -542,6 +565,7 @@ model ServiceLocation {
   workOrders          WorkOrder[]
   serviceReports      ServiceReport[]
   installateurAttachments InstallateurAttachment[]
+  appointmentRequests AppointmentRequest[]
 
   @@index([salonId, postcode])
   @@index([salonId, plaats])
@@ -573,6 +597,7 @@ model Asset {
   workOrders            WorkOrder[]
   serviceReports        ServiceReport[]
   installateurAttachments InstallateurAttachment[]
+  appointmentRequests   AppointmentRequest[]
 
   @@index([salonId, serienummer])
   @@index([serviceLocationId, type])
@@ -603,6 +628,7 @@ model WorkOrder {
   assignments       WorkOrderAssignment[]
   serviceReport     ServiceReport?
   attachments       InstallateurAttachment[]
+  appointmentRequests AppointmentRequest[]
 
   @@index([salonId, status, geplandStart])
   @@index([customerAccountId, createdAt])
@@ -684,4 +710,67 @@ model InstallateurAttachment {
   @@index([salonId, createdAt])
   @@index([workOrderId, createdAt])
   @@index([serviceReportId, createdAt])
+}
+
+model CustomerPortalUser {
+  id                Int                      @id @default(autoincrement())
+  salonId           Int
+  customerAccountId Int
+  naam              String
+  email             String
+  wachtwoord        String
+  sessionVersion    Int                      @default(0)
+  status            CustomerPortalUserStatus @default(ACTIEF)
+  lastLoginAt       DateTime?
+  createdAt         DateTime                 @default(now())
+  updatedAt         DateTime                 @updatedAt
+  salon             Salon                    @relation(fields: [salonId], references: [id], onDelete: Cascade)
+  customerAccount   CustomerAccount          @relation(fields: [customerAccountId], references: [id], onDelete: Cascade)
+  appointmentRequests AppointmentRequest[]
+
+  @@unique([salonId, email])
+  @@index([customerAccountId, email])
+}
+
+model AppointmentRequest {
+  id                 Int                      @id @default(autoincrement())
+  salonId            Int
+  customerAccountId  Int
+  serviceLocationId  Int
+  assetId            Int?
+  portalUserId       Int
+  workOrderId        Int?
+  gekozenVoorkeurId  Int?                     @unique
+  type               AppointmentRequestType
+  status             AppointmentRequestStatus @default(NIEUW)
+  toelichting        String
+  plannerNotitie     String?
+  createdAt          DateTime                 @default(now())
+  updatedAt          DateTime                 @updatedAt
+  salon              Salon                    @relation(fields: [salonId], references: [id], onDelete: Cascade)
+  customerAccount    CustomerAccount          @relation(fields: [customerAccountId], references: [id], onDelete: Cascade)
+  serviceLocation    ServiceLocation          @relation(fields: [serviceLocationId], references: [id], onDelete: Cascade)
+  asset              Asset?                   @relation(fields: [assetId], references: [id], onDelete: SetNull)
+  portalUser         CustomerPortalUser       @relation(fields: [portalUserId], references: [id], onDelete: Cascade)
+  workOrder          WorkOrder?               @relation(fields: [workOrderId], references: [id], onDelete: SetNull)
+  gekozenVoorkeur    AppointmentRequestPreference? @relation("ChosenPreference", fields: [gekozenVoorkeurId], references: [id], onDelete: SetNull)
+  preferences        AppointmentRequestPreference[]
+
+  @@index([salonId, status, createdAt])
+  @@index([customerAccountId, createdAt])
+}
+
+model AppointmentRequestPreference {
+  id                   Int      @id @default(autoincrement())
+  appointmentRequestId Int
+  voorkeurNummer       Int
+  datum                DateTime
+  startTijd            DateTime
+  eindTijd             DateTime
+  createdAt            DateTime @default(now())
+  appointmentRequest   AppointmentRequest @relation(fields: [appointmentRequestId], references: [id], onDelete: Cascade)
+  chosenByRequest      AppointmentRequest? @relation("ChosenPreference")
+
+  @@unique([appointmentRequestId, voorkeurNummer])
+  @@index([appointmentRequestId, datum])
 }

@@ -7,8 +7,10 @@ import { formatDate, formatDateOnly } from "@/lib/utils";
 import { buildInstallateurSearchVariants } from "@/lib/installateurs/search";
 import {
   createAssetAction,
+  confirmAppointmentRequestAction,
   createWorkOrderAssignmentAction,
   createCustomerAccountAction,
+  createCustomerPortalUserAction,
   createServiceReportAction,
   createServiceLocationAction,
   sendServiceReportEmailAction,
@@ -20,6 +22,7 @@ import { InstallateurAttachmentForm } from "@/components/installateur-attachment
 import { InstallateurAssetForm } from "@/components/installateur-asset-form";
 import { InstallateurCustomerAccountForm } from "@/components/installateur-customer-account-form";
 import { InstallateurDocumentSendForm } from "@/components/installateur-document-send-form";
+import { InstallateurPortalUserForm } from "@/components/installateur-portal-user-form";
 import { InstallateurServiceReportForm } from "@/components/installateur-service-report-form";
 import { InstallateurServiceLocationForm } from "@/components/installateur-service-location-form";
 import { InstallateurWorkOrderAssignmentForm } from "@/components/installateur-work-order-assignment-form";
@@ -40,6 +43,9 @@ const installateurCustomerInclude = Prisma.validator<Prisma.CustomerAccountInclu
     orderBy: [{ createdAt: "desc" }]
   },
   assets: {
+    orderBy: [{ createdAt: "desc" }]
+  },
+  customerPortalUsers: {
     orderBy: [{ createdAt: "desc" }]
   },
   workOrders: {
@@ -110,6 +116,52 @@ const installateurCustomerInclude = Prisma.validator<Prisma.CustomerAccountInclu
   }
 });
 
+const appointmentRequestInclude = Prisma.validator<Prisma.AppointmentRequestInclude>()({
+  portalUser: {
+    select: {
+      id: true,
+      naam: true,
+      email: true
+    }
+  },
+  customerAccount: {
+    select: {
+      id: true,
+      naam: true
+    }
+  },
+  serviceLocation: {
+    select: {
+      id: true,
+      naam: true,
+      adresregel1: true,
+      plaats: true
+    }
+  },
+  asset: {
+    select: {
+      id: true,
+      type: true,
+      merk: true,
+      model: true
+    }
+  },
+  gekozenVoorkeur: true,
+  workOrder: {
+    select: {
+      id: true,
+      titel: true
+    }
+  },
+  preferences: {
+    orderBy: [{ voorkeurNummer: "asc" }]
+  }
+});
+
+type InstallateurAppointmentRequestWithRelations = Prisma.AppointmentRequestGetPayload<{
+  include: typeof appointmentRequestInclude;
+}>;
+
 type InstallateurCustomerAccountWithRelations = Prisma.CustomerAccountGetPayload<{
   include: typeof installateurCustomerInclude;
 }>;
@@ -165,7 +217,7 @@ export default async function PlatformInstallateursPage({
   }
 
   try {
-    const [customerAccounts, medewerkers] = await Promise.all([
+    const [customerAccounts, medewerkers, appointmentRequests] = await Promise.all([
       prisma.customerAccount.findMany({
         where: {
           salonId,
@@ -205,7 +257,14 @@ export default async function PlatformInstallateursPage({
           rol: true
         },
         orderBy: [{ rol: "asc" }, { naam: "asc" }]
-      })
+      }),
+      prisma.appointmentRequest.findMany({
+        where: {
+          salonId
+        },
+        include: appointmentRequestInclude,
+        orderBy: [{ createdAt: "desc" }]
+      }) as Promise<InstallateurAppointmentRequestWithRelations[]>
     ]);
 
     const totalLocations = customerAccounts.reduce((count, customer) => count + customer.locations.length, 0);
@@ -229,6 +288,7 @@ export default async function PlatformInstallateursPage({
         ),
       0
     );
+    const totalAppointmentRequests = appointmentRequests.length;
     const customerOptions = customerAccounts.map((customer) => ({
       id: customer.id,
       naam: customer.naam,
@@ -283,6 +343,7 @@ export default async function PlatformInstallateursPage({
         : []
     );
     const salonNaam = salon.instellingen?.weergavenaam ?? salon.naam;
+    const portalBaseUrl = `/portaal/login?salon=${encodeURIComponent(salon.slug)}`;
 
     return (
       <div className="rooster">
@@ -340,6 +401,10 @@ export default async function PlatformInstallateursPage({
             <h3>Media</h3>
             <strong>{totalAttachments}</strong>
           </article>
+          <article className="stat-kaart">
+            <h3>Aanvragen</h3>
+            <strong>{totalAppointmentRequests}</strong>
+          </article>
         </section>
 
         <section className="kaart">
@@ -388,6 +453,79 @@ export default async function PlatformInstallateursPage({
               />
             </div>
           </article>
+
+          <article className="kaart">
+            <h3>Portalaccount voor klant</h3>
+            <p className="meta" style={{ marginTop: 10 }}>
+              Geef klanten een eigen login voor hun dossier, locaties, installaties en afspraken. De portal gebruikt een aparte sessielaag naast medewerkers.
+            </p>
+            <div style={{ marginTop: 18 }}>
+              <InstallateurPortalUserForm
+                salonId={salonId}
+                customers={customerAccounts.map((customer) => ({
+                  id: customer.id,
+                  naam: customer.naam
+                }))}
+                action={createCustomerPortalUserAction}
+              />
+            </div>
+            <p className="meta" style={{ marginTop: 12 }}>
+              Portal login: <Link href={portalBaseUrl} className="link-tekst">{portalBaseUrl}</Link>
+            </p>
+          </article>
+        </section>
+
+        <section className="kaart">
+          <h3>Afspraakaanvragen uit portaal</h3>
+          <p className="meta" style={{ marginTop: 10 }}>
+            Nieuwe klantaanvragen komen hier binnen met 3 voorkeursblokken van 2 uur. Bevestig een voorkeur en we zetten automatisch een werkbon klaar.
+          </p>
+          <div className="lijst" style={{ marginTop: 18 }}>
+            {appointmentRequests.length === 0 ? (
+              <div className="leeg">Er zijn nog geen portaalaanvragen binnengekomen.</div>
+            ) : (
+              appointmentRequests.map((request) => (
+                <div className="lijst-item" key={request.id}>
+                  <div className="acties" style={{ justifyContent: "space-between", alignItems: "center" }}>
+                    <div>
+                      <h4>{request.customerAccount.naam} · {request.type}</h4>
+                      <p className="meta">
+                        {request.portalUser.naam} ({request.portalUser.email})
+                        <br />
+                        {request.serviceLocation.naam ?? `${request.serviceLocation.adresregel1}, ${request.serviceLocation.plaats}`}
+                        {request.asset ? ` · ${request.asset.type}${request.asset.merk || request.asset.model ? ` (${[request.asset.merk, request.asset.model].filter(Boolean).join(" ")})` : ""}` : ""}
+                      </p>
+                    </div>
+                    <span className="badge">{request.status}</span>
+                  </div>
+                  <p className="meta" style={{ marginTop: 8 }}>{request.toelichting}</p>
+                  <div className="lijst" style={{ marginTop: 12 }}>
+                    {request.preferences.map((preference) => (
+                      <div className="lijst-item" key={preference.id}>
+                        <p className="meta">
+                          Voorkeur {preference.voorkeurNummer}: {formatDateOnly(preference.datum)} · {formatDate(preference.startTijd)} - {formatDate(preference.eindTijd)}
+                        </p>
+                        {request.status !== "BEVESTIGD" ? (
+                          <form action={confirmAppointmentRequestAction} style={{ marginTop: 8 }}>
+                            <input type="hidden" name="salonId" value={salonId} />
+                            <input type="hidden" name="appointmentRequestId" value={request.id} />
+                            <input type="hidden" name="preferenceId" value={preference.id} />
+                            <button type="submit" className="knop-zacht">
+                              Bevestig deze voorkeur
+                            </button>
+                          </form>
+                        ) : request.gekozenVoorkeurId === preference.id ? (
+                          <p className="meta" style={{ marginTop: 8 }}>
+                            Deze voorkeur is bevestigd{request.workOrder ? ` · Werkbon: ${request.workOrder.titel}` : ""}.
+                          </p>
+                        ) : null}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
         </section>
 
         <section className="kaart">
@@ -536,6 +674,20 @@ export default async function PlatformInstallateursPage({
                     </div>
                     <span className="badge">{customer.locations.length} locatie(s) · {customer.assets.length} installatie(s)</span>
                   </div>
+                  {customer.customerPortalUsers.length > 0 ? (
+                    <div className="lijst" style={{ marginTop: 12 }}>
+                      {customer.customerPortalUsers.map((portalUser) => (
+                        <div className="lijst-item" key={portalUser.id}>
+                          <h4>{portalUser.naam}</h4>
+                          <p className="meta">
+                            {portalUser.email} · {portalUser.status}
+                            <br />
+                            Portalaccount aangemaakt op {formatDate(portalUser.createdAt)}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  ) : null}
 
                   {customer.locations.length === 0 ? (
                     <p className="meta" style={{ marginTop: 12 }}>

@@ -10,13 +10,16 @@ import {
 } from "@/lib/installateurs/communications";
 import { prisma } from "@/lib/prisma";
 import { formatDate } from "@/lib/utils";
+import { hashPassword } from "@/lib/password";
 import {
   createAuditLog,
   getRequestIp
 } from "@/lib/core/security";
 import {
   assetSchema,
+  appointmentRequestReviewSchema,
   customerAccountSchema,
+  customerPortalUserSchema,
   installateurAttachmentSchema,
   installateurDocumentTargetSchema,
   serviceReportSchema,
@@ -90,6 +93,130 @@ export type InstallateurDocumentFormState = {
   success?: string;
 };
 
+export type InstallateurPortalUserFormState = {
+  error?: string;
+  success?: string;
+};
+
+export async function confirmAppointmentRequestAction(formData: FormData): Promise<void> {
+  const actor = await requirePlatformAdmin();
+  const salonId = Number(formData.get("salonId"));
+
+  if (!Number.isInteger(salonId)) {
+    throw new Error("Ongeldige installateur-tenant geselecteerd.");
+  }
+
+  const parsed = appointmentRequestReviewSchema.safeParse({
+    appointmentRequestId: formData.get("appointmentRequestId"),
+    preferenceId: formData.get("preferenceId")
+  });
+
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues[0]?.message ?? "Controleer de aanvraagkeuze.");
+  }
+
+  const appointmentRequest = await prisma.appointmentRequest.findFirst({
+    where: {
+      id: parsed.data.appointmentRequestId,
+      salonId
+    },
+    include: {
+      customerAccount: {
+        select: {
+          naam: true
+        }
+      },
+      serviceLocation: {
+        select: {
+          naam: true,
+          adresregel1: true,
+          plaats: true
+        }
+      },
+      preferences: {
+        where: {
+          id: parsed.data.preferenceId
+        },
+        take: 1
+      }
+    }
+  });
+
+  if (!appointmentRequest) {
+    throw new Error("Aanvraag niet gevonden voor deze tenant.");
+  }
+
+  if (appointmentRequest.status === "BEVESTIGD") {
+    revalidatePath(`/platform/${salonId}/installateurs`);
+    return;
+  }
+
+  const chosenPreference = appointmentRequest.preferences[0];
+
+  if (!chosenPreference) {
+    throw new Error("De gekozen voorkeur hoort niet bij deze aanvraag.");
+  }
+
+  const workOrderType =
+    appointmentRequest.type === "ONDERHOUD"
+      ? "ONDERHOUD"
+      : appointmentRequest.type === "STORING"
+        ? "STORING"
+        : appointmentRequest.type === "INSPECTIE"
+          ? "INSPECTIE"
+          : "OPNAME";
+
+  const workOrder = await prisma.workOrder.create({
+    data: {
+      salonId,
+      customerAccountId: appointmentRequest.customerAccountId,
+      serviceLocationId: appointmentRequest.serviceLocationId,
+      assetId: appointmentRequest.assetId,
+      type: workOrderType,
+      status: "INGEPLAND",
+      prioriteit: appointmentRequest.type === "STORING" ? "HOOG" : "NORMAAL",
+      titel: `Portaalafspraak ${appointmentRequest.type.toLowerCase()}`,
+      melding: appointmentRequest.toelichting,
+      klantNotities: "Aangemaakt vanuit klantportaal.",
+      geplandStart: chosenPreference.startTijd,
+      geplandEinde: chosenPreference.eindTijd
+    }
+  });
+
+  await prisma.appointmentRequest.update({
+    where: {
+      id: appointmentRequest.id
+    },
+    data: {
+      status: "BEVESTIGD",
+      gekozenVoorkeurId: chosenPreference.id,
+      workOrderId: workOrder.id,
+      plannerNotitie: `Bevestigd door planner op ${new Date().toISOString()}`
+    }
+  });
+
+  const ipAddress = await getRequestIp();
+
+  await createAuditLog({
+    salonId,
+    actorUserId: actor.id,
+    action: "INSTALLATEUR_APPOINTMENT_REQUEST_CONFIRMED",
+    entityType: "AppointmentRequest",
+    entityId: appointmentRequest.id,
+    message: "Portaalaanvraag bevestigd en omgezet naar werkbon.",
+    ipAddress,
+    metadata: {
+      customerName: appointmentRequest.customerAccount.naam,
+      locationName: appointmentRequest.serviceLocation.naam ?? `${appointmentRequest.serviceLocation.adresregel1}, ${appointmentRequest.serviceLocation.plaats}`,
+      workOrderId: workOrder.id,
+      preferenceId: chosenPreference.id
+    }
+  });
+
+  revalidatePath(`/platform/${salonId}/installateurs`);
+  revalidatePath("/portaal");
+}
+
 export async function createCustomerAccountAction(
   _: InstallateurCustomerFormState,
   formData: FormData
@@ -159,6 +286,87 @@ export async function createCustomerAccountAction(
   revalidatePath(`/platform/${salonId}/installateurs`);
 
   return { success: `${parsed.data.naam} is toegevoegd aan de installateursmodule.` };
+}
+
+export async function createCustomerPortalUserAction(
+  _: InstallateurPortalUserFormState,
+  formData: FormData
+): Promise<InstallateurPortalUserFormState> {
+  const actor = await requirePlatformAdmin();
+  const salonId = Number(formData.get("salonId"));
+
+  if (!Number.isInteger(salonId)) {
+    return { error: "Ongeldige installateur-tenant geselecteerd." };
+  }
+
+  const parsed = customerPortalUserSchema.safeParse({
+    customerAccountId: formData.get("customerAccountId"),
+    naam: formData.get("naam"),
+    email: formData.get("email"),
+    wachtwoord: formData.get("wachtwoord")
+  });
+
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Controleer de portalgebruiker." };
+  }
+
+  const customerAccount = await prisma.customerAccount.findFirst({
+    where: {
+      id: parsed.data.customerAccountId,
+      salonId
+    },
+    select: {
+      id: true,
+      naam: true
+    }
+  });
+
+  if (!customerAccount) {
+    return { error: "Deze klant hoort niet bij de geselecteerde tenant." };
+  }
+
+  const existingUser = await prisma.customerPortalUser.findFirst({
+    where: {
+      salonId,
+      email: parsed.data.email.toLowerCase()
+    },
+    select: {
+      id: true
+    }
+  });
+
+  if (existingUser) {
+    return { error: "Er bestaat al een portalaccount met dit e-mailadres." };
+  }
+
+  await prisma.customerPortalUser.create({
+    data: {
+      salonId,
+      customerAccountId: customerAccount.id,
+      naam: parsed.data.naam,
+      email: parsed.data.email.toLowerCase(),
+      wachtwoord: await hashPassword(parsed.data.wachtwoord)
+    }
+  });
+
+  const ipAddress = await getRequestIp();
+
+  await createAuditLog({
+    salonId,
+    actorUserId: actor.id,
+    action: "INSTALLATEUR_PORTAL_USER_CREATED",
+    entityType: "CustomerPortalUser",
+    message: "Portalgebruiker aangemaakt voor installateursklant.",
+    ipAddress,
+    metadata: {
+      customerName: customerAccount.naam,
+      email: parsed.data.email.toLowerCase()
+    }
+  });
+
+  revalidatePath(`/platform/${salonId}/installateurs`);
+
+  return { success: `Portalaccount toegevoegd voor ${customerAccount.naam}.` };
 }
 
 export async function createServiceLocationAction(

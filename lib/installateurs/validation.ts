@@ -158,9 +158,15 @@ export const installateurDocumentTargetSchema = z.object({
   id: z.coerce.number().int().positive()
 }).strict();
 
+export const appointmentRequestReviewSchema = z.object({
+  appointmentRequestId: z.coerce.number().int().positive(),
+  preferenceId: z.coerce.number().int().positive()
+}).strict();
+
 export const customerPortalUserSchema = z.object({
   naam: z.string().trim().min(2, "Naam is verplicht."),
-  email: z.string().email("Gebruik een geldig e-mailadres."),
+  customerAccountId: z.coerce.number().int().positive(),
+  email: z.string().trim().email("Gebruik een geldig e-mailadres."),
   wachtwoord: z.string().min(8, "Wachtwoord moet minimaal 8 tekens bevatten.")
 }).strict();
 
