@@ -153,7 +153,15 @@ export default async function PlatformInstallateursKlantenPage({
                     <div className="lijst" style={{ marginTop: 14 }}>
                       {customer.locations.map((location) => (
                         <div className="lijst-item" key={location.id}>
-                          <h4>{location.naam ?? `${location.adresregel1}, ${location.plaats}`}</h4>
+                          <div className="acties" style={{ justifyContent: "space-between", alignItems: "center" }}>
+                            <h4>{location.naam ?? `${location.adresregel1}, ${location.plaats}`}</h4>
+                            <Link
+                              href={`/platform/${salonId}/installateurs/klanten/${customer.id}/locaties/${location.id}`}
+                              className="knop-zacht"
+                            >
+                              Open locatie
+                            </Link>
+                          </div>
                           <p className="meta">
                             {location.adresregel1}
                             {location.adresregel2 ? `, ${location.adresregel2}` : ""}
@@ -166,10 +174,18 @@ export default async function PlatformInstallateursKlantenPage({
                             <div className="lijst" style={{ marginTop: 12 }}>
                               {location.assets.map((asset) => (
                                 <div className="lijst-item" key={asset.id}>
-                                  <h4>
-                                    {asset.type}
-                                    {asset.merk || asset.model ? ` · ${[asset.merk, asset.model].filter(Boolean).join(" ")}` : ""}
-                                  </h4>
+                                  <div className="acties" style={{ justifyContent: "space-between", alignItems: "center" }}>
+                                    <h4>
+                                      {asset.type}
+                                      {asset.merk || asset.model ? ` · ${[asset.merk, asset.model].filter(Boolean).join(" ")}` : ""}
+                                    </h4>
+                                    <Link
+                                      href={`/platform/${salonId}/installateurs/klanten/${customer.id}/installaties/${asset.id}`}
+                                      className="knop-zacht"
+                                    >
+                                      Open installatie
+                                    </Link>
+                                  </div>
                                   <p className="meta">
                                     Status: {asset.status}
                                     {asset.serienummer ? ` · Serienummer: ${asset.serienummer}` : ""}

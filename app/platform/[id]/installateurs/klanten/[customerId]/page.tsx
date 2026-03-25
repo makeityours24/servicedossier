@@ -139,7 +139,15 @@ export default async function PlatformInstallateursKlantDetailPage({
                 <div className="lijst-item" key={location.id}>
                   <div className="acties" style={{ justifyContent: "space-between", alignItems: "center" }}>
                     <h4>{location.naam ?? `${location.adresregel1}, ${location.plaats}`}</h4>
-                    <span className="badge">{location.assets.length} installatie(s)</span>
+                    <div className="acties" style={{ gap: 10 }}>
+                      <span className="badge">{location.assets.length} installatie(s)</span>
+                      <Link
+                        href={`/platform/${salonId}/installateurs/klanten/${customer.id}/locaties/${location.id}`}
+                        className="knop-zacht"
+                      >
+                        Open locatie
+                      </Link>
+                    </div>
                   </div>
                   <p className="meta">
                     {location.adresregel1}
@@ -158,10 +166,18 @@ export default async function PlatformInstallateursKlantDetailPage({
                     <div className="lijst" style={{ marginTop: 12 }}>
                       {location.assets.map((asset) => (
                         <div className="lijst-item" key={asset.id}>
-                          <h4>
-                            {asset.type}
-                            {asset.merk || asset.model ? ` · ${[asset.merk, asset.model].filter(Boolean).join(" ")}` : ""}
-                          </h4>
+                          <div className="acties" style={{ justifyContent: "space-between", alignItems: "center" }}>
+                            <h4>
+                              {asset.type}
+                              {asset.merk || asset.model ? ` · ${[asset.merk, asset.model].filter(Boolean).join(" ")}` : ""}
+                            </h4>
+                            <Link
+                              href={`/platform/${salonId}/installateurs/klanten/${customer.id}/installaties/${asset.id}`}
+                              className="knop-zacht"
+                            >
+                              Open installatie
+                            </Link>
+                          </div>
                           <p className="meta">
                             Status: {asset.status}
                             {asset.serienummer ? ` · Serienummer: ${asset.serienummer}` : ""}
