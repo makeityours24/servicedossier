@@ -115,85 +115,123 @@ export async function confirmAppointmentRequestAction(formData: FormData): Promi
     throw new Error(parsed.error.issues[0]?.message ?? "Controleer de aanvraagkeuze.");
   }
 
-  const appointmentRequest = await prisma.appointmentRequest.findFirst({
-    where: {
-      id: parsed.data.appointmentRequestId,
-      salonId
-    },
-    include: {
-      customerAccount: {
-        select: {
-          naam: true
-        }
+  const confirmation = await prisma.$transaction(async (tx) => {
+    const appointmentRequest = await tx.appointmentRequest.findFirst({
+      where: {
+        id: parsed.data.appointmentRequestId,
+        salonId
       },
-      serviceLocation: {
-        select: {
-          naam: true,
-          adresregel1: true,
-          plaats: true
-        }
-      },
-      preferences: {
-        where: {
-          id: parsed.data.preferenceId
+      include: {
+        customerAccount: {
+          select: {
+            naam: true
+          }
         },
-        take: 1
+        serviceLocation: {
+          select: {
+            naam: true,
+            adresregel1: true,
+            plaats: true
+          }
+        },
+        preferences: {
+          where: {
+            id: parsed.data.preferenceId
+          },
+          take: 1
+        }
       }
+    });
+
+    if (!appointmentRequest) {
+      throw new Error("Aanvraag niet gevonden voor deze tenant.");
     }
+
+    if (appointmentRequest.status === "BEVESTIGD" || appointmentRequest.workOrderId) {
+      return {
+        alreadyConfirmed: true as const
+      };
+    }
+
+    const chosenPreference = appointmentRequest.preferences[0];
+
+    if (!chosenPreference) {
+      throw new Error("De gekozen voorkeur hoort niet bij deze aanvraag.");
+    }
+
+    const reservation = await tx.appointmentRequest.updateMany({
+      where: {
+        id: appointmentRequest.id,
+        salonId,
+        workOrderId: null,
+        status: {
+          not: "BEVESTIGD"
+        }
+      },
+      data: {
+        status: "IN_BEOORDELING",
+        gekozenVoorkeurId: chosenPreference.id,
+        plannerNotitie: `Bevestiging gestart door planner op ${new Date().toISOString()}`
+      }
+    });
+
+    if (reservation.count !== 1) {
+      return {
+        alreadyConfirmed: true as const
+      };
+    }
+
+    const workOrderType =
+      appointmentRequest.type === "ONDERHOUD"
+        ? "ONDERHOUD"
+        : appointmentRequest.type === "STORING"
+          ? "STORING"
+          : appointmentRequest.type === "INSPECTIE"
+            ? "INSPECTIE"
+            : "OPNAME";
+
+    const workOrder = await tx.workOrder.create({
+      data: {
+        salonId,
+        customerAccountId: appointmentRequest.customerAccountId,
+        serviceLocationId: appointmentRequest.serviceLocationId,
+        assetId: appointmentRequest.assetId,
+        type: workOrderType,
+        status: "INGEPLAND",
+        prioriteit: appointmentRequest.type === "STORING" ? "HOOG" : "NORMAAL",
+        titel: `Portaalafspraak ${appointmentRequest.type.toLowerCase()}`,
+        melding: appointmentRequest.toelichting,
+        klantNotities: "Aangemaakt vanuit klantportaal.",
+        geplandStart: chosenPreference.startTijd,
+        geplandEinde: chosenPreference.eindTijd
+      }
+    });
+
+    await tx.appointmentRequest.update({
+      where: {
+        id: appointmentRequest.id
+      },
+      data: {
+        status: "BEVESTIGD",
+        gekozenVoorkeurId: chosenPreference.id,
+        workOrderId: workOrder.id,
+        plannerNotitie: `Bevestigd door planner op ${new Date().toISOString()}`
+      }
+    });
+
+    return {
+      alreadyConfirmed: false as const,
+      appointmentRequest,
+      chosenPreference,
+      workOrder
+    };
   });
 
-  if (!appointmentRequest) {
-    throw new Error("Aanvraag niet gevonden voor deze tenant.");
-  }
-
-  if (appointmentRequest.status === "BEVESTIGD") {
+  if (confirmation.alreadyConfirmed) {
     revalidatePath(`/platform/${salonId}/installateurs`);
+    revalidatePath("/portaal");
     return;
   }
-
-  const chosenPreference = appointmentRequest.preferences[0];
-
-  if (!chosenPreference) {
-    throw new Error("De gekozen voorkeur hoort niet bij deze aanvraag.");
-  }
-
-  const workOrderType =
-    appointmentRequest.type === "ONDERHOUD"
-      ? "ONDERHOUD"
-      : appointmentRequest.type === "STORING"
-        ? "STORING"
-        : appointmentRequest.type === "INSPECTIE"
-          ? "INSPECTIE"
-          : "OPNAME";
-
-  const workOrder = await prisma.workOrder.create({
-    data: {
-      salonId,
-      customerAccountId: appointmentRequest.customerAccountId,
-      serviceLocationId: appointmentRequest.serviceLocationId,
-      assetId: appointmentRequest.assetId,
-      type: workOrderType,
-      status: "INGEPLAND",
-      prioriteit: appointmentRequest.type === "STORING" ? "HOOG" : "NORMAAL",
-      titel: `Portaalafspraak ${appointmentRequest.type.toLowerCase()}`,
-      melding: appointmentRequest.toelichting,
-      klantNotities: "Aangemaakt vanuit klantportaal.",
-      geplandStart: chosenPreference.startTijd,
-      geplandEinde: chosenPreference.eindTijd
-    }
-  });
-
-  await prisma.appointmentRequest.update({
-    where: {
-      id: appointmentRequest.id
-    },
-    data: {
-      status: "BEVESTIGD",
-      gekozenVoorkeurId: chosenPreference.id,
-      workOrderId: workOrder.id,
-      plannerNotitie: `Bevestigd door planner op ${new Date().toISOString()}`
-    }
-  });
 
   const ipAddress = await getRequestIp();
 
@@ -202,14 +240,16 @@ export async function confirmAppointmentRequestAction(formData: FormData): Promi
     actorUserId: actor.id,
     action: "INSTALLATEUR_APPOINTMENT_REQUEST_CONFIRMED",
     entityType: "AppointmentRequest",
-    entityId: appointmentRequest.id,
+    entityId: confirmation.appointmentRequest.id,
     message: "Portaalaanvraag bevestigd en omgezet naar werkbon.",
     ipAddress,
     metadata: {
-      customerName: appointmentRequest.customerAccount.naam,
-      locationName: appointmentRequest.serviceLocation.naam ?? `${appointmentRequest.serviceLocation.adresregel1}, ${appointmentRequest.serviceLocation.plaats}`,
-      workOrderId: workOrder.id,
-      preferenceId: chosenPreference.id
+      customerName: confirmation.appointmentRequest.customerAccount.naam,
+      locationName:
+        confirmation.appointmentRequest.serviceLocation.naam ??
+        `${confirmation.appointmentRequest.serviceLocation.adresregel1}, ${confirmation.appointmentRequest.serviceLocation.plaats}`,
+      workOrderId: confirmation.workOrder.id,
+      preferenceId: confirmation.chosenPreference.id
     }
   });
 
