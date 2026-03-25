@@ -93,9 +93,80 @@ export const workOrderSchema = z.object({
     .refine((value) => !value || !Number.isNaN(new Date(value).getTime()), "Gebruik een geldige eindtijd.")
 }).strict();
 
+export const workOrderAssignmentSchema = z
+  .object({
+    workOrderId: z.coerce.number().int().positive(),
+    userId: z.coerce.number().int().positive(),
+    rolOpOpdracht: z.enum(["HOOFDMONTEUR", "ASSISTENT"]).default("HOOFDMONTEUR"),
+    status: z.enum(["INGEPLAND", "ONDERWEG", "IN_UITVOERING", "AFGEROND", "GEANNULEERD"]).default("INGEPLAND"),
+    geplandStart: z
+      .string()
+      .min(1, "Gepland startmoment is verplicht.")
+      .refine((value) => !Number.isNaN(new Date(value).getTime()), "Gebruik een geldig startmoment."),
+    geplandEinde: z
+      .string()
+      .min(1, "Gepland eindmoment is verplicht.")
+      .refine((value) => !Number.isNaN(new Date(value).getTime()), "Gebruik een geldig eindmoment.")
+  })
+  .strict()
+  .superRefine((data, ctx) => {
+    if (new Date(data.geplandEinde) <= new Date(data.geplandStart)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Het eindmoment moet na het startmoment liggen.",
+        path: ["geplandEinde"]
+      });
+    }
+  });
+
+export const serviceReportSchema = z
+  .object({
+    workOrderId: z.coerce.number().int().positive(),
+    ingevuldDoorUserId: z
+      .union([z.coerce.number().int().positive(), z.literal(""), z.null(), z.undefined()])
+      .transform((value) => (typeof value === "number" ? value : null)),
+    werkzaamhedenUitgevoerd: z.string().trim().min(5, "Beschrijf kort welke werkzaamheden zijn uitgevoerd."),
+    bevindingen: z.string().trim().max(1500, "Bevindingen zijn te lang.").optional(),
+    advies: z.string().trim().max(1500, "Advies is te lang.").optional(),
+    vervolgActieNodig: z.enum(["true", "false"]).default("false"),
+    vervolgActieOmschrijving: z.string().trim().max(1000, "De vervolgactie is te lang.").optional(),
+    afgerondOp: z
+      .string()
+      .min(1, "Afronddatum is verplicht.")
+      .refine((value) => !Number.isNaN(new Date(value).getTime()), "Gebruik een geldige afrondatum.")
+  })
+  .strict()
+  .superRefine((data, ctx) => {
+    if (data.vervolgActieNodig === "true" && !data.vervolgActieOmschrijving?.trim()) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Omschrijf de vervolgactie als die nodig is.",
+        path: ["vervolgActieOmschrijving"]
+      });
+    }
+  });
+
+export const installateurAttachmentSchema = z.object({
+  workOrderId: z.coerce.number().int().positive(),
+  serviceReportId: z
+    .union([z.coerce.number().int().positive(), z.literal(""), z.null(), z.undefined()])
+    .transform((value) => (typeof value === "number" ? value : null)),
+  notitie: z.string().trim().max(500, "Notitie is te lang.").optional()
+}).strict();
+
+export const installateurDocumentTargetSchema = z.object({
+  id: z.coerce.number().int().positive()
+}).strict();
+
+export const appointmentRequestReviewSchema = z.object({
+  appointmentRequestId: z.coerce.number().int().positive(),
+  preferenceId: z.coerce.number().int().positive()
+}).strict();
+
 export const customerPortalUserSchema = z.object({
   naam: z.string().trim().min(2, "Naam is verplicht."),
-  email: z.string().email("Gebruik een geldig e-mailadres."),
+  customerAccountId: z.coerce.number().int().positive(),
+  email: z.string().trim().email("Gebruik een geldig e-mailadres."),
   wachtwoord: z.string().min(8, "Wachtwoord moet minimaal 8 tekens bevatten.")
 }).strict();
 
