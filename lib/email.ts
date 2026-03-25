@@ -1,11 +1,10 @@
 type SendPasswordResetEmailParams = {
   to: string;
-  resetUrl: string;
-  recipientName: string;
-  salonName: string;
+  subject: string;
+  text: string;
 };
 
-export async function sendPasswordResetEmail(params: SendPasswordResetEmailParams) {
+export async function sendTransactionalEmail(params: SendPasswordResetEmailParams) {
   const apiKey = process.env.RESEND_API_KEY?.trim();
   const from = process.env.RESET_EMAIL_FROM?.trim();
 
@@ -25,18 +24,8 @@ export async function sendPasswordResetEmail(params: SendPasswordResetEmailParam
     body: JSON.stringify({
       from,
       to: [params.to],
-      subject: `Wachtwoord reset voor ${params.salonName}`,
-      text: [
-        `Hoi ${params.recipientName},`,
-        "",
-        `Er is een verzoek gedaan om het wachtwoord voor je account bij ${params.salonName} opnieuw in te stellen.`,
-        "Gebruik onderstaande link om een nieuw wachtwoord te kiezen:",
-        params.resetUrl,
-        "",
-        "Deze link is 60 minuten geldig en kan maar één keer worden gebruikt.",
-        "",
-        "Heb je dit verzoek niet gedaan? Dan kun je deze e-mail negeren."
-      ].join("\n")
+      subject: params.subject,
+      text: params.text
     })
   });
 
@@ -50,4 +39,29 @@ export async function sendPasswordResetEmail(params: SendPasswordResetEmailParam
   return {
     delivered: true as const
   };
+}
+
+type LegacyPasswordResetEmailParams = {
+  to: string;
+  resetUrl: string;
+  recipientName: string;
+  salonName: string;
+};
+
+export async function sendPasswordResetEmail(params: LegacyPasswordResetEmailParams) {
+  return sendTransactionalEmail({
+    to: params.to,
+    subject: `Wachtwoord reset voor ${params.salonName}`,
+    text: [
+      `Hoi ${params.recipientName},`,
+      "",
+      `Er is een verzoek gedaan om het wachtwoord voor je account bij ${params.salonName} opnieuw in te stellen.`,
+      "Gebruik onderstaande link om een nieuw wachtwoord te kiezen:",
+      params.resetUrl,
+      "",
+      "Deze link is 60 minuten geldig en kan maar één keer worden gebruikt.",
+      "",
+      "Heb je dit verzoek niet gedaan? Dan kun je deze e-mail negeren."
+    ].join("\n")
+  });
 }

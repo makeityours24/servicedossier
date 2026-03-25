@@ -106,6 +106,9 @@ export default async function PlatformSalonDetailPage({
           <Link href="/platform" className="knop-zacht">
             Terug naar overzicht
           </Link>
+          <Link href={`/platform/${salon.id}/installateurs`} className="knop-zacht">
+            Installateurs pilot
+          </Link>
           <Link href={`/platform/${salon.id}/bewerken`} className="knop-secundair">
             Salon bewerken
           </Link>
