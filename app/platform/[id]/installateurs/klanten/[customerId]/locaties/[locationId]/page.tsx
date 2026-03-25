@@ -154,9 +154,14 @@ export default async function PlatformInstallateursLocatieDetailPage({
                 <div className="lijst-item" key={workOrder.id}>
                   <div className="acties" style={{ justifyContent: "space-between", alignItems: "center" }}>
                     <h4>{workOrder.titel}</h4>
-                    <span className="badge">
-                      {workOrder.type} · {workOrder.status}
-                    </span>
+                    <div className="acties" style={{ gap: 10 }}>
+                      <span className="badge">
+                        {workOrder.type} · {workOrder.status}
+                      </span>
+                      <Link href={`/platform/${salonId}/installateurs/werkbonnen/${workOrder.id}`} className="knop-zacht">
+                        Open werkbon
+                      </Link>
+                    </div>
                   </div>
                   <p className="meta">
                     Prioriteit: {workOrder.prioriteit}
