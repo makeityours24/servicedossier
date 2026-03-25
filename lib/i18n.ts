@@ -1231,6 +1231,7 @@ export const agendaDictionary = {
     backToAgenda: "Terug naar agenda",
     reminderCopy: "Herinnering kopiëren",
     openWhatsApp: "Open in WhatsApp",
+    reminderCopiedHint: "De herinnering staat nu op je klembord. Plak hem in WhatsApp of e-mail.",
     views: {
       list: "Lijst",
       team: "Team"
@@ -1356,6 +1357,7 @@ export const agendaDictionary = {
     backToAgenda: "Back to appointment book",
     reminderCopy: "Copy reminder",
     openWhatsApp: "Open in WhatsApp",
+    reminderCopiedHint: "The reminder is now on your clipboard. Paste it into WhatsApp or email.",
     views: {
       list: "List",
       team: "Team"
@@ -1481,6 +1483,7 @@ export const agendaDictionary = {
     backToAgenda: "Zurück zum Terminbuch",
     reminderCopy: "Erinnerung kopieren",
     openWhatsApp: "In WhatsApp öffnen",
+    reminderCopiedHint: "Die Erinnerung befindet sich jetzt in deiner Zwischenablage. Füge sie in WhatsApp oder eine E-Mail ein.",
     views: {
       list: "Liste",
       team: "Team"
@@ -1585,7 +1588,8 @@ export const customerDictionary = {
     reminderLabels: {
       copied: "Herinnering gekopieerd",
       copy: "Herinnering kopiëren",
-      openWhatsApp: "Open in WhatsApp"
+      openWhatsApp: "Open in WhatsApp",
+      copiedHint: "De herinnering staat nu op je klembord. Plak hem in WhatsApp of e-mail."
     },
     profileTitle: "Profiel en haarinfo",
     profileText: "Werk hier snel geboortedatum, haartype, haarkleur, allergieen en stylistnotities bij.",
@@ -1850,7 +1854,8 @@ export const customerDictionary = {
     reminderLabels: {
       copied: "Reminder copied",
       copy: "Copy reminder",
-      openWhatsApp: "Open in WhatsApp"
+      openWhatsApp: "Open in WhatsApp",
+      copiedHint: "The reminder is now on your clipboard. Paste it into WhatsApp or email."
     },
     profileTitle: "Profile and hair details",
     profileText: "Quickly update date of birth, hair type, hair colour, allergies and stylist notes here.",
@@ -2115,7 +2120,8 @@ export const customerDictionary = {
     reminderLabels: {
       copied: "Erinnerung kopiert",
       copy: "Erinnerung kopieren",
-      openWhatsApp: "In WhatsApp öffnen"
+      openWhatsApp: "In WhatsApp öffnen",
+      copiedHint: "Die Erinnerung befindet sich jetzt in deiner Zwischenablage. Füge sie in WhatsApp oder eine E-Mail ein."
     },
     profileTitle: "Profil und Haarinfos",
     profileText:

@@ -127,7 +127,8 @@ export default async function BewerkAfspraakPage({ params }: BewerkAfspraakPageP
             labels={{
               copied: `${dict.reminderCopy} ✓`,
               copy: dict.reminderCopy,
-              openWhatsApp: dict.openWhatsApp
+              openWhatsApp: dict.openWhatsApp,
+              copiedHint: dict.reminderCopiedHint
             }}
             phoneNumber={appointment.customer.telefoonnummer}
             message={buildAppointmentReminderMessage({

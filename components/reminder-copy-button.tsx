@@ -10,6 +10,7 @@ type ReminderCopyButtonProps = {
     copied: string;
     copy: string;
     openWhatsApp: string;
+    copiedHint: string;
   };
 };
 
@@ -19,7 +20,8 @@ export function ReminderCopyButton({
   labels = {
     copied: "Herinnering gekopieerd",
     copy: "Herinnering kopiëren",
-    openWhatsApp: "Open in WhatsApp"
+    openWhatsApp: "Open in WhatsApp",
+    copiedHint: "De herinnering staat nu op je klembord. Plak hem in WhatsApp of e-mail."
   }
 }: ReminderCopyButtonProps) {
   const [copied, setCopied] = useState(false);
@@ -35,18 +37,25 @@ export function ReminderCopyButton({
   }
 
   return (
-    <div className="acties">
-      <button type="button" className="knop-zacht" onClick={handleCopy}>
-        {copied ? labels.copied : labels.copy}
-      </button>
-      <a
-        href={buildWhatsAppReminderUrl(message, phoneNumber)}
-        target="_blank"
-        rel="noreferrer"
-        className="knop-secundair"
-      >
-        {labels.openWhatsApp}
-      </a>
+    <div style={{ display: "grid", gap: 10 }}>
+      <div className="acties">
+        <button type="button" className="knop-zacht" onClick={handleCopy}>
+          {copied ? labels.copied : labels.copy}
+        </button>
+        <a
+          href={buildWhatsAppReminderUrl(message, phoneNumber)}
+          target="_blank"
+          rel="noreferrer"
+          className="knop-secundair"
+        >
+          {labels.openWhatsApp}
+        </a>
+      </div>
+      {copied ? (
+        <p className="meta" aria-live="polite" style={{ margin: 0 }}>
+          {labels.copiedHint}
+        </p>
+      ) : null}
     </div>
   );
 }
