@@ -211,6 +211,9 @@ export default async function PlatformPage({ searchParams }: PlatformPageProps) 
                     <Link href={`/platform/${salon.id}`} className="knop">
                       Details
                     </Link>
+                    <Link href={`/platform/${salon.id}/installateurs`} className="knop-secundair">
+                      Installateurs
+                    </Link>
                     <Link href={`/platform/${salon.id}/bewerken`} className="knop-secundair">
                       Bewerken
                     </Link>

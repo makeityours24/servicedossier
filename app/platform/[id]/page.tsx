@@ -133,6 +133,20 @@ export default async function PlatformSalonDetailPage({
         </article>
       </section>
 
+      <section className="kaart">
+        <div className="acties" style={{ justifyContent: "space-between", alignItems: "center" }}>
+          <div>
+            <h3>Modules</h3>
+            <p className="meta" style={{ marginTop: 10 }}>
+              Open vanaf hier direct de installateursomgeving voor klanten, locaties, installaties, werkbonnen en portaal.
+            </p>
+          </div>
+          <Link href={`/platform/${salon.id}/installateurs`} className="knop">
+            Open installateursmodule
+          </Link>
+        </div>
+      </section>
+
       <section className="twee-kolommen">
         <article className="kaart">
           <h3>Kerngegevens</h3>
