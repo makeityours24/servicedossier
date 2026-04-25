@@ -111,7 +111,12 @@ export default async function PlatformInstallateursPortaalPage({
                         {request.asset ? ` · ${request.asset.type}${request.asset.merk || request.asset.model ? ` (${[request.asset.merk, request.asset.model].filter(Boolean).join(" ")})` : ""}` : ""}
                       </p>
                     </div>
-                    <span className="badge">{request.status}</span>
+                    <div className="acties" style={{ gap: 10 }}>
+                      <span className="badge">{request.status}</span>
+                      <Link href={`/platform/${salonId}/installateurs/portaal/aanvragen/${request.id}`} className="knop-zacht">
+                        Open aanvraag
+                      </Link>
+                    </div>
                   </div>
                   <p className="meta" style={{ marginTop: 8 }}>{request.toelichting}</p>
                   <div className="lijst" style={{ marginTop: 12 }}>

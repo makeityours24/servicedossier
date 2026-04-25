@@ -15,6 +15,7 @@ import { InstallateurWorkOrderForm } from "@/components/installateur-work-order-
 import { InstallateursModuleShell } from "@/components/installateurs-module-shell";
 import { InstallateursSchemaFallback } from "@/components/installateurs-schema-fallback";
 import { formatDate } from "@/lib/utils";
+import Link from "next/link";
 
 type PlatformInstallateursWerkbonnenPageProps = {
   params: Promise<{ id: string }>;
@@ -172,9 +173,14 @@ export default async function PlatformInstallateursWerkbonnenPage({
                   <div className="lijst-item" key={workOrder.id}>
                     <div className="acties" style={{ justifyContent: "space-between", alignItems: "center" }}>
                       <h4>{workOrder.titel}</h4>
-                      <span className="badge">
-                        {workOrder.type} · {workOrder.status}
-                      </span>
+                      <div className="acties" style={{ gap: 10 }}>
+                        <span className="badge">
+                          {workOrder.type} · {workOrder.status}
+                        </span>
+                        <Link href={`/platform/${salonId}/installateurs/werkbonnen/${workOrder.id}`} className="knop-zacht">
+                          Open werkbon
+                        </Link>
+                      </div>
                     </div>
                     <p className="meta">
                       {customer.naam}
